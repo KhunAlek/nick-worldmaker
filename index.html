@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0920" />
+  <title>Nick: Build Your World</title>
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="glow-orb orb-a"></div>
+  <div class="glow-orb orb-b"></div>
+
+  <header class="wrap topbar">
+    <div class="logo"><div class="logo-cube">N</div> NICK // WORLDMAKER</div>
+    <div class="topbar-actions"><div class="idea-badge">⚡ Your original idea</div><a class="top-hq-link" href="hq.html">Enter Build HQ</a></div>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <div class="hero-copy-col">
+        <div class="eyebrow"><span class="pulse-dot"></span> Built by you. Played by real people.</div>
+        <h1>Start with 2 people.<span class="gradient">Build a civilization.</span></h1>
+        <p class="hero-copy">
+          Give orders. Gather resources. Build homes. Grow your population. Survive hunger, monsters and rival tribes. <strong>No final level. Your world keeps growing.</strong>
+        </p>
+        <div class="hero-punch">
+          <span class="chip"><b>$0</b> to start</span>
+          <span class="chip">🎮 Real playable game</span>
+          <span class="chip">🌍 Publish on Roblox</span>
+          <span class="chip">👥 Share when access allows</span>
+        </div>
+        <div class="actions">
+          <a class="btn btn-primary btn-hq" href="hq.html">ENTER BUILD HQ →</a>
+          <button class="btn btn-secondary" onclick="document.querySelector('#first-mission').scrollIntoView()">See the first mission ↓</button>
+          <button class="btn btn-secondary" onclick="runDemo()">Run mini demo</button>
+        </div>
+        <div class="scroll-hint">This is not a school assignment. It is your game.</div>
+      </div>
+
+      <div class="world-shell" aria-label="Animated concept of Nick's Roblox civilization game">
+        <div class="world-frame">
+          <div class="game-top">
+            <div class="mini-title">YOUR WORLD // DAY 1</div>
+            <div class="resources">
+              <div class="resource">🪵 <span id="wood">0</span></div>
+              <div class="resource">🪨 <span id="stone">0</span></div>
+              <div class="resource">👤 <span id="pop">2</span></div>
+            </div>
+          </div>
+
+          <div class="world-map">
+            <div class="ground-glow"></div>
+            <div class="island"></div>
+            <div class="river"></div>
+            <div class="node tree t1">🌲</div>
+            <div class="node tree t2">🌳</div>
+            <div class="node tree t3">🌲</div>
+            <div class="node rock">🪨</div>
+            <div class="node food">🌾</div>
+            <div class="hut" id="hut">🏠</div>
+            <div class="flag">🚩</div>
+            <div class="monster">👾</div>
+            <div class="npc n1" id="npc1"><span></span></div>
+            <div class="npc n2" id="npc2"><span></span></div>
+          </div>
+
+          <div class="command-panel">
+            <div class="command-label">Current command</div>
+            <div class="command-text" id="commandText">READY FOR YOUR ORDER</div>
+            <div class="command-bar" id="commandBar"><span></span></div>
+          </div>
+          <button class="demo-button" id="demoBtn" onclick="runDemo()">▶ TRY THE FIRST LOOP</button>
+          <div class="build-flash" id="buildFlash"></div>
+          <div class="confetti" id="confetti"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="section-head">
+        <div class="kicker">Why this can become huge</div>
+        <h2>Your idea becomes a real game fast.</h2>
+        <p class="section-copy">You do not need to finish the whole giant civilization game before anyone sees it. Every stage is playable, publishable and bigger than the last.</p>
+      </div>
+      <div class="value-grid">
+        <article class="value-card">
+          <div class="value-icon">⚡</div>
+          <h3>See results early</h3>
+          <p>Two NPCs, resources and the first hut become a complete Version 1 — not months of invisible work.</p>
+        </article>
+        <article class="value-card">
+          <div class="value-icon">🚀</div>
+          <h3>Publish every version</h3>
+          <p>Publish a Roblox link when the account permits it. Let people play and get real reactions to something you created.</p>
+        </article>
+        <article class="value-card">
+          <div class="value-icon">🧠</div>
+          <h3>You control the pace</h3>
+          <p>No fake time targets. Progress means one thing: the next feature actually works inside your world.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap" id="roadmap">
+      <div class="section-head">
+        <div class="kicker">The evolution</div>
+        <h2>One world. Seven power-ups.</h2>
+        <p class="section-copy">Tap a stage to see how your small settlement grows into the open-ended “playing god” game you imagined.</p>
+      </div>
+
+      <div class="roadmap">
+        <div class="stage-track" id="stageTrack">
+          <button class="stage active" data-stage="0"><span class="stage-num">1</span><span class="stage-icon">🫵</span><span class="stage-title">Command</span></button>
+          <button class="stage" data-stage="1"><span class="stage-num">2</span><span class="stage-icon">👥</span><span class="stage-title">Growth</span></button>
+          <button class="stage" data-stage="2"><span class="stage-num">3</span><span class="stage-icon">🎯</span><span class="stage-title">Policies</span></button>
+          <button class="stage" data-stage="3"><span class="stage-num">4</span><span class="stage-icon">🌩️</span><span class="stage-title">Survival</span></button>
+          <button class="stage" data-stage="4"><span class="stage-num">5</span><span class="stage-icon">👾</span><span class="stage-title">Monsters</span></button>
+          <button class="stage" data-stage="5"><span class="stage-num">6</span><span class="stage-icon">⚔️</span><span class="stage-title">Rival tribe</span></button>
+          <button class="stage" data-stage="6"><span class="stage-num">7</span><span class="stage-icon">🏰</span><span class="stage-title">Full world</span></button>
+        </div>
+        <div class="stage-display">
+          <div class="stage-big-icon" id="stageIcon">🫵</div>
+          <div>
+            <h3 id="stageName">Command the first two people</h3>
+            <p id="stageDesc">Select an NPC. Order them to gather wood or stone. Watch them move, return and build the first hut. Your basic game loop is alive.</p>
+          </div>
+          <div class="stage-tag" id="stageTag">Playable V1</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="first-mission">
+      <div class="mission">
+        <div class="mission-main">
+          <div class="kicker">Your first mission</div>
+          <h2>Make one tiny world come alive.</h2>
+          <div class="loop">
+            <div class="loop-step"><span class="loop-icon">🫵</span><b>Select</b><small>Click one NPC</small></div>
+            <div class="loop-step"><span class="loop-icon">🌲</span><b>Gather</b><small>Send them for wood</small></div>
+            <div class="loop-step"><span class="loop-icon">🏠</span><b>Build</b><small>Spawn the first hut</small></div>
+            <div class="loop-step"><span class="loop-icon">🚀</span><b>Publish</b><small>Let someone play</small></div>
+          </div>
+          <div class="not-homework">That is not a tutorial nobody sees. That is your first complete game.</div>
+        </div>
+
+        <aside class="mission-side">
+          <p class="big-quote">Your idea is <span class="accent">big.</span><br>That is the point.</p>
+          <div>
+            <p class="section-copy">Start small without making the dream smaller. Every new version adds another part of the world you already imagined.</p>
+            <div class="publish-flow"><span>BUILD</span><i>→</i><span>PLAY</span><i>→</i><span>PUBLISH</span><i>→</i><span>GROW</span></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="wrap final">
+      <div class="final-card">
+        <div class="kicker">The world is empty</div>
+        <h2>It is waiting for its creator.</h2>
+        <p>Open Roblox Studio. Place the first two people. Give the first command. Everything after that grows from one working idea.</p>
+        <a class="btn btn-primary btn-hq" href="hq.html">ENTER BUILD HQ →</a>
+        <div class="signature">NICK // WORLDMAKER // VERSION 1 BEGINS NOW</div><p class="access-note">Audience access depends on current Roblox account and parent settings.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

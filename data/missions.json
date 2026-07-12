@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+  "missions": [
+    {
+      "id": "V1-M01",
+      "order": 1,
+      "title": "Studio Ready",
+      "difficulty": "Easy",
+      "summary": "Create the project structure, run the first server script, and prove Studio is showing useful Output.",
+      "objective": "Create the project structure, run the first server script, and prove Studio is showing useful Output.",
+      "whyItMatters": "A reliable project structure and readable Output are the foundation for every later test and review.",
+      "startingState": "Roblox Studio is installed and you can sign in. No project objects are assumed.",
+      "visibleResult": "Play mode starts normally, the player appears on the baseplate, and Output contains VERSION 1 SERVER READY with no red error produced by your script.",
+      "concepts": [
+        {
+          "name": "Explorer",
+          "text": "The tree that shows where every object lives."
+        },
+        {
+          "name": "Properties",
+          "text": "The panel used to change the selected object’s name and settings."
+        },
+        {
+          "name": "Output",
+          "text": "The live log that shows prints, warnings, and runtime errors."
+        },
+        {
+          "name": "Script location",
+          "text": "A normal Script in ServerScriptService runs on the server."
+        }
+      ],
+      "steps": [
+        "Create a new Baseplate experience.",
+        "Open Explorer, Properties, and Output from Studio’s Window menu.",
+        "In Workspace, create a Folder named World.",
+        "Inside World, create empty folders named Ground, NPCs, NPCHomes, Resources, and Buildings.",
+        "In ReplicatedStorage, create folders named Remotes and GameState.",
+        "In ServerStorage, create a folder named Templates.",
+        "In ServerScriptService, create a normal Script named WorldServer.",
+        "Replace the default line with one line that prints VERSION 1 SERVER READY.",
+        "Press Play, read Output, then Stop. Save a local .rbxl backup with a clear name.",
+        "Do not add free-model scripts or rename the required folders."
+      ],
+      "submission": [
+        "Full text of WorldServer",
+        "Named hierarchy through Workspace, ReplicatedStorage, ServerStorage, and ServerScriptService",
+        "Output from one clean Play test",
+        "Mission 1 test checklist",
+        "Optional answer to the understanding question"
+      ],
+      "mistakes": [
+        "Using a LocalScript instead of a Script",
+        "Putting WorldServer in Workspace or ReplicatedStorage",
+        "Misspelling a folder name",
+        "Submitting Output from edit mode instead of a Play test",
+        "Leaving the default script and claiming a different message printed"
+      ],
+      "hints": [
+        "The problem is probably location or script type. Ask: should this line run on the server or only for one player?",
+        "Check ServerScriptService > WorldServer, then check that it is a normal Script and not disabled.",
+        "A print statement has one function call with the message inside quotes: print( ... ).",
+        "Use print(\"VERSION 1 SERVER READY\"), but type the missing quote or parenthesis yourself if Studio marks one red.",
+        "Use exactly print(\"VERSION 1 SERVER READY\"). Run Play again and submit the new Output."
+      ],
+      "understandingQuestion": "What is the first place you will look when a script seems to do nothing?",
+      "requiredHierarchy": "Workspace\n└── World (Folder)\n    ├── Ground (Folder)\n    ├── NPCs (Folder)\n    ├── NPCHomes (Folder)\n    ├── Resources (Folder)\n    └── Buildings (Folder)\n\nReplicatedStorage\n├── Remotes (Folder)\n└── GameState (Folder)\n\nServerStorage\n└── Templates (Folder)\n\nServerScriptService\n└── WorldServer (Script)",
+      "tests": [
+        {
+          "id": "V1-M01-T01",
+          "name": "Server script runs",
+          "setup": "Open the current project and clear Output.",
+          "action": "Press Play.",
+          "expected": "Output contains exactly one VERSION 1 SERVER READY and no Nick-code red error."
+        },
+        {
+          "id": "V1-M01-T02",
+          "name": "Hierarchy exists",
+          "setup": "Return to Edit mode.",
+          "action": "Inspect the required folders and WorldServer.",
+          "expected": "All Mission 1 folders and WorldServer exist with exact names and locations."
+        },
+        {
+          "id": "V1-M01-T03",
+          "name": "Restart is clean",
+          "setup": "Stop after T01.",
+          "action": "Press Play again.",
+          "expected": "The message appears again once, with no duplicate scripts or errors."
+        }
+      ]
+    },
+    {
+      "id": "V1-M02",
+      "order": 2,
+      "title": "Build the Island",
+      "difficulty": "Easy",
+      "summary": "Turn the empty baseplate into a small playable settlement area with a spawn and build site."
+    },
+    {
+      "id": "V1-M03",
+      "order": 3,
+      "title": "Add Two Settlers",
+      "difficulty": "Easy",
+      "summary": "Create two correctly organised NPC rigs that stand in the world without falling apart."
+    },
+    {
+      "id": "V1-M04",
+      "order": 4,
+      "title": "Select a Settler",
+      "difficulty": "Moderate",
+      "summary": "Click either NPC and move one visible selection marker to the NPC you chose."
+    },
+    {
+      "id": "V1-M05",
+      "order": 5,
+      "title": "Place the Resources",
+      "difficulty": "Easy",
+      "summary": "Add clearly named wood and stone nodes with invisible navigation target points."
+    },
+    {
+      "id": "V1-M06",
+      "order": 6,
+      "title": "Build the Command HUD",
+      "difficulty": "Moderate",
+      "summary": "Create the on-screen command panel and make it show which NPC is selected."
+    },
+    {
+      "id": "V1-M07",
+      "order": 7,
+      "title": "Send Safe Commands",
+      "difficulty": "Challenging",
+      "summary": "Make the Wood and Stone buttons send validated command requests to the server and show a response."
+    },
+    {
+      "id": "V1-M08",
+      "order": 8,
+      "title": "Walk to the Resource",
+      "difficulty": "Challenging",
+      "summary": "Use pathfinding so the selected NPC reaches the requested resource or reports that it cannot."
+    },
+    {
+      "id": "V1-M09",
+      "order": 9,
+      "title": "Gather and Return",
+      "difficulty": "Challenging",
+      "summary": "Collect at the correct node, return the NPC home, and prevent duplicate orders while it is busy."
+    },
+    {
+      "id": "V1-M10",
+      "order": 10,
+      "title": "Show Resource Totals",
+      "difficulty": "Moderate",
+      "summary": "Store wood and stone on the server and keep the HUD counters visibly in sync."
+    },
+    {
+      "id": "V1-M11",
+      "order": 11,
+      "title": "Unlock Construction",
+      "difficulty": "Moderate",
+      "summary": "Show the hut cost and make construction available only when both resource requirements are met."
+    },
+    {
+      "id": "V1-M12",
+      "order": 12,
+      "title": "Build the First Hut",
+      "difficulty": "Challenging",
+      "summary": "Spend 6 wood and 3 stone and create exactly one hut at the build site."
+    },
+    {
+      "id": "V1-M13",
+      "order": 13,
+      "title": "Restart the World",
+      "difficulty": "Challenging",
+      "summary": "Reset resources, hut state, NPC positions, busy flags, selection, and HUD so the loop can be replayed."
+    },
+    {
+      "id": "V1-M14",
+      "order": 14,
+      "title": "Prove Version 1",
+      "difficulty": "Challenging",
+      "summary": "Run the complete normal loop and important edge cases with no unresolved red runtime errors."
+    },
+    {
+      "id": "V1-M15",
+      "order": 15,
+      "title": "Publish Version 1",
+      "difficulty": "Moderate",
+      "summary": "Publish the tested build, complete any parent account checkpoint, and prove the shared version matches Studio."
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070716" />
+  <title>Mission · Nick // Worldmaker</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body data-page="mission">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+  <div class="site-shell header-inner">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="hq.html" data-nav="hq">Build HQ</a>
+      <a href="mission.html?id=V1-M01" data-nav="mission">Mission</a>
+      <a href="progress.html" data-nav="progress">Progress</a>
+      <a href="parent.html" data-nav="parent">Parent View</a>
+    </nav>
+  </div>
+</header>
+<main id="main-content"><div class="site-shell">
+  <p class="local-notice" data-local-notice></p>
+  <div id="mission-one-content">
+    <section class="card mission-header"><div class="mission-meta"><span class="status status-not-submitted" id="mission-status"></span><span class="status status-not-submitted" id="mission-id"></span><span class="status status-not-submitted">Easy</span></div><h1 id="mission-title">Studio Ready</h1><p class="lead" id="mission-objective"></p><div class="callout"><strong>Visible result:</strong> <span id="visible-result"></span></div></section>
+    <div class="detail-layout section">
+      <div>
+        <section class="card content-card"><h2>Why it matters</h2><p id="why-it-matters"></p><h2 class="section">Starting state</h2><p id="starting-state"></p></section>
+        <section class="card content-card"><h2>New concepts</h2><div id="concepts" class="concepts"></div></section>
+        <section class="card content-card"><h2>Build instructions</h2><ol id="build-steps"></ol></section>
+        <section class="card content-card"><h2>Required Mission 1 hierarchy</h2><pre id="hierarchy-block" class="code-block"></pre></section>
+        <section class="card content-card"><h2>Acceptance tests</h2><div id="test-list" class="test-list"></div></section>
+        <section class="card content-card"><h2>What to submit</h2><ul id="submit-list"></ul></section>
+      </div>
+      <aside class="sidebar-sticky">
+        <section class="card content-card"><h2>Common mistakes</h2><ul id="mistakes"></ul></section>
+        <section class="card content-card"><div class="section-head"><h2>Progressive hint</h2><span id="hint-level" class="status status-not-submitted">Hint level 0</span></div><div id="hint-text" class="hint-box"></div><button id="next-hint" type="button" class="button button-secondary">Show stronger hint</button></section>
+        <section class="card content-card"><h2>Understanding check</h2><p id="understanding-question"></p><p class="muted">The answer is optional in Build 1 and is not an English test.</p></section>
+      </aside>
+    </div>
+    <section class="card form-card" aria-labelledby="submit-title"><div class="eyebrow">Local mock review</div><h2 id="submit-title">Submit Mission 1 evidence</h2><p class="lead">Nothing here is sent to ChatGPT. The browser checks fixed Mission 1 rules and stores progress locally.</p>
+      <form id="submission-form" class="form-grid">
+        <div class="field"><label for="worldserver-code">WorldServer code</label><textarea id="worldserver-code" spellcheck="false" placeholder='print("VERSION 1 SERVER READY")'></textarea><small>Submitted Luau is treated as text. The website does not execute it.</small></div>
+        <div class="field"><label for="hierarchy-text">Roblox hierarchy text</label><textarea id="hierarchy-text" spellcheck="false" placeholder="Paste or type the named Explorer hierarchy..."></textarea></div>
+        <div class="field"><label for="studio-output">Roblox Studio Output</label><textarea id="studio-output" spellcheck="false" placeholder="Paste Output from one clean Play run..."></textarea></div>
+        <fieldset><legend>Mission 1 test checklist</legend>
+          <label class="check-row"><input id="check-t01" type="checkbox" /><span><strong>V1-M01-T01:</strong> One clean Play run printed the readiness line exactly once with no project-code red error.</span></label>
+          <label class="check-row"><input id="check-t02" type="checkbox" /><span><strong>V1-M01-T02:</strong> I checked the exact folder names and ServerScriptService/WorldServer.</span></label>
+          <label class="check-row"><input id="check-t03" type="checkbox" /><span><strong>V1-M01-T03:</strong> I stopped, played again, and the restart was clean with no duplicate script.</span></label>
+        </fieldset>
+        <div class="field"><label for="understanding-answer">Optional understanding answer</label><input id="understanding-answer" type="text" maxlength="500" placeholder="Where will you look first if a script seems to do nothing?" /></div>
+        <label class="check-row"><input id="strong-help" type="checkbox" /><span><strong>I’m completely stuck.</strong> Show the strongest Mission 1 hint in the review. Stronger help does not lower the evidence required for approval.</span></label>
+        <details class="prototype-tools"><summary>Prototype test samples</summary><p class="muted">These buttons fill the form so the three evaluator outcomes can be reviewed quickly.</p><div class="sample-buttons"><button type="button" class="button button-secondary" data-sample="fix">Load NEEDS_FIX</button><button type="button" class="button button-secondary" data-sample="evidence">Load NEEDS_EVIDENCE</button><button type="button" class="button button-secondary" data-sample="approved">Load APPROVED</button></div></details>
+        <div class="form-actions"><button type="submit" class="button button-primary">Run local mock review</button><a class="button button-secondary" href="hq.html">Back to Build HQ</a></div>
+      </form>
+    </section>
+    <section id="feedback-card" class="feedback" hidden aria-live="polite"><div class="mission-meta"><span id="feedback-status" class="status"></span><span class="status status-not-submitted">Deterministic local simulation</span></div><h2 id="feedback-headline"></h2><div class="feedback-grid">
+      <div class="feedback-section"><h3>What worked</h3><ul id="feedback-worked"></ul></div>
+      <div class="feedback-section"><h3>Main issue</h3><p id="feedback-problem"></p></div>
+      <div class="feedback-section"><h3>Why</h3><p id="feedback-explanation"></p></div>
+      <div class="feedback-section"><h3>Next action</h3><p id="feedback-next"></p></div>
+      <div class="feedback-section"><h3>Tests to repeat</h3><ul id="feedback-tests"></ul></div>
+      <div class="feedback-section"><h3>Review state</h3><p><span id="feedback-hint"></span> · <span id="feedback-unlock"></span></p></div>
+    </div><details class="raw-review"><summary>View schema-shaped response object</summary><pre id="review-json" class="code-block"></pre></details></section>
+  </div>
+  <section id="later-mission-panel" class="card locked-panel" hidden><div class="lock-icon">🔒</div><div class="mission-meta" style="justify-content:center"><span id="later-status" class="status"></span><span id="later-id" class="status status-not-submitted"></span><span id="later-difficulty" class="status status-not-submitted"></span></div><h1 id="later-title"></h1><p id="later-summary" class="lead" style="margin-inline:auto"></p><p id="later-message" class="muted"></p><a id="later-action" class="button button-primary" href="hq.html">Return to Build HQ</a></section>
+</div></main>
+<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · WEBSITE MVP BUILD 1 · LOCAL PROTOTYPE</div></footer>
+<script src="assets/js/missions-data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/mock-evaluator.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

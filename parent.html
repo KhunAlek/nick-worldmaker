@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070716" />
+  <title>Parent View · Nick // Worldmaker</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body data-page="parent">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+  <div class="site-shell header-inner">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="hq.html" data-nav="hq">Build HQ</a>
+      <a href="mission.html?id=V1-M01" data-nav="mission">Mission</a>
+      <a href="progress.html" data-nav="progress">Progress</a>
+      <a href="parent.html" data-nav="parent">Parent View</a>
+    </nav>
+  </div>
+</header>
+<main id="main-content"><div class="site-shell"><div class="page-hero"><div><div class="eyebrow">Read-only prototype dashboard</div><h1>Parent View</h1><p class="lead">This view observes the same local progress. It cannot approve technical work.</p></div><a class="button button-primary" href="hq.html">Return to Build HQ</a></div><p class="local-notice" data-local-notice></p>
+  <div class="grid grid-3"><section class="card card-pad"><div class="card-kicker">Current mission</div><div class="big-value" id="parent-current"></div></section><section class="card card-pad"><div class="card-kicker">Latest attempt</div><div class="big-value" id="parent-latest-attempt"></div></section><section class="card card-pad"><div class="card-kicker">Latest status</div><div style="margin-top:12px"><span id="parent-status" class="status"></span></div></section></div>
+  <div class="grid grid-2 section"><section class="card card-pad"><h2>Main problem or result</h2><p id="parent-problem"></p></section><section class="card card-pad"><h2>Next action</h2><p id="parent-next-action"></p></section></div>
+  <div class="grid grid-2 section"><section class="card card-pad"><h2>Approved missions</h2><div id="parent-approved" class="inline-links"></div></section><section class="card card-pad"><h2>Last local activity</h2><p id="parent-last-activity"></p></section></div>
+  <section class="card card-pad section"><div class="section-head"><div><div class="eyebrow">Local attempt history</div><h2>Recent reviews</h2></div></div><div id="parent-attempts" class="attempt-list"></div></section>
+  <section class="card card-pad section"><h2>Reset prototype progress</h2><p class="muted">This deletes only the Build 1 state stored by this website in the current browser. It does not change Roblox Studio or any account.</p><button id="reset-progress" type="button" class="button button-danger">Reset Prototype Progress</button></section>
+</div></main>
+<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · WEBSITE MVP BUILD 1 · LOCAL PROTOTYPE</div></footer>
+<script src="assets/js/missions-data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/mock-evaluator.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
