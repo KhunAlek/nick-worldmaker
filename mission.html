@@ -7,125 +7,275 @@
   <title>Mission · Nick // Worldmaker</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <style>
-    .lesson{display:grid;gap:18px}.lesson-card{border-left:4px solid rgba(86,246,255,.55)}
-    .lesson-card p,.lesson-card li{line-height:1.65}.lesson-card h3{margin-top:22px}
-    .checkpoint,.prediction,.experiment{padding:16px;border-radius:14px;margin:18px 0}
-    .checkpoint{border:1px solid rgba(151,255,130,.28);background:rgba(151,255,130,.07)}
-    .prediction{border:1px solid rgba(255,214,107,.28);background:rgba(255,214,107,.07)}
-    .experiment{border:1px solid rgba(166,107,255,.28);background:rgba(166,107,255,.08)}
-    .mini-code{display:block;padding:14px 16px;margin:10px 0;border-radius:12px;background:#090b1d;border:1px solid rgba(255,255,255,.12);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;color:#eef2ff}
-    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.result-grid>div{padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}
-    .submit-steps{display:grid;gap:10px}.submit-steps>div{padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)}
-    @media(max-width:700px){.result-grid{grid-template-columns:1fr}}
+    .lesson-path{display:grid;gap:18px}.lesson-part{border-left:4px solid rgba(86,246,255,.55)}
+    .lesson-part h2{margin-bottom:8px}.lesson-part h3{margin:22px 0 8px}.lesson-part p,.lesson-part li{line-height:1.65}
+    .lesson-goal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+    .lesson-goal>div{padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}
+    .checkpoint{margin:20px 0;padding:18px;border:1px solid rgba(151,255,130,.25);border-radius:16px;background:rgba(151,255,130,.07)}
+    .checkpoint strong{color:#b8ffac}.prediction{margin:18px 0;padding:18px;border:1px solid rgba(255,214,107,.25);border-radius:16px;background:rgba(255,214,107,.07)}
+    .try-it{margin:18px 0;padding:18px;border:1px solid rgba(166,107,255,.28);border-radius:16px;background:rgba(166,107,255,.08)}
+    .mini-code{display:block;margin:10px 0;padding:14px 16px;border-radius:12px;background:#090b1d;border:1px solid rgba(255,255,255,.12);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;color:#eef2ff}
+    .expected{font-weight:800;color:#97ff82}.not-yet{color:#ffd66b}.submission-guide{counter-reset:submit-step;display:grid;gap:12px;padding:0;list-style:none}
+    .submission-guide li{counter-increment:submit-step;padding:15px 15px 15px 54px;position:relative;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03)}
+    .submission-guide li:before{content:counter(submit-step);position:absolute;left:14px;top:13px;width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(135deg,#56f6ff,#a66bff);color:#080a17;font-weight:950}
+    .field-help{margin-top:8px;color:#aeb5d9;line-height:1.5}.exact-box{margin:10px 0;padding:12px;border-radius:10px;background:rgba(86,246,255,.07);border:1px solid rgba(86,246,255,.18)}
+    
+    .start-banner{padding:18px;border:1px solid rgba(255,214,107,.32);border-radius:16px;background:rgba(255,214,107,.08);margin-top:16px}
+    .step-card{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.03);overflow:hidden}
+    .step-card summary{cursor:pointer;padding:18px;font-weight:900;font-size:1.05rem;list-style:none}.step-card summary::-webkit-details-marker{display:none}
+    .step-card[open] summary{border-bottom:1px solid rgba(255,255,255,.1);background:rgba(86,246,255,.06)}.step-body{padding:18px}
+    .screen-check{display:grid;gap:10px;margin:15px 0}.screen-check label{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+    .structure-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.structure-good,.structure-bad{padding:15px;border-radius:14px}.structure-good{border:1px solid rgba(151,255,130,.25);background:rgba(151,255,130,.07)}.structure-bad{border:1px solid rgba(255,108,124,.25);background:rgba(255,108,124,.07)}
+    .triage{margin-top:12px;padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035);white-space:pre-line}.triage.good{border-color:rgba(151,255,130,.35);background:rgba(151,255,130,.08)}.triage.warn{border-color:rgba(255,214,107,.35);background:rgba(255,214,107,.08)}.triage.bad{border-color:rgba(255,108,124,.35);background:rgba(255,108,124,.08)}
+    .hidden-evidence{display:none!important}.recovery-grid{display:grid;gap:10px}.recovery-grid details{border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;background:rgba(255,255,255,.025)}
+    @media(max-width:700px){.lesson-goal,.structure-compare{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body data-page="mission">
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="site-header"><div class="site-shell header-inner">
-  <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
-  <nav class="site-nav" aria-label="Main navigation"><a href="hq.html" data-nav="hq">Build HQ</a><a href="mission.html?id=V1-M01" data-nav="mission">Mission</a><a href="progress.html" data-nav="progress">Progress</a><a href="parent.html" data-nav="parent">Parent View</a></nav>
-</div></header>
+<header class="site-header">
+  <div class="site-shell header-inner">
+    <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="hq.html" data-nav="hq">Build HQ</a>
+      <a href="mission.html?id=V1-M01" data-nav="mission">Mission</a>
+      <a href="progress.html" data-nav="progress">Progress</a>
+      <a href="parent.html" data-nav="parent">Parent View</a>
+    </nav>
+  </div>
+</header>
 <main id="main-content"><div class="site-shell">
-<p class="local-notice" data-local-notice></p>
-<div id="mission-one-content">
-  <section class="card mission-header">
-    <div class="mission-meta"><span class="status status-not-submitted" id="mission-status"></span><span class="status status-not-submitted" id="mission-id"></span><span class="status status-not-submitted">First build</span></div>
-    <h1 id="mission-title">Studio Ready</h1><p class="lead" id="mission-objective"></p>
-    <div class="callout"><strong>What should happen:</strong> <span id="visible-result"></span></div>
-    <div class="result-grid"><div><strong>In the 3D world</strong><br>Your character appears on the Baseplate. Nothing else changes yet.</div><div><strong>In Output</strong><br><code>VERSION 1 SERVER READY</code> appears once on every clean Play run.</div></div>
-  </section>
+  <p class="local-notice" data-local-notice></p>
+  <div id="mission-one-content">
+    <section class="card mission-header">
+      <div class="mission-meta"><span class="status status-not-submitted" id="mission-status"></span><span class="status status-not-submitted" id="mission-id"></span><span class="status status-not-submitted">First build</span></div>
+      <h1 id="mission-title">Studio Ready</h1>
+      <p class="lead" id="mission-objective"></p>
+      <div class="callout"><strong>What should happen:</strong> <span id="visible-result"></span></div>
+      <div class="lesson-goal">
+        <div><strong>In the 3D world</strong><br>Your character appears on the Baseplate. Nothing else changes yet.</div>
+        <div><strong>In Output</strong><br><span class="expected">VERSION 1 SERVER READY</span> appears once on each Play run.</div>
+      </div>
+    </section>
 
-  <div class="detail-layout section">
-    <div class="lesson">
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 1 · Know your tools</div><h2>Where code lives and where results appear</h2>
-        <p id="why-it-matters"></p>
-        <p><strong>Explorer</strong> shows every object in the game as a tree. It answers: “Where is my Script?” and “Did I use the exact name?”</p>
-        <p><strong>Properties</strong> shows settings for the selected object.</p>
-        <p><strong>Output</strong> is the game’s report window. It shows messages from code, warnings, and runtime errors.</p>
-        <p><strong>Script Editor</strong> is where you write Luau. It opens when you double-click a Script.</p>
-        <ol><li>Open Explorer and Properties from the <strong>Window</strong> menu or Home toolbar.</li><li>Open Output from the <strong>Window</strong> menu or Script toolbar.</li><li>Keep the 3D Baseplate visible.</li></ol>
-        <div class="checkpoint"><strong>Checkpoint A:</strong> do not continue until Explorer, Properties, Output, and the Baseplate are all visible.</div>
-      </section>
+    <div class="detail-layout section">
+      <div class="lesson-path">
+        <section class="card content-card lesson-part">
+          <div class="eyebrow">Start here</div>
+          <h2>One small result: make the server say it is ready</h2>
+          <p id="why-it-matters"></p>
+          <div class="start-banner"><strong>Important:</strong> open one step at a time. Do not create anything that the current step does not ask for.</div>
+        </section>
 
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 2 · Organise the project</div><h2>Build the folder skeleton</h2>
-        <p>A <strong>Folder</strong> is an organisational container. It does not create anything visible and it does not run code. It gives future objects a predictable home.</p>
-        <ol><li>Inside <strong>Workspace</strong>, create a Folder named <code>World</code>.</li><li>Inside World, create <code>Ground</code>, <code>NPCs</code>, <code>NPCHomes</code>, <code>Resources</code>, and <code>Buildings</code>.</li><li>Inside <strong>ReplicatedStorage</strong>, create <code>Remotes</code> and <code>GameState</code>.</li><li>Inside <strong>ServerStorage</strong>, create <code>Templates</code>.</li></ol>
-        <p>These names describe where later parts of the game will live: the island, settlers, their return points, resources, buildings, shared values, messages, and hut template.</p>
-        <div class="checkpoint"><strong>Checkpoint B:</strong> compare every name and location with the required hierarchy below. Capital letters matter.</div>
-      </section>
+        <details class="step-card" open>
+          <summary>Step 1 — Make the Studio windows visible</summary>
+          <div class="step-body">
+            <ol>
+              <li>At the top of Roblox Studio, click <strong>Window</strong>.</li>
+              <li>Click <strong>Explorer</strong>.</li>
+              <li>Open <strong>Window</strong> again and click <strong>Properties</strong>.</li>
+              <li>Open <strong>Window</strong> again and click <strong>Output</strong>.</li>
+            </ol>
+            <p><strong>Explorer</strong> is the list of objects in the game. <strong>Output</strong> is where code messages and errors appear.</p>
+            <div class="screen-check"><label><input type="checkbox"> I can see Explorer.</label><label><input type="checkbox"> I can see Output.</label><label><input type="checkbox"> I can still see the Baseplate.</label></div>
+          </div>
+        </details>
 
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 3 · Create server code</div><h2>Make the WorldServer Script</h2>
-        <p>A Roblox game has a <strong>server</strong> and one or more <strong>clients</strong>. The server controls shared rules and world state. A client is one player’s controls, camera, and interface.</p>
-        <p>Later, the real resource totals and hut will belong to the server so every player sees the same truth.</p>
-        <ol><li>In Explorer, find <strong>ServerScriptService</strong>.</li><li>Click <strong>+</strong> and choose <strong>Script</strong> — not LocalScript or ModuleScript.</li><li>Rename it exactly <code>WorldServer</code>.</li><li>Double-click it and delete Studio’s starter line.</li></ol>
-        <div class="checkpoint"><strong>Checkpoint C:</strong> Explorer must show <code>ServerScriptService &gt; WorldServer</code>, and WorldServer must be a normal Script.</div>
-      </section>
+        <details class="step-card">
+          <summary>Step 2 — Create the World folder</summary>
+          <div class="step-body">
+            <ol>
+              <li>In Explorer, find <strong>Workspace</strong>.</li>
+              <li>Move the mouse over Workspace. Click the small <strong>+</strong> that appears.</li>
+              <li>Choose <strong>Folder</strong>.</li>
+              <li>A new Folder appears underneath Workspace. Rename it exactly <code>World</code>.</li>
+            </ol>
+            <div class="checkpoint"><strong>Stop and check:</strong><pre class="mini-code">Workspace
+└── World</pre>If World is not directly under Workspace, drag it onto Workspace before continuing.</div>
+          </div>
+        </details>
 
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 4 · Write real Luau</div><h2>Construct the line yourself</h2>
-        <p><code>print</code> is a Luau <strong>function</strong>. A function is a named instruction that performs a job. The job of <code>print</code> is to send information to Output.</p>
-        <h3>Step 1 — Type the function name</h3><code class="mini-code">print</code>
-        <p>Nothing runs yet. Luau still needs to know what information you are giving to the function.</p>
-        <h3>Step 2 — Add parentheses</h3><code class="mini-code">print()</code>
-        <p>Parentheses hold the information passed into a function. The information inside is called an <strong>argument</strong>.</p>
-        <h3>Step 3 — Add a string</h3><p>The exact message is:</p><code class="mini-code">VERSION 1 SERVER READY</code>
-        <p>Text in Luau is called a <strong>string</strong>. A string must be surrounded by quotation marks. Put the message inside the parentheses and add the quotation marks yourself.</p>
-        <div class="prediction"><strong>Predict before running:</strong> what exact line should appear in Output? What should change in the 3D world?</div>
-        <details><summary>Check the completed line only after writing yours</summary><code class="mini-code">print("VERSION 1 SERVER READY")</code></details>
-      </section>
+        <details class="step-card">
+          <summary>Step 3 — Add the empty folders</summary>
+          <div class="step-body">
+            <p>Repeat the same <strong>+ → Folder → rename</strong> action.</p>
+            <ol>
+              <li>Under <code>World</code>, add: <code>Ground</code>, <code>NPCs</code>, <code>NPCHomes</code>, <code>Resources</code>, and <code>Buildings</code>.</li>
+              <li>Under <code>ReplicatedStorage</code>, add: <code>Remotes</code> and <code>GameState</code>.</li>
+              <li>Under <code>ServerStorage</code>, add: <code>Templates</code>.</li>
+            </ol>
+            <div class="checkpoint"><strong>Stop and compare:</strong> expand the folders in Explorer and compare them with the full picture lower on this page. Do not type this structure anywhere.</div>
+          </div>
+        </details>
 
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 5 · Run and observe</div><h2>Prove what the code does</h2>
-        <ol><li>Clear old messages from Output.</li><li>Press <strong>Play</strong>.</li><li>Confirm your character appears on the Baseplate.</li><li>Confirm Output shows <code>VERSION 1 SERVER READY</code> exactly once.</li><li>Check that your Script produced no unresolved red error.</li><li>Press <strong>Stop</strong>.</li></ol>
-        <p>Nothing new appears in the world because <code>print()</code> reports information. It does not create parts or move characters.</p>
-        <div class="experiment"><strong>Small experiment:</strong> temporarily change only the text inside the quotation marks. Run once and observe what changes. Then restore the required message.</div>
-      </section>
+        <details class="step-card">
+          <summary>Step 4 — Create exactly one Script</summary>
+          <div class="step-body">
+            <ol>
+              <li>In Explorer, find <strong>ServerScriptService</strong>.</li>
+              <li>Move the mouse over it and click <strong>+</strong>.</li>
+              <li>Choose <strong>Script</strong>. Do not choose LocalScript or ModuleScript.</li>
+              <li>Rename the new Script exactly <code>WorldServer</code>.</li>
+              <li>Double-click WorldServer.</li>
+              <li>Delete the starter line <code>print("Hello world!")</code>.</li>
+            </ol>
+            <div class="structure-compare"><div class="structure-good"><strong>Correct</strong><pre class="mini-code">ServerScriptService
+└── WorldServer</pre></div><div class="structure-bad"><strong>Wrong</strong><pre class="mini-code">Workspace
+└── Script</pre></div></div>
+          </div>
+        </details>
 
-      <section class="card content-card lesson-card">
-        <div class="eyebrow">Part 6 · Debug on purpose</div><h2>See what an error looks like</h2>
-        <ol><li>Temporarily remove the final quotation mark.</li><li>Notice how the Script Editor marks unfinished code.</li><li>Inspect the error information.</li><li>Restore the quotation mark.</li><li>Run again and prove the error is gone.</li></ol>
-        <p>This experiment is not submitted. It teaches you where to look when code appears to do nothing.</p>
-      </section>
+        <details class="step-card">
+          <summary>Step 5 — Type the first Luau line</summary>
+          <div class="step-body">
+            <p><code>print</code> tells Roblox to place a message in Output. Build the line in three pieces:</p>
+            <ol><li>Type <code>print</code>.</li><li>Add parentheses: <code>print()</code>.</li><li>Put the exact message inside quotation marks.</li></ol>
+            <code class="mini-code">VERSION 1 SERVER READY</code>
+            <details><summary>Check the completed line after typing yours</summary><code class="mini-code">print("VERSION 1 SERVER READY")</code></details>
+            <div class="prediction"><strong>Before Play:</strong> predict what will appear in Output. Nothing new should appear on the Baseplate yet.</div>
+          </div>
+        </details>
 
-      <section class="card content-card lesson-card"><div class="eyebrow">Part 7 · Final proof</div><h2>Run the exact tests</h2><div id="test-list" class="test-list"></div><div class="checkpoint"><strong>Final clean state:</strong> restore the required message, remove temporary experiments, verify the hierarchy, and complete two separate clean Play runs.</div></section>
-      <section class="card content-card"><h2>Required Mission 1 hierarchy</h2><pre id="hierarchy-block" class="code-block"></pre></section>
-      <section class="card content-card"><h2>Exactly what you will submit</h2><div class="submit-steps"><div><strong>1. Complete WorldServer code</strong><br>Paste everything inside the Script, not a screenshot or cropped fragment.</div><div><strong>2. Explorer hierarchy</strong><br>Paste or type the object names and nesting so the reviewer can verify locations.</div><div><strong>3. Current Output</strong><br>Paste Output from the final clean code after running it.</div><div><strong>4. Test checklist</strong><br>Tick a test only after performing its exact setup and action.</div><div><strong>5. Understanding answer</strong><br>Explain where you will look first when a Script seems to do nothing and why.</div></div><ul id="submit-list" hidden></ul></section>
+        <details class="step-card">
+          <summary>Step 6 — Script audit before Play</summary>
+          <div class="step-body">
+            <p>This check prevents the exact problem that creates repeated <code>Hello world!</code> messages.</p>
+            <ol>
+              <li>Use the Explorer search box and search for <code>Script</code>.</li>
+              <li>Open every Script shown by the search.</li>
+              <li>Keep the one named <code>WorldServer</code> under <code>ServerScriptService</code>.</li>
+              <li>Delete accidental Scripts directly under Workspace.</li>
+              <li>Delete unnecessary Scripts that still contain <code>print("Hello world!")</code>.</li>
+              <li>Clear the Explorer search box.</li>
+            </ol>
+            <div class="screen-check">
+              <label><input id="audit-one-script" type="checkbox"> There is one intended Script: ServerScriptService → WorldServer.</label>
+              <label><input id="audit-no-workspace" type="checkbox"> There is no Script directly under Workspace.</label>
+              <label><input id="audit-no-hello" type="checkbox"> No unnecessary Script still prints Hello world!</label>
+              <label><input id="audit-code-complete" type="checkbox"> WorldServer contains one complete print line.</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="step-card">
+          <summary>Step 7 — Play, read Output, and test again</summary>
+          <div class="step-body">
+            <ol>
+              <li>Clear old Output messages.</li>
+              <li>Press <strong>Play</strong>.</li>
+              <li>Find <code>VERSION 1 SERVER READY</code> in Output.</li>
+              <li>Press <strong>Stop</strong>.</li>
+              <li>Clear Output and press <strong>Play</strong> a second time.</li>
+              <li>The readiness message should appear once again.</li>
+            </ol>
+            <div class="checkpoint"><strong>About unrelated errors:</strong> an error containing a name such as <code>cloud_...MA2Theme</code> comes from a plugin or external package. It is not proof that WorldServer failed. The page will identify this after you paste Output.</div>
+          </div>
+        </details>
+
+        <section class="card content-card">
+          <h2>What Explorer should look like</h2>
+          <p>Expand these sections and compare them. You do not need to copy or type this tree.</p>
+          <pre id="hierarchy-block" class="code-block"></pre>
+        </section>
+
+        <section class="card content-card">
+          <h2>Something went wrong?</h2>
+          <div class="recovery-grid">
+            <details><summary>I see Hello world!</summary><p>An old or accidental Script is still running. Search Explorer for Script, open each result, and remove unnecessary Scripts containing the Hello world line.</p></details>
+            <details><summary>I see Workspace.Script</summary><p>That Script is in the wrong place. Stop Play, delete the accidental Script under Workspace, and keep WorldServer under ServerScriptService.</p></details>
+            <details><summary>I see “Incomplete statement”</summary><p>One line is unfinished. Open the Script named in the error, check its line number, and repair the missing quote, parenthesis, or incomplete text.</p></details>
+            <details><summary>I see cloud_... or MA2Theme</summary><p>This is usually plugin code. First check whether VERSION 1 SERVER READY appears. The website will treat the plugin error separately instead of blaming your Script.</p></details>
+          </div>
+        </section>
+
+        <section class="card content-card lesson-part">
+          <div class="eyebrow">Final proof</div><h2>Run the required checks</h2><div id="test-list" class="test-list"></div>
+        </section>
+        <ul id="submit-list" hidden></ul>
+      </div>
+
+      <aside class="sidebar-sticky">
+        <section class="card content-card"><h2>Starting state</h2><p id="starting-state"></p></section>
+        <section class="card content-card"><h2>Key concepts</h2><div id="concepts" class="concepts"></div></section>
+        <section class="card content-card" hidden><h2>Build instructions</h2><ol id="build-steps"></ol></section>
+        <section class="card content-card"><h2>Common mistakes</h2><ul id="mistakes"></ul></section>
+        <section class="card content-card"><div class="section-head"><h2>Progressive hint</h2><span id="hint-level" class="status status-not-submitted">Hint level 0</span></div><div id="hint-text" class="hint-box"></div><button id="next-hint" type="button" class="button button-secondary">Show stronger hint</button></section>
+        <section class="card content-card"><h2>Understanding check</h2><p id="understanding-question"></p><p class="muted">This checks whether the central idea makes sense. It is not an English test.</p></section>
+      </aside>
     </div>
 
-    <aside class="sidebar-sticky">
-      <section class="card content-card"><h2>Starting state</h2><p id="starting-state"></p></section>
-      <section class="card content-card"><h2>Key concepts</h2><div id="concepts" class="concepts"></div></section>
-      <section class="card content-card" hidden><h2>Build instructions</h2><ol id="build-steps"></ol></section>
-      <section class="card content-card"><h2>Common mistakes</h2><ul id="mistakes"></ul></section>
-      <section class="card content-card"><div class="section-head"><h2>Progressive hint</h2><span id="hint-level" class="status status-not-submitted">Hint level 0</span></div><div id="hint-text" class="hint-box"></div><button id="next-hint" type="button" class="button button-secondary">Show stronger hint</button></section>
-      <section class="card content-card"><h2>Understanding check</h2><p id="understanding-question"></p><p class="muted">This checks the central idea. It is not an English test.</p></section>
-    </aside>
+    <section class="card form-card" aria-labelledby="submit-title">
+      <div class="eyebrow">Final check</div><h2 id="submit-title">Show what works</h2>
+      <p class="lead">Paste two things: the code in WorldServer and the Output from the final Play run. The folder structure is checked with the simple checklist below.</p>
+      <form id="submission-form" class="form-grid">
+        <div class="field"><label for="worldserver-code">1. Code inside WorldServer</label><textarea id="worldserver-code" spellcheck="false" placeholder='print("VERSION 1 SERVER READY")'></textarea><p class="field-help">Open WorldServer, select all its code, copy, and paste it here.</p></div>
+        <div class="field hidden-evidence" aria-hidden="true"><label for="hierarchy-text">Saved required structure</label><textarea id="hierarchy-text" spellcheck="false"></textarea></div>
+        <div class="field"><label for="studio-output">2. Output from the final Play run</label><textarea id="studio-output" spellcheck="false" placeholder="Paste the Output text here"></textarea><div id="output-triage" class="triage">Paste Output and this box will explain what belongs to your Script, what comes from an extra Script, and what may come from a plugin.</div></div>
+        <fieldset><legend>3. Check what you actually tested</legend>
+          <label class="check-row"><input id="check-t01" type="checkbox" /><span>I pressed Play and saw <code>VERSION 1 SERVER READY</code> exactly once.</span></label>
+          <label class="check-row"><input id="check-t02" type="checkbox" /><span>I expanded Explorer and compared every required name and location with the example.</span></label>
+          <label class="check-row"><input id="check-t03" type="checkbox" /><span>I stopped, cleared Output, pressed Play again, and saw the message once again.</span></label>
+        </fieldset>
+        <div class="field"><label for="understanding-answer">4. One quick answer</label><input id="understanding-answer" type="text" maxlength="500" placeholder="Where will you look first when a Script seems to do nothing?" /></div>
+        <label class="check-row"><input id="strong-help" type="checkbox" /><span><strong>I’m stuck.</strong> Give me the strongest focused help.</span></label>
+        <div class="form-actions"><button type="submit" class="button button-primary">Check my mission</button><a class="button button-secondary" href="hq.html">Back to Build HQ</a></div>
+      </form>
+    </section>
+
+    <section id="feedback-card" class="feedback" hidden aria-live="polite"><div class="mission-meta"><span id="feedback-status" class="status"></span></div><h2 id="feedback-headline"></h2><div class="feedback-grid">
+      <div class="feedback-section"><h3>What worked</h3><ul id="feedback-worked"></ul></div>
+      <div class="feedback-section"><h3>Main issue</h3><p id="feedback-problem"></p></div>
+      <div class="feedback-section"><h3>Why</h3><p id="feedback-explanation"></p></div>
+      <div class="feedback-section"><h3>Next action</h3><p id="feedback-next"></p></div>
+      <div class="feedback-section"><h3>Tests to repeat</h3><ul id="feedback-tests"></ul></div>
+      <div class="feedback-section"><h3>Review state</h3><p><span id="feedback-hint"></span> · <span id="feedback-unlock"></span></p></div>
+    </div><pre id="review-json" class="code-block" hidden></pre></section>
   </div>
 
-  <section class="card form-card" aria-labelledby="submit-title"><div class="eyebrow">Mission evidence</div><h2 id="submit-title">Submit Mission 1</h2><p class="lead">The current website uses a deterministic local reviewer. It does not execute your code or send anything to ChatGPT. Progress stays in this browser.</p>
-    <form id="submission-form" class="form-grid">
-      <div class="field"><label for="worldserver-code">1. Complete WorldServer code</label><textarea id="worldserver-code" spellcheck="false" placeholder="Paste all code from ServerScriptService > WorldServer"></textarea><small>The website treats submitted Luau only as text.</small></div>
-      <div class="field"><label for="hierarchy-text">2. Explorer hierarchy</label><textarea id="hierarchy-text" spellcheck="false" placeholder="Paste or type the required object tree and exact names"></textarea><small>Include Workspace, ReplicatedStorage, ServerStorage, ServerScriptService, and their required children.</small></div>
-      <div class="field"><label for="studio-output">3. Output from the final clean Play run</label><textarea id="studio-output" spellcheck="false" placeholder="Paste the current clean Output here"></textarea><small>Required message: VERSION 1 SERVER READY</small></div>
-      <fieldset><legend>4. Mission 1 test checklist</legend>
-        <label class="check-row"><input id="check-t01" type="checkbox" /><span><strong>V1-M01-T01:</strong> I cleared Output, pressed Play, saw the readiness line exactly once, and saw no unresolved red error from my Script.</span></label>
-        <label class="check-row"><input id="check-t02" type="checkbox" /><span><strong>V1-M01-T02:</strong> I compared every required folder and WorldServer name/location with the hierarchy.</span></label>
-        <label class="check-row"><input id="check-t03" type="checkbox" /><span><strong>V1-M01-T03:</strong> I stopped, pressed Play a second time, and the message appeared once again without duplicate scripts or errors.</span></label>
-      </fieldset>
-      <div class="field"><label for="understanding-answer">5. Understanding answer</label><input id="understanding-answer" type="text" maxlength="500" placeholder="Where will you look first if a script seems to do nothing, and why?" /><small>Use your own words. Perfect wording is not required.</small></div>
-      <label class="check-row"><input id="strong-help" type="checkbox" /><span><strong>I’m completely stuck.</strong> Show the strongest Mission 1 hint. Stronger help does not reduce the evidence required for approval.</span></label>
-      <details class="prototype-tools"><summary>Parent/developer test samples</summary><p class="muted">These buttons verify the three local evaluator outcomes.</p><div class="sample-buttons"><button type="button" class="button button-secondary" data-sample="fix">Load NEEDS_FIX</button><button type="button" class="button button-secondary" data-sample="evidence">Load NEEDS_EVIDENCE</button><button type="button" class="button button-secondary" data-sample="approved">Load APPROVED</button></div></details>
-      <div class="form-actions"><button type="submit" class="button button-primary">Review my evidence</button><a class="button button-secondary" href="hq.html">Back to Build HQ</a></div>
-    </form>
-  </section>
-
-  <section id="feedback-card" class="feedback" hidden aria-live="polite"><div class="mission-meta"><span id="feedback-status" class="status"></span><span class="status status-not-submitted">Deterministic local simulation</span></div><h2 id="feedback-headline"></h2><div class="feedback-grid"><div class="feedback-section"><h3>What worked</h3><ul id="feedback-worked"></ul></div><div class="feedback-section"><h3>Main issue</h3><p id="feedback-problem"></p></div><div class="feedback-section"><h3>Why</h3><p id="feedback-explanation"></p></div><div class="feedback-section"><h3>Next action</h3><p id="feedback-next"></p></div><div class="feedback-section"><h3>Tests to repeat</h3><ul id="feedback-tests"></ul></div><div class="feedback-section"><h3>Review state</h3><p><span id="feedback-hint"></span> · <span id="feedback-unlock"></span></p></div></div><details class="raw-review"><summary>View schema-shaped response object</summary><pre id="review-json" class="code-block"></pre></details></section>
-</div>
-<section id="later-mission-panel" class="card locked-panel" hidden><div class="lock-icon">🔒</div><div class="mission-meta" style="justify-content:center"><span id="later-status" class="status"></span><span id="later-id" class="status status-not-submitted"></span><span id="later-difficulty" class="status status-not-submitted"></span></div><h1 id="later-title"></h1><p id="later-summary" class="lead" style="margin-inline:auto"></p><p id="later-message" class="muted"></p><a id="later-action" class="button button-primary" href="hq.html">Return to Build HQ</a></section>
+  <section id="later-mission-panel" class="card locked-panel" hidden><div class="lock-icon">🔒</div><div class="mission-meta" style="justify-content:center"><span id="later-status" class="status"></span><span id="later-id" class="status status-not-submitted"></span><span id="later-difficulty" class="status status-not-submitted"></span></div><h1 id="later-title"></h1><p id="later-summary" class="lead" style="margin-inline:auto"></p><p id="later-message" class="muted"></p><a id="later-action" class="button button-primary" href="hq.html">Return to Build HQ</a></section>
 </div></main>
-<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · WEBSITE MVP BUILD 1 · LOCAL PROTOTYPE</div></footer>
-<script src="assets/js/missions-data.js"></script><script src="assets/js/storage.js"></script><script src="assets/js/mock-evaluator.js"></script><script src="assets/js/app.js"></script>
-</body></html>
+<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · BUILD HQ</div></footer>
+<script src="assets/js/missions-data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/mock-evaluator.js"></script>
+<script src="assets/js/app.js"></script>
+
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  var mission = window.WORLDMAKER_MISSIONS && window.WORLDMAKER_MISSIONS[0];
+  var hierarchy = document.getElementById("hierarchy-text");
+  if (hierarchy && mission) hierarchy.value = mission.requiredHierarchy;
+
+  document.querySelectorAll("[data-local-notice]").forEach(function(el){
+    el.textContent = "Your progress is saved in this browser. The checker reads pasted text only; it never runs your Roblox code.";
+  });
+
+  var output = document.getElementById("studio-output");
+  var triage = document.getElementById("output-triage");
+  function classifyOutput() {
+    if (!output || !triage) return;
+    var text = output.value || "";
+    if (!text.trim()) { triage.className="triage"; triage.textContent="Paste Output and this box will explain it."; return; }
+    var ready=(text.match(/VERSION 1 SERVER READY/g)||[]).length;
+    var hello=(text.match(/Hello world!/gi)||[]).length;
+    var misplaced=/Workspace\.Script|Incomplete statement/i.test(text);
+    var plugin=/cloud_[^\s]*|MA2Theme/i.test(text);
+    var projectError=/WorldServer[^\n]*(error|expected|attempt to|incomplete)|Workspace\.Script|Incomplete statement/i.test(text);
+    var lines=[];
+    if (ready===1) lines.push("✓ WorldServer readiness message appeared once.");
+    else if (ready===0) lines.push("✗ The WorldServer readiness message is missing.");
+    else lines.push("✗ The readiness message appears "+ready+" times. Check for duplicate WorldServer Scripts.");
+    if (hello) lines.push("✗ “Hello world!” appears "+hello+" time(s). Extra starter Scripts are still running.");
+    if (misplaced) lines.push("✗ Output names Workspace.Script or unfinished code. Remove or repair that accidental Script.");
+    if (projectError) lines.push("✗ A project Script error is present. Repair the Script named in that error.");
+    if (plugin) lines.push("⚠ A cloud_/MA2Theme plugin error is also present. This is separate from WorldServer and does not by itself fail the mission.");
+    var bad=hello||misplaced||projectError||ready!==1;
+    triage.className="triage "+(bad?"bad":plugin?"warn":"good");
+    triage.textContent=lines.join("\n");
+  }
+  if(output){output.addEventListener("input",classifyOutput);classifyOutput();}
+});
+</script>
+</body>
+</html>
