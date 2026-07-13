@@ -6,70 +6,126 @@
   <meta name="theme-color" content="#070716" />
   <title>Mission · Nick // Worldmaker</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    .lesson{display:grid;gap:18px}.lesson-card{border-left:4px solid rgba(86,246,255,.55)}
+    .lesson-card p,.lesson-card li{line-height:1.65}.lesson-card h3{margin-top:22px}
+    .checkpoint,.prediction,.experiment{padding:16px;border-radius:14px;margin:18px 0}
+    .checkpoint{border:1px solid rgba(151,255,130,.28);background:rgba(151,255,130,.07)}
+    .prediction{border:1px solid rgba(255,214,107,.28);background:rgba(255,214,107,.07)}
+    .experiment{border:1px solid rgba(166,107,255,.28);background:rgba(166,107,255,.08)}
+    .mini-code{display:block;padding:14px 16px;margin:10px 0;border-radius:12px;background:#090b1d;border:1px solid rgba(255,255,255,.12);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;color:#eef2ff}
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.result-grid>div{padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}
+    .submit-steps{display:grid;gap:10px}.submit-steps>div{padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)}
+    @media(max-width:700px){.result-grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body data-page="mission">
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="site-header">
-  <div class="site-shell header-inner">
-    <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
-    <nav class="site-nav" aria-label="Main navigation">
-      <a href="hq.html" data-nav="hq">Build HQ</a>
-      <a href="mission.html?id=V1-M01" data-nav="mission">Mission</a>
-      <a href="progress.html" data-nav="progress">Progress</a>
-      <a href="parent.html" data-nav="parent">Parent View</a>
-    </nav>
-  </div>
-</header>
+<header class="site-header"><div class="site-shell header-inner">
+  <a class="brand" href="index.html"><span class="brand-mark">N</span> NICK // WORLDMAKER</a>
+  <nav class="site-nav" aria-label="Main navigation"><a href="hq.html" data-nav="hq">Build HQ</a><a href="mission.html?id=V1-M01" data-nav="mission">Mission</a><a href="progress.html" data-nav="progress">Progress</a><a href="parent.html" data-nav="parent">Parent View</a></nav>
+</div></header>
 <main id="main-content"><div class="site-shell">
-  <p class="local-notice" data-local-notice></p>
-  <div id="mission-one-content">
-    <section class="card mission-header"><div class="mission-meta"><span class="status status-not-submitted" id="mission-status"></span><span class="status status-not-submitted" id="mission-id"></span><span class="status status-not-submitted">Easy</span></div><h1 id="mission-title">Studio Ready</h1><p class="lead" id="mission-objective"></p><div class="callout"><strong>Visible result:</strong> <span id="visible-result"></span></div></section>
-    <div class="detail-layout section">
-      <div>
-        <section class="card content-card"><h2>Why it matters</h2><p id="why-it-matters"></p><h2 class="section">Starting state</h2><p id="starting-state"></p></section>
-        <section class="card content-card"><h2>New concepts</h2><div id="concepts" class="concepts"></div></section>
-        <section class="card content-card"><h2>Build instructions</h2><ol id="build-steps"></ol></section>
-        <section class="card content-card"><h2>Required Mission 1 hierarchy</h2><pre id="hierarchy-block" class="code-block"></pre></section>
-        <section class="card content-card"><h2>Acceptance tests</h2><div id="test-list" class="test-list"></div></section>
-        <section class="card content-card"><h2>What to submit</h2><ul id="submit-list"></ul></section>
-      </div>
-      <aside class="sidebar-sticky">
-        <section class="card content-card"><h2>Common mistakes</h2><ul id="mistakes"></ul></section>
-        <section class="card content-card"><div class="section-head"><h2>Progressive hint</h2><span id="hint-level" class="status status-not-submitted">Hint level 0</span></div><div id="hint-text" class="hint-box"></div><button id="next-hint" type="button" class="button button-secondary">Show stronger hint</button></section>
-        <section class="card content-card"><h2>Understanding check</h2><p id="understanding-question"></p><p class="muted">The answer is optional in Build 1 and is not an English test.</p></section>
-      </aside>
+<p class="local-notice" data-local-notice></p>
+<div id="mission-one-content">
+  <section class="card mission-header">
+    <div class="mission-meta"><span class="status status-not-submitted" id="mission-status"></span><span class="status status-not-submitted" id="mission-id"></span><span class="status status-not-submitted">First build</span></div>
+    <h1 id="mission-title">Studio Ready</h1><p class="lead" id="mission-objective"></p>
+    <div class="callout"><strong>What should happen:</strong> <span id="visible-result"></span></div>
+    <div class="result-grid"><div><strong>In the 3D world</strong><br>Your character appears on the Baseplate. Nothing else changes yet.</div><div><strong>In Output</strong><br><code>VERSION 1 SERVER READY</code> appears once on every clean Play run.</div></div>
+  </section>
+
+  <div class="detail-layout section">
+    <div class="lesson">
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 1 · Know your tools</div><h2>Where code lives and where results appear</h2>
+        <p id="why-it-matters"></p>
+        <p><strong>Explorer</strong> shows every object in the game as a tree. It answers: “Where is my Script?” and “Did I use the exact name?”</p>
+        <p><strong>Properties</strong> shows settings for the selected object.</p>
+        <p><strong>Output</strong> is the game’s report window. It shows messages from code, warnings, and runtime errors.</p>
+        <p><strong>Script Editor</strong> is where you write Luau. It opens when you double-click a Script.</p>
+        <ol><li>Open Explorer and Properties from the <strong>Window</strong> menu or Home toolbar.</li><li>Open Output from the <strong>Window</strong> menu or Script toolbar.</li><li>Keep the 3D Baseplate visible.</li></ol>
+        <div class="checkpoint"><strong>Checkpoint A:</strong> do not continue until Explorer, Properties, Output, and the Baseplate are all visible.</div>
+      </section>
+
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 2 · Organise the project</div><h2>Build the folder skeleton</h2>
+        <p>A <strong>Folder</strong> is an organisational container. It does not create anything visible and it does not run code. It gives future objects a predictable home.</p>
+        <ol><li>Inside <strong>Workspace</strong>, create a Folder named <code>World</code>.</li><li>Inside World, create <code>Ground</code>, <code>NPCs</code>, <code>NPCHomes</code>, <code>Resources</code>, and <code>Buildings</code>.</li><li>Inside <strong>ReplicatedStorage</strong>, create <code>Remotes</code> and <code>GameState</code>.</li><li>Inside <strong>ServerStorage</strong>, create <code>Templates</code>.</li></ol>
+        <p>These names describe where later parts of the game will live: the island, settlers, their return points, resources, buildings, shared values, messages, and hut template.</p>
+        <div class="checkpoint"><strong>Checkpoint B:</strong> compare every name and location with the required hierarchy below. Capital letters matter.</div>
+      </section>
+
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 3 · Create server code</div><h2>Make the WorldServer Script</h2>
+        <p>A Roblox game has a <strong>server</strong> and one or more <strong>clients</strong>. The server controls shared rules and world state. A client is one player’s controls, camera, and interface.</p>
+        <p>Later, the real resource totals and hut will belong to the server so every player sees the same truth.</p>
+        <ol><li>In Explorer, find <strong>ServerScriptService</strong>.</li><li>Click <strong>+</strong> and choose <strong>Script</strong> — not LocalScript or ModuleScript.</li><li>Rename it exactly <code>WorldServer</code>.</li><li>Double-click it and delete Studio’s starter line.</li></ol>
+        <div class="checkpoint"><strong>Checkpoint C:</strong> Explorer must show <code>ServerScriptService &gt; WorldServer</code>, and WorldServer must be a normal Script.</div>
+      </section>
+
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 4 · Write real Luau</div><h2>Construct the line yourself</h2>
+        <p><code>print</code> is a Luau <strong>function</strong>. A function is a named instruction that performs a job. The job of <code>print</code> is to send information to Output.</p>
+        <h3>Step 1 — Type the function name</h3><code class="mini-code">print</code>
+        <p>Nothing runs yet. Luau still needs to know what information you are giving to the function.</p>
+        <h3>Step 2 — Add parentheses</h3><code class="mini-code">print()</code>
+        <p>Parentheses hold the information passed into a function. The information inside is called an <strong>argument</strong>.</p>
+        <h3>Step 3 — Add a string</h3><p>The exact message is:</p><code class="mini-code">VERSION 1 SERVER READY</code>
+        <p>Text in Luau is called a <strong>string</strong>. A string must be surrounded by quotation marks. Put the message inside the parentheses and add the quotation marks yourself.</p>
+        <div class="prediction"><strong>Predict before running:</strong> what exact line should appear in Output? What should change in the 3D world?</div>
+        <details><summary>Check the completed line only after writing yours</summary><code class="mini-code">print("VERSION 1 SERVER READY")</code></details>
+      </section>
+
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 5 · Run and observe</div><h2>Prove what the code does</h2>
+        <ol><li>Clear old messages from Output.</li><li>Press <strong>Play</strong>.</li><li>Confirm your character appears on the Baseplate.</li><li>Confirm Output shows <code>VERSION 1 SERVER READY</code> exactly once.</li><li>Check that your Script produced no unresolved red error.</li><li>Press <strong>Stop</strong>.</li></ol>
+        <p>Nothing new appears in the world because <code>print()</code> reports information. It does not create parts or move characters.</p>
+        <div class="experiment"><strong>Small experiment:</strong> temporarily change only the text inside the quotation marks. Run once and observe what changes. Then restore the required message.</div>
+      </section>
+
+      <section class="card content-card lesson-card">
+        <div class="eyebrow">Part 6 · Debug on purpose</div><h2>See what an error looks like</h2>
+        <ol><li>Temporarily remove the final quotation mark.</li><li>Notice how the Script Editor marks unfinished code.</li><li>Inspect the error information.</li><li>Restore the quotation mark.</li><li>Run again and prove the error is gone.</li></ol>
+        <p>This experiment is not submitted. It teaches you where to look when code appears to do nothing.</p>
+      </section>
+
+      <section class="card content-card lesson-card"><div class="eyebrow">Part 7 · Final proof</div><h2>Run the exact tests</h2><div id="test-list" class="test-list"></div><div class="checkpoint"><strong>Final clean state:</strong> restore the required message, remove temporary experiments, verify the hierarchy, and complete two separate clean Play runs.</div></section>
+      <section class="card content-card"><h2>Required Mission 1 hierarchy</h2><pre id="hierarchy-block" class="code-block"></pre></section>
+      <section class="card content-card"><h2>Exactly what you will submit</h2><div class="submit-steps"><div><strong>1. Complete WorldServer code</strong><br>Paste everything inside the Script, not a screenshot or cropped fragment.</div><div><strong>2. Explorer hierarchy</strong><br>Paste or type the object names and nesting so the reviewer can verify locations.</div><div><strong>3. Current Output</strong><br>Paste Output from the final clean code after running it.</div><div><strong>4. Test checklist</strong><br>Tick a test only after performing its exact setup and action.</div><div><strong>5. Understanding answer</strong><br>Explain where you will look first when a Script seems to do nothing and why.</div></div><ul id="submit-list" hidden></ul></section>
     </div>
-    <section class="card form-card" aria-labelledby="submit-title"><div class="eyebrow">Local mock review</div><h2 id="submit-title">Submit Mission 1 evidence</h2><p class="lead">Nothing here is sent to ChatGPT. The browser checks fixed Mission 1 rules and stores progress locally.</p>
-      <form id="submission-form" class="form-grid">
-        <div class="field"><label for="worldserver-code">WorldServer code</label><textarea id="worldserver-code" spellcheck="false" placeholder='print("VERSION 1 SERVER READY")'></textarea><small>Submitted Luau is treated as text. The website does not execute it.</small></div>
-        <div class="field"><label for="hierarchy-text">Roblox hierarchy text</label><textarea id="hierarchy-text" spellcheck="false" placeholder="Paste or type the named Explorer hierarchy..."></textarea></div>
-        <div class="field"><label for="studio-output">Roblox Studio Output</label><textarea id="studio-output" spellcheck="false" placeholder="Paste Output from one clean Play run..."></textarea></div>
-        <fieldset><legend>Mission 1 test checklist</legend>
-          <label class="check-row"><input id="check-t01" type="checkbox" /><span><strong>V1-M01-T01:</strong> One clean Play run printed the readiness line exactly once with no project-code red error.</span></label>
-          <label class="check-row"><input id="check-t02" type="checkbox" /><span><strong>V1-M01-T02:</strong> I checked the exact folder names and ServerScriptService/WorldServer.</span></label>
-          <label class="check-row"><input id="check-t03" type="checkbox" /><span><strong>V1-M01-T03:</strong> I stopped, played again, and the restart was clean with no duplicate script.</span></label>
-        </fieldset>
-        <div class="field"><label for="understanding-answer">Optional understanding answer</label><input id="understanding-answer" type="text" maxlength="500" placeholder="Where will you look first if a script seems to do nothing?" /></div>
-        <label class="check-row"><input id="strong-help" type="checkbox" /><span><strong>I’m completely stuck.</strong> Show the strongest Mission 1 hint in the review. Stronger help does not lower the evidence required for approval.</span></label>
-        <details class="prototype-tools"><summary>Prototype test samples</summary><p class="muted">These buttons fill the form so the three evaluator outcomes can be reviewed quickly.</p><div class="sample-buttons"><button type="button" class="button button-secondary" data-sample="fix">Load NEEDS_FIX</button><button type="button" class="button button-secondary" data-sample="evidence">Load NEEDS_EVIDENCE</button><button type="button" class="button button-secondary" data-sample="approved">Load APPROVED</button></div></details>
-        <div class="form-actions"><button type="submit" class="button button-primary">Run local mock review</button><a class="button button-secondary" href="hq.html">Back to Build HQ</a></div>
-      </form>
-    </section>
-    <section id="feedback-card" class="feedback" hidden aria-live="polite"><div class="mission-meta"><span id="feedback-status" class="status"></span><span class="status status-not-submitted">Deterministic local simulation</span></div><h2 id="feedback-headline"></h2><div class="feedback-grid">
-      <div class="feedback-section"><h3>What worked</h3><ul id="feedback-worked"></ul></div>
-      <div class="feedback-section"><h3>Main issue</h3><p id="feedback-problem"></p></div>
-      <div class="feedback-section"><h3>Why</h3><p id="feedback-explanation"></p></div>
-      <div class="feedback-section"><h3>Next action</h3><p id="feedback-next"></p></div>
-      <div class="feedback-section"><h3>Tests to repeat</h3><ul id="feedback-tests"></ul></div>
-      <div class="feedback-section"><h3>Review state</h3><p><span id="feedback-hint"></span> · <span id="feedback-unlock"></span></p></div>
-    </div><details class="raw-review"><summary>View schema-shaped response object</summary><pre id="review-json" class="code-block"></pre></details></section>
+
+    <aside class="sidebar-sticky">
+      <section class="card content-card"><h2>Starting state</h2><p id="starting-state"></p></section>
+      <section class="card content-card"><h2>Key concepts</h2><div id="concepts" class="concepts"></div></section>
+      <section class="card content-card" hidden><h2>Build instructions</h2><ol id="build-steps"></ol></section>
+      <section class="card content-card"><h2>Common mistakes</h2><ul id="mistakes"></ul></section>
+      <section class="card content-card"><div class="section-head"><h2>Progressive hint</h2><span id="hint-level" class="status status-not-submitted">Hint level 0</span></div><div id="hint-text" class="hint-box"></div><button id="next-hint" type="button" class="button button-secondary">Show stronger hint</button></section>
+      <section class="card content-card"><h2>Understanding check</h2><p id="understanding-question"></p><p class="muted">This checks the central idea. It is not an English test.</p></section>
+    </aside>
   </div>
-  <section id="later-mission-panel" class="card locked-panel" hidden><div class="lock-icon">🔒</div><div class="mission-meta" style="justify-content:center"><span id="later-status" class="status"></span><span id="later-id" class="status status-not-submitted"></span><span id="later-difficulty" class="status status-not-submitted"></span></div><h1 id="later-title"></h1><p id="later-summary" class="lead" style="margin-inline:auto"></p><p id="later-message" class="muted"></p><a id="later-action" class="button button-primary" href="hq.html">Return to Build HQ</a></section>
+
+  <section class="card form-card" aria-labelledby="submit-title"><div class="eyebrow">Mission evidence</div><h2 id="submit-title">Submit Mission 1</h2><p class="lead">The current website uses a deterministic local reviewer. It does not execute your code or send anything to ChatGPT. Progress stays in this browser.</p>
+    <form id="submission-form" class="form-grid">
+      <div class="field"><label for="worldserver-code">1. Complete WorldServer code</label><textarea id="worldserver-code" spellcheck="false" placeholder="Paste all code from ServerScriptService > WorldServer"></textarea><small>The website treats submitted Luau only as text.</small></div>
+      <div class="field"><label for="hierarchy-text">2. Explorer hierarchy</label><textarea id="hierarchy-text" spellcheck="false" placeholder="Paste or type the required object tree and exact names"></textarea><small>Include Workspace, ReplicatedStorage, ServerStorage, ServerScriptService, and their required children.</small></div>
+      <div class="field"><label for="studio-output">3. Output from the final clean Play run</label><textarea id="studio-output" spellcheck="false" placeholder="Paste the current clean Output here"></textarea><small>Required message: VERSION 1 SERVER READY</small></div>
+      <fieldset><legend>4. Mission 1 test checklist</legend>
+        <label class="check-row"><input id="check-t01" type="checkbox" /><span><strong>V1-M01-T01:</strong> I cleared Output, pressed Play, saw the readiness line exactly once, and saw no unresolved red error from my Script.</span></label>
+        <label class="check-row"><input id="check-t02" type="checkbox" /><span><strong>V1-M01-T02:</strong> I compared every required folder and WorldServer name/location with the hierarchy.</span></label>
+        <label class="check-row"><input id="check-t03" type="checkbox" /><span><strong>V1-M01-T03:</strong> I stopped, pressed Play a second time, and the message appeared once again without duplicate scripts or errors.</span></label>
+      </fieldset>
+      <div class="field"><label for="understanding-answer">5. Understanding answer</label><input id="understanding-answer" type="text" maxlength="500" placeholder="Where will you look first if a script seems to do nothing, and why?" /><small>Use your own words. Perfect wording is not required.</small></div>
+      <label class="check-row"><input id="strong-help" type="checkbox" /><span><strong>I’m completely stuck.</strong> Show the strongest Mission 1 hint. Stronger help does not reduce the evidence required for approval.</span></label>
+      <details class="prototype-tools"><summary>Parent/developer test samples</summary><p class="muted">These buttons verify the three local evaluator outcomes.</p><div class="sample-buttons"><button type="button" class="button button-secondary" data-sample="fix">Load NEEDS_FIX</button><button type="button" class="button button-secondary" data-sample="evidence">Load NEEDS_EVIDENCE</button><button type="button" class="button button-secondary" data-sample="approved">Load APPROVED</button></div></details>
+      <div class="form-actions"><button type="submit" class="button button-primary">Review my evidence</button><a class="button button-secondary" href="hq.html">Back to Build HQ</a></div>
+    </form>
+  </section>
+
+  <section id="feedback-card" class="feedback" hidden aria-live="polite"><div class="mission-meta"><span id="feedback-status" class="status"></span><span class="status status-not-submitted">Deterministic local simulation</span></div><h2 id="feedback-headline"></h2><div class="feedback-grid"><div class="feedback-section"><h3>What worked</h3><ul id="feedback-worked"></ul></div><div class="feedback-section"><h3>Main issue</h3><p id="feedback-problem"></p></div><div class="feedback-section"><h3>Why</h3><p id="feedback-explanation"></p></div><div class="feedback-section"><h3>Next action</h3><p id="feedback-next"></p></div><div class="feedback-section"><h3>Tests to repeat</h3><ul id="feedback-tests"></ul></div><div class="feedback-section"><h3>Review state</h3><p><span id="feedback-hint"></span> · <span id="feedback-unlock"></span></p></div></div><details class="raw-review"><summary>View schema-shaped response object</summary><pre id="review-json" class="code-block"></pre></details></section>
+</div>
+<section id="later-mission-panel" class="card locked-panel" hidden><div class="lock-icon">🔒</div><div class="mission-meta" style="justify-content:center"><span id="later-status" class="status"></span><span id="later-id" class="status status-not-submitted"></span><span id="later-difficulty" class="status status-not-submitted"></span></div><h1 id="later-title"></h1><p id="later-summary" class="lead" style="margin-inline:auto"></p><p id="later-message" class="muted"></p><a id="later-action" class="button button-primary" href="hq.html">Return to Build HQ</a></section>
 </div></main>
 <footer class="footer"><div class="site-shell">NICK // WORLDMAKER · WEBSITE MVP BUILD 1 · LOCAL PROTOTYPE</div></footer>
-<script src="assets/js/missions-data.js"></script>
-<script src="assets/js/storage.js"></script>
-<script src="assets/js/mock-evaluator.js"></script>
-<script src="assets/js/app.js"></script>
-</body>
-</html>
+<script src="assets/js/missions-data.js"></script><script src="assets/js/storage.js"></script><script src="assets/js/mock-evaluator.js"></script><script src="assets/js/app.js"></script>
+</body></html>
