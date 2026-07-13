@@ -10,14 +10,15 @@
   function normalise(text) { return String(text || "").replace(/\r/g, ""); }
   function containsExactPrint(code) { return /print\s*\(\s*["']VERSION 1 SERVER READY["']\s*\)/.test(code); }
   function readinessCount(text) { return (text.match(/VERSION 1 SERVER READY/g) || []).length; }
-  function hasApparentRuntimeError(output) {
-    const lines = normalise(output).split("\n").map(line => line.trim()).filter(Boolean);
+  function helloCount(text) { return (text.match(/Hello world!/gi) || []).length; }
+  function hasExternalNoise(text) { return /cloud_[^\s]*|MA2Theme/i.test(text); }
+  function hasProjectError(text) {
+    const lines = normalise(text).split("\n");
     return lines.some(line =>
-      /^(error|runtime error|syntax error)\b/i.test(line) ||
-      /stack begin|stack end/i.test(line) ||
-      /attempt to (index|call|perform|concatenate|compare)/i.test(line) ||
-      /script ['\"].+['\"], line \d+/i.test(line) ||
-      /expected .+ got/i.test(line)
+      /Workspace\.Script/i.test(line) ||
+      /WorldServer[^\n]*(incomplete statement|expected|attempt to|syntax error|runtime error)/i.test(line) ||
+      /Incomplete statement/i.test(line) ||
+      (/Script ['\"](?:Workspace\.)?WorldServer['\"]/i.test(line) && /Line \d+/i.test(line))
     );
   }
   function hierarchyAssessment(hierarchy) {
@@ -41,43 +42,46 @@
     const outputPresent = Boolean(output.trim());
     const codePass = codePresent && containsExactPrint(code);
     const outputCount = readinessCount(output);
-    const outputHasError = outputPresent && hasApparentRuntimeError(output);
-    const outputPass = outputPresent && outputCount === 1 && !outputHasError;
+    const oldHelloCount = helloCount(output);
+    const externalNoise = hasExternalNoise(output);
+    const projectError = outputPresent && hasProjectError(output);
+    const outputPass = outputPresent && outputCount === 1 && oldHelloCount === 0 && !projectError;
     const checklist = submission.checklist || {};
     const checklistPass = REQUIRED_TESTS.every(id => checklist[id] === true);
     const explicitFailures = [];
     const missingEvidence = [];
 
-    if (!codePresent) missingEvidence.push("Full WorldServer code");
-    else if (!codePass) explicitFailures.push("WorldServer does not contain the exact readiness print statement.");
+    if (!codePresent) missingEvidence.push("the code inside WorldServer");
+    else if (!codePass) explicitFailures.push("WorldServer does not contain the exact readiness print line.");
 
-    if (!hierarchyPresent) missingEvidence.push("Mission 1 hierarchy text");
+    if (!hierarchyPresent) missingEvidence.push("the completed Explorer structure check");
     else {
-      if (hierarchyResult.localScriptWrong) explicitFailures.push("WorldServer is shown as a LocalScript instead of a normal Script.");
-      if (hierarchyResult.disabled) explicitFailures.push("WorldServer is shown as disabled.");
-      if (hierarchyResult.missing.length) explicitFailures.push("Required hierarchy names are missing: " + hierarchyResult.missing.join(", ") + ".");
-      if (!hierarchyResult.pathOK) explicitFailures.push("The hierarchy does not prove ServerScriptService/WorldServer.");
-      if (!hierarchyResult.scriptTypeShown && hierarchyResult.pathOK) missingEvidence.push("WorldServer object type (normal Script)");
+      if (hierarchyResult.localScriptWrong) explicitFailures.push("WorldServer is a LocalScript instead of a normal Script.");
+      if (hierarchyResult.disabled) explicitFailures.push("WorldServer is disabled.");
+      if (hierarchyResult.missing.length) explicitFailures.push("Required Explorer names are missing: " + hierarchyResult.missing.join(", ") + ".");
+      if (!hierarchyResult.pathOK) explicitFailures.push("WorldServer is not proven under ServerScriptService.");
     }
 
-    if (!outputPresent) missingEvidence.push("Output from one clean Play test");
+    if (!outputPresent) missingEvidence.push("Output from the final Play run");
     else {
-      if (outputHasError) explicitFailures.push("The submitted Output contains an apparent unresolved runtime error.");
-      else if (outputCount === 0) missingEvidence.push("Output line VERSION 1 SERVER READY");
-      else if (outputCount > 1) explicitFailures.push("The submitted clean-run Output contains the readiness message more than once.");
+      if (oldHelloCount > 0) explicitFailures.push("Extra starter Scripts are still printing Hello world!.");
+      if (projectError) explicitFailures.push("Output contains an error from WorldServer or an accidental Workspace Script.");
+      if (outputCount === 0) missingEvidence.push("the VERSION 1 SERVER READY line in Output");
+      if (outputCount > 1) explicitFailures.push("The readiness message appears more than once, which suggests duplicate WorldServer Scripts.");
     }
 
-    REQUIRED_TESTS.forEach(id => { if (checklist[id] !== true) missingEvidence.push("Confirmed checklist item " + id); });
+    REQUIRED_TESTS.forEach(id => { if (checklist[id] !== true) missingEvidence.push("the completed check for " + id); });
 
     const approved = [];
     if (codePass && outputPass && checklist["V1-M01-T01"]) approved.push("V1-M01-T01");
-    if (hierarchyResult.pass && hierarchyResult.scriptTypeShown && checklist["V1-M01-T02"]) approved.push("V1-M01-T02");
+    if (hierarchyResult.pass && checklist["V1-M01-T02"]) approved.push("V1-M01-T02");
     if (outputPass && checklist["V1-M01-T03"]) approved.push("V1-M01-T03");
 
     return {
-      codePresent, hierarchyPresent, outputPresent, codePass, outputPass, outputHasError,
-      outputCount, hierarchyResult, checklistPass, explicitFailures, missingEvidence,
-      approved, allMandatory: explicitFailures.length === 0 && missingEvidence.length === 0 && approved.length === 3
+      codePresent, hierarchyPresent, outputPresent, codePass, outputPass, projectError,
+      outputCount, oldHelloCount, externalNoise, hierarchyResult, checklistPass,
+      explicitFailures, missingEvidence, approved,
+      allMandatory: explicitFailures.length === 0 && missingEvidence.length === 0 && approved.length === 3
     };
   }
 
@@ -88,15 +92,15 @@
       status: "NEEDS_EVIDENCE",
       mission_id: "V1-M01",
       attempt_number: attemptNumber,
-      headline: "More current evidence is needed before Mission 1 can unlock.",
+      headline: "One small check is still needed.",
       approved_requirements: assessment.approved,
       main_problem: null,
-      explanation: "The local checker only approves what the submitted code, hierarchy, Output, and checklist prove together.",
-      next_action: "Add the smallest missing proof and submit again.",
+      explanation: "The checker uses only the code, Output, and checks shown on this page.",
+      next_action: "Complete the first missing item and check again.",
       tests_to_repeat: REQUIRED_TESTS.filter(id => !assessment.approved.includes(id)),
       hint_level: Math.max(0, Math.min(5, hintLevel || 0)),
       understanding_question: null,
-      parent_summary: "Mission 1 has been reviewed locally. More evidence is needed before the prototype unlocks Mission 2.",
+      parent_summary: "Mission 1 was checked. One or more current proof items are still missing.",
       unlock_next_mission: false,
       next_mission_id: null,
       confidence: 0.94,
@@ -111,9 +115,18 @@
       },
       regressions: [],
       suspicious_input_detected: suspiciousDetected,
-      suspicious_input_note: suspiciousDetected ? "Instruction-like text was detected inside submitted evidence. Build 1 displays it as untrusted text and does not follow it." : null,
+      suspicious_input_note: suspiciousDetected ? "Instruction-like text inside the pasted evidence was ignored and treated as plain text." : null,
       block_type: null
     };
+  }
+
+  function nextActionFor(problem) {
+    if (/Hello world/i.test(problem)) return "Search Explorer for Script. Delete unnecessary Scripts that still contain print(\"Hello world!\"). Keep ServerScriptService > WorldServer.";
+    if (/Workspace Script|Workspace\.Script/i.test(problem)) return "Stop Play. Delete the accidental Script under Workspace. Keep WorldServer under ServerScriptService, then run again.";
+    if (/readiness print/i.test(problem)) return "Open ServerScriptService > WorldServer and repair the one print line. Then clear Output and run Play again.";
+    if (/more than once|duplicate/i.test(problem)) return "Search Explorer for WorldServer and Script. Keep one WorldServer only, then clear Output and run again.";
+    if (/Explorer names|ServerScriptService|LocalScript|disabled/i.test(problem)) return "Compare Explorer with the example on the mission page and correct the first wrong name, location, or Script type.";
+    return "Open the Script named in Output, repair the first unfinished line, then clear Output and run again.";
   }
 
   function evaluateMission1(submission, attemptNumber, requestedHintLevel) {
@@ -123,18 +136,14 @@
     if (assessment.explicitFailures.length) {
       const problem = assessment.explicitFailures[0];
       review.status = "NEEDS_FIX";
-      review.headline = "One proven Mission 1 problem needs a fix.";
+      review.headline = "Your main Script is close; fix this one thing.";
       review.main_problem = problem;
-      review.explanation = problem + " Fix the first proven blocker, then rerun the affected test from a clean Play session.";
-      review.next_action = problem.includes("print")
-        ? "Open ServerScriptService > WorldServer, use the exact print line, clear Output, and run Play again."
-        : problem.includes("hierarchy") || problem.includes("ServerScriptService") || problem.includes("LocalScript")
-          ? "Correct the object name, location, or script type in Explorer, then repeat the hierarchy and Play checks."
-          : "Clear the runtime error shown in Output, clear Output, and repeat the Play test.";
-      review.tests_to_repeat = assessment.outputHasError || problem.includes("print") ? ["V1-M01-T01", "V1-M01-T03"] : ["V1-M01-T02"];
+      review.explanation = problem + (assessment.externalNoise ? " The cloud_/MA2Theme message is separate plugin noise and is not the reason for this result." : "");
+      review.next_action = nextActionFor(problem);
+      review.tests_to_repeat = /Explorer|ServerScriptService|LocalScript|disabled/i.test(problem) ? ["V1-M01-T02"] : ["V1-M01-T01", "V1-M01-T03"];
       review.hint_level = Math.max(1, review.hint_level);
-      review.understanding_question = "What is the first place you will look when a script seems to do nothing?";
-      review.parent_summary = "Mission 1 has one proven technical blocker: " + problem;
+      review.understanding_question = "Which Script name appears in the error or unexpected Output line?";
+      review.parent_summary = "Mission 1 has one concrete setup or code problem: " + problem + (assessment.externalNoise ? " An unrelated plugin warning is also present." : "");
       review.missing_evidence = assessment.missingEvidence;
       review.confidence = 0.98;
       return review;
@@ -142,24 +151,25 @@
 
     if (assessment.missingEvidence.length) {
       review.main_problem = assessment.missingEvidence[0];
-      review.next_action = "Provide " + assessment.missingEvidence[0] + ", then submit the same current version again.";
-      review.tests_to_repeat = REQUIRED_TESTS.filter(id => !assessment.approved.includes(id));
-      review.parent_summary = "Mission 1 may be working, but the local prototype is missing: " + assessment.missingEvidence.join("; ") + ".";
+      review.next_action = "Add " + assessment.missingEvidence[0] + ", then press Check my mission again.";
+      review.parent_summary = "Mission 1 may be working. The checker still needs: " + assessment.missingEvidence.join("; ") + ".";
       review.hint_level = 0;
       review.confidence = 0.96;
       return review;
     }
 
     review.status = "APPROVED";
-    review.headline = "Mission 1 is proven. Studio is ready.";
+    review.headline = assessment.externalNoise ? "WorldServer works. The plugin warning is separate." : "Mission 1 works. Studio is ready.";
     review.approved_requirements = REQUIRED_TESTS.slice();
     review.main_problem = null;
-    review.explanation = "WorldServer is in ServerScriptService, the required folder skeleton is present, the exact readiness message appears once, and the submitted Output is clean.";
-    review.next_action = "Mission V1-M02 is unlocked: build the island and settlement area.";
+    review.explanation = assessment.externalNoise
+      ? "WorldServer is in the correct place and prints the readiness message once. Output also contains unrelated cloud_/MA2Theme plugin noise, which does not block this mission."
+      : "WorldServer is in the correct place, the required folders are present, and the readiness message appears once on a clean run.";
+    review.next_action = "Mission V1-M02 is unlocked, but its full beginner lesson must be ready before starting it.";
     review.tests_to_repeat = [];
     review.hint_level = 0;
     review.understanding_question = null;
-    review.parent_summary = "V1-M01 approved. Nick proved the required Studio structure, server script, clean Output, and restart checklist.";
+    review.parent_summary = "V1-M01 approved. Nick proved the Script location, folder structure, and clean readiness output." + (assessment.externalNoise ? " A separate plugin warning remains but did not come from WorldServer." : "");
     review.unlock_next_mission = true;
     review.next_mission_id = "V1-M02";
     review.confidence = 0.99;
