@@ -87,17 +87,24 @@ async function authenticate(request, env) {
   return env.DB.prepare("SELECT family_id, role FROM sessions WHERE token_hash=? AND expires_at > ?").bind(tokenHash, new Date().toISOString()).first();
 }
 
+function isPilotMissionAvailable(auth, env, missionId, config) {
+  return config.releaseState === "released" || (
+    auth.family_id === env.RELEASE_TEST_FAMILY_ID &&
+    missionId === env.RELEASE_TEST_MISSION_ID
+  );
+}
+
 async function getProgress(auth, env, cors) {
   const progress = await env.DB.prepare("SELECT mission_id,status,hint_level,updated_at FROM mission_progress WHERE family_id=? ORDER BY mission_id").bind(auth.family_id).all();
   const attempts = await env.DB.prepare("SELECT s.mission_id,s.attempt_number,s.created_at,r.response_json FROM submissions s LEFT JOIN reviews r ON r.submission_id=s.id WHERE s.family_id=? ORDER BY s.created_at DESC LIMIT 20").bind(auth.family_id).all();
-  const missions = Object.entries(missionRegistry).map(([id, config]) => ({ id, title: config.title, next_mission_id: config.next, release_state: config.releaseState, test_ids: config.tests, required_evidence: config.evidence }));
+  const missions = Object.entries(missionRegistry).map(([id, config]) => ({ id, title: config.title, next_mission_id: config.next, release_state: isPilotMissionAvailable(auth, env, id, config) ? "released" : config.releaseState, test_ids: config.tests, required_evidence: config.evidence }));
   return json({ progress: progress.results, attempts: attempts.results.map(item => ({ ...item, review: item.response_json ? JSON.parse(item.response_json) : null })), missions }, 200, cors);
 }
 
 async function submitMission(request, auth, env, cors, missionId) {
   const config = missionRegistry[missionId];
   if (!config) return json({ error: "Mission evaluator is not configured" }, 404, cors);
-  if (config.releaseState !== "released") return json({ error: "Mission is unlocked in progress but not released yet" }, 409, cors);
+  if (!isPilotMissionAvailable(auth, env, missionId, config)) return json({ error: "Mission is unlocked in progress but not released yet" }, 409, cors);
   const body = await readJson(request);
   const pre = deterministicPrecheck(body, missionId, config);
   const count = await env.DB.prepare("SELECT COUNT(*) count FROM submissions WHERE family_id=? AND mission_id=?").bind(auth.family_id, missionId).first();
