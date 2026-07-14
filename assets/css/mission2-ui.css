@@ -1,0 +1,65 @@
+/* Mission 2 evidence form polish */
+#mission2-form .field {
+  display: grid;
+  gap: 8px;
+}
+
+#mission2-form .field > label {
+  margin: 0;
+  font-size: 1rem;
+}
+
+#mission2-form #m2-understanding {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 13px;
+  color: var(--text);
+  background: #090b1e;
+  font-size: 1rem;
+}
+
+#mission2-form #m2-understanding::placeholder {
+  color: #8f98bf;
+  opacity: 1;
+}
+
+#mission2-form #m2-understanding:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(86,246,255,.12);
+}
+
+#mission2-form #m2-image {
+  width: 100%;
+  min-height: 58px;
+  padding: 8px;
+  border: 1px dashed rgba(86,246,255,.42);
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(9,11,30,.82);
+  cursor: pointer;
+}
+
+#mission2-form #m2-image::file-selector-button {
+  min-height: 40px;
+  margin-right: 14px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  color: #071018;
+  background: linear-gradient(100deg,var(--cyan),#9dc7ff 52%,#d9a9ff);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#mission2-form #m2-image:hover {
+  border-color: var(--cyan);
+  background: rgba(86,246,255,.06);
+}
+
+#mission2-form .field-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
