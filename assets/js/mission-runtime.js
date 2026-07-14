@@ -4,19 +4,30 @@
   const API = "https://nick-worldmaker-api.abystrov66.workers.dev";
   const lessons = window.WORLDMAKER_LESSONS || {};
 
-  function text(value) {
-    return String(value == null ? "" : value);
-  }
-
+  function text(value) { return String(value == null ? "" : value); }
   function element(tag, className, content) {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (content != null) node.textContent = text(content);
     return node;
   }
+  function token() { return sessionStorage.getItem("worldmaker_token_learner"); }
 
-  function token() {
-    return sessionStorage.getItem("worldmaker_token_learner");
+  function installRuntimeStyles() {
+    if (document.getElementById("worldmaker-runtime-styles")) return;
+    const style = document.createElement("style");
+    style.id = "worldmaker-runtime-styles";
+    style.textContent = `
+      .evidence-upload{position:relative;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px;min-height:76px;padding:14px;border:1px dashed rgba(86,246,255,.48);border-radius:16px;background:rgba(9,11,30,.82);cursor:pointer;transition:border-color .18s ease,background .18s ease,transform .18s ease}
+      .evidence-upload:hover,.evidence-upload:focus-within{border-color:var(--cyan);background:rgba(86,246,255,.07);transform:translateY(-1px)}
+      .evidence-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+      .evidence-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border-radius:11px;color:#071018;background:linear-gradient(100deg,var(--cyan),#9dc7ff 52%,#d9a9ff);font-weight:950;white-space:nowrap}
+      .evidence-upload-copy{min-width:0}.evidence-upload-title{display:block;color:var(--text);font-weight:850}.evidence-upload-name{display:block;margin-top:4px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .evidence-upload.has-file{border-style:solid;border-color:rgba(151,255,130,.55);background:rgba(151,255,130,.07)}
+      .evidence-upload.has-file .evidence-upload-name{color:#b8ffac}
+      @media(max-width:620px){.evidence-upload{grid-template-columns:1fr}.evidence-upload-button{width:100%}}
+    `;
+    document.head.appendChild(style);
   }
 
   async function api(path, options = {}) {
@@ -43,7 +54,6 @@
   function addLesson(panel, lesson, status) {
     panel.className = "card content-card";
     panel.textContent = "";
-
     const header = element("section", "mission-header");
     const meta = element("div", "mission-meta");
     const statusBadge = element("span", "status status-" + String(status || "NOT_SUBMITTED").toLowerCase().replaceAll("_", "-"), status === "APPROVED" ? "Approved" : "Ready");
@@ -104,32 +114,45 @@
 
     if (status === "APPROVED") {
       const approved = element("div", "callout");
-      approved.innerHTML = "<strong>Mission 3 is approved.</strong> The result is stored in shared progress.";
+      approved.innerHTML = `<strong>${text(lesson.title)} is approved.</strong> The result is stored in shared progress.`;
       panel.appendChild(approved);
       return;
     }
-
     panel.appendChild(buildForm(lesson));
+  }
+
+  function buildUpload(field) {
+    const upload = element("label", "evidence-upload");
+    upload.htmlFor = `evidence-${field.key}`;
+    const input = element("input", "");
+    input.id = `evidence-${field.key}`;
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp";
+    input.required = true;
+    const button = element("span", "evidence-upload-button", "Choose screenshot");
+    const copy = element("span", "evidence-upload-copy");
+    copy.append(element("span", "evidence-upload-title", "Add a current Play screenshot"), element("span", "evidence-upload-name", "PNG, JPG, or WebP · about 120 KB or less"));
+    upload.append(input, button, copy);
+    input.addEventListener("change", () => {
+      const file = input.files[0];
+      upload.classList.toggle("has-file", Boolean(file));
+      upload.querySelector(".evidence-upload-button").textContent = file ? "Change screenshot" : "Choose screenshot";
+      upload.querySelector(".evidence-upload-name").textContent = file ? `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB` : "PNG, JPG, or WebP · about 120 KB or less";
+    });
+    return upload;
   }
 
   function buildForm(lesson) {
     const form = element("form", "form-grid");
     form.id = "registry-mission-form";
     form.appendChild(element("h2", "", "Send current evidence"));
-
     lesson.submission.fields.forEach((field, index) => {
       const wrap = element("div", "field");
       const label = element("label", "", `${index + 1}. ${field.label}`);
       label.htmlFor = `evidence-${field.key}`;
       wrap.appendChild(label);
-      if (field.key === "screenshot") {
-        const input = element("input", "");
-        input.id = `evidence-${field.key}`;
-        input.type = "file";
-        input.accept = "image/png,image/jpeg,image/webp";
-        input.required = true;
-        wrap.appendChild(input);
-      } else {
+      if (field.key === "screenshot") wrap.appendChild(buildUpload(field));
+      else {
         const input = element("textarea", "");
         input.id = `evidence-${field.key}`;
         input.required = true;
@@ -203,23 +226,21 @@
         button.disabled = false;
       }
     });
-
     return form;
   }
 
   async function init() {
     if (document.body.dataset.page !== "mission") return;
+    installRuntimeStyles();
     const id = new URLSearchParams(location.search).get("id");
     const lesson = lessons[id];
     if (!lesson || !token()) return;
-
     try {
       const progress = await api("/api/progress");
       const missionMeta = (progress.missions || []).find(mission => mission.id === id);
       const progressRow = (progress.progress || []).find(row => row.mission_id === id);
       if (missionMeta?.release_state !== "released") return;
       if (!progressRow && id !== "V1-M01") return;
-
       const oldContent = document.getElementById("mission-one-content");
       if (oldContent) oldContent.hidden = true;
       const panel = document.getElementById("later-mission-panel");
