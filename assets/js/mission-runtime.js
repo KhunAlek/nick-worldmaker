@@ -3,15 +3,17 @@
 
   const API = "https://nick-worldmaker-api.abystrov66.workers.dev";
   const lessons = window.WORLDMAKER_LESSONS || {};
+  const IMAGE_KEYS = new Set(["screenshot", "screenshots"]);
+  const VIDEO_KEYS = new Set(["video", "videos"]);
 
-  function text(value) { return String(value == null ? "" : value); }
+  const text = value => String(value == null ? "" : value);
   function element(tag, className, content) {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (content != null) node.textContent = text(content);
     return node;
   }
-  function token() { return sessionStorage.getItem("worldmaker_token_learner"); }
+  const token = () => sessionStorage.getItem("worldmaker_token_learner");
 
   async function api(path, options = {}) {
     const headers = { ...(options.headers || {}) };
@@ -51,7 +53,7 @@
     document.head.appendChild(style);
   }
 
-  function buildUpload(field) {
+  function buildImageUpload(field) {
     installUploadStyles();
     const box = element("div", "evidence-upload");
     const input = element("input", "");
@@ -59,7 +61,6 @@
     input.type = "file";
     input.accept = "image/png,image/jpeg,image/webp";
     input.required = true;
-
     const row = element("div", "evidence-upload-row");
     const choose = element("label", "evidence-upload-button", "Choose screenshot");
     choose.htmlFor = input.id;
@@ -67,18 +68,11 @@
     const note = element("p", "evidence-upload-note", "PNG, JPG, or WebP. Crop to about 120 KB or less.");
     row.append(choose, name);
     box.append(input, row, note);
-
     input.addEventListener("change", () => {
       const file = input.files[0];
-      if (!file) {
-        box.classList.remove("has-file");
-        choose.textContent = "Choose screenshot";
-        name.textContent = "No screenshot selected";
-        return;
-      }
-      box.classList.add("has-file");
-      choose.textContent = "Change screenshot";
-      name.textContent = `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB`;
+      box.classList.toggle("has-file", Boolean(file));
+      choose.textContent = file ? "Change screenshot" : "Choose screenshot";
+      name.textContent = file ? `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB` : "No screenshot selected";
     });
     return box;
   }
@@ -86,7 +80,6 @@
   function addLesson(panel, lesson, status) {
     panel.className = "card content-card";
     panel.textContent = "";
-
     const header = element("section", "mission-header");
     const meta = element("div", "mission-meta");
     const statusBadge = element("span", "status status-" + String(status || "NOT_SUBMITTED").toLowerCase().replaceAll("_", "-"), status === "APPROVED" ? "Approved" : "Ready");
@@ -112,8 +105,8 @@
     concepts.appendChild(conceptGrid);
     panel.appendChild(concepts);
 
-    const path = element("section", "section lesson-path");
-    path.appendChild(element("h2", "", "Build it one step at a time"));
+    const lessonPath = element("section", "section lesson-path");
+    lessonPath.appendChild(element("h2", "", "Build it one step at a time"));
     lesson.steps.forEach((step, index) => {
       const details = element("details", "step-card");
       if (index === 0) details.open = true;
@@ -127,9 +120,9 @@
       recovery.innerHTML = `<strong>Something went wrong?</strong> ${text(step.recovery)}`;
       body.append(list, checkpoint, recovery);
       details.appendChild(body);
-      path.appendChild(details);
+      lessonPath.appendChild(details);
     });
-    panel.appendChild(path);
+    panel.appendChild(lessonPath);
 
     const structure = element("section", "section");
     structure.append(element("h2", "", "Explorer target"), element("pre", "mini-code", lesson.hierarchy));
@@ -163,13 +156,15 @@
       const label = element("label", "", `${index + 1}. ${field.label}`);
       label.htmlFor = `evidence-${field.key}`;
       wrap.appendChild(label);
-      if (field.key === "screenshot") wrap.appendChild(buildUpload(field));
-      else {
+      if (IMAGE_KEYS.has(field.key)) {
+        wrap.appendChild(buildImageUpload(field));
+      } else {
         const input = element("textarea", "");
         input.id = `evidence-${field.key}`;
         input.required = true;
         input.minLength = 10;
         if (field.key === "code") input.setAttribute("spellcheck", "false");
+        if (VIDEO_KEYS.has(field.key)) input.placeholder = "Paste a current share link and briefly state what the recording proves.";
         wrap.appendChild(input);
       }
       wrap.appendChild(element("p", "field-help", field.help));
@@ -193,9 +188,9 @@
     understandingLabel.htmlFor = "evidence-understanding";
     const understandingInput = element("textarea", "");
     understandingInput.id = "evidence-understanding";
-    understandingInput.required = true;
-    understandingInput.minLength = 10;
-    understanding.append(understandingLabel, element("p", "field-help", lesson.submission.understanding), understandingInput);
+    understandingInput.required = Boolean(lesson.submission.understanding);
+    understandingInput.minLength = lesson.submission.understanding ? 10 : 0;
+    understanding.append(understandingLabel, element("p", "field-help", lesson.submission.understanding || "No additional answer is required for this mission."), understandingInput);
     form.appendChild(understanding);
 
     const error = element("p", "muted");
@@ -213,13 +208,19 @@
         const payload = { mission_id: lesson.id, checklist: {}, understanding: understandingInput.value };
         for (const field of lesson.submission.fields) {
           const input = document.getElementById(`evidence-${field.key}`);
-          if (field.key === "screenshot") {
+          if (IMAGE_KEYS.has(field.key)) {
             const screenshot = input.files[0];
             if (!screenshot) throw new Error("Choose a current screenshot.");
             if (!/^image\/(png|jpeg|webp)$/.test(screenshot.type)) throw new Error("Use a PNG, JPG, or WebP screenshot.");
             if (screenshot.size > 130000) throw new Error("Crop or resize the screenshot to about 120 KB or less.");
             payload.screenshots = [{ name: screenshot.name, mime_type: screenshot.type, data_url: await fileAsDataUrl(screenshot) }];
-          } else payload[field.key] = input.value;
+          } else if (VIDEO_KEYS.has(field.key)) {
+            const evidence = input.value.trim();
+            if (!evidence) throw new Error("Add the current video link and what it proves.");
+            payload.videos = [{ url_or_note: evidence }];
+          } else {
+            payload[field.key] = input.value;
+          }
         }
         lesson.tests.forEach(test => { payload.checklist[test.id] = document.getElementById(`test-${test.id}`).checked; });
         error.textContent = "The evaluator is reviewing the evidence…";
