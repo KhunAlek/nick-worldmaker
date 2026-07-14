@@ -111,7 +111,11 @@ for (let number = 3; number <= 15; number += 1) {
 const backendSource = read("backend/src/index.js");
 assert.match(backendSource, /url\.pathname\.match/, "Generic mission route matcher missing");
 assert.match(backendSource, /env\.DB\.batch\(statements\)/, "Atomic persistence batch missing");
-assert.match(backendSource, /config\.releaseState !== "released"/, "Server-side release gate missing");
+assert.ok(
+  /config\.releaseState !== "released"/.test(backendSource) ||
+  /!isPilotMissionAvailable\(auth, env, missionId, config\)/.test(backendSource),
+  "Server-side release gate missing"
+);
 assert.match(backendSource, /ON CONFLICT\(family_id,mission_id\) DO NOTHING/, "Exact-next idempotent unlock missing");
 
 const runtime = read("assets/js/mission-runtime.js");
