@@ -20,14 +20,14 @@
     </nav>
   </div>
 </header>
-<main id="main-content"><div class="site-shell"><div class="page-hero"><div><div class="eyebrow">Read-only prototype dashboard</div><h1>Parent View</h1><p class="lead">This view observes the same local progress. It cannot approve technical work.</p></div><a class="button button-primary" href="hq.html">Return to Build HQ</a></div><p class="local-notice" data-local-notice></p>
+<main id="main-content"><div class="site-shell"><div class="page-hero"><div><div class="eyebrow">Read-only parent dashboard</div><h1>Parent View</h1><p class="lead">This view shows the same shared progress stored in the live backend. It cannot approve technical work.</p></div><a class="button button-primary" href="hq.html">Return to Build HQ</a></div><p class="local-notice" data-local-notice></p>
   <div class="grid grid-3"><section class="card card-pad"><div class="card-kicker">Current mission</div><div class="big-value" id="parent-current"></div></section><section class="card card-pad"><div class="card-kicker">Latest attempt</div><div class="big-value" id="parent-latest-attempt"></div></section><section class="card card-pad"><div class="card-kicker">Latest status</div><div style="margin-top:12px"><span id="parent-status" class="status"></span></div></section></div>
   <div class="grid grid-2 section"><section class="card card-pad"><h2>Main problem or result</h2><p id="parent-problem"></p></section><section class="card card-pad"><h2>Next action</h2><p id="parent-next-action"></p></section></div>
-  <div class="grid grid-2 section"><section class="card card-pad"><h2>Approved missions</h2><div id="parent-approved" class="inline-links"></div></section><section class="card card-pad"><h2>Last local activity</h2><p id="parent-last-activity"></p></section></div>
-  <section class="card card-pad section"><div class="section-head"><div><div class="eyebrow">Local attempt history</div><h2>Recent reviews</h2></div></div><div id="parent-attempts" class="attempt-list"></div></section>
-  <section class="card card-pad section"><h2>Reset prototype progress</h2><p class="muted">This deletes only the Build 1 state stored by this website in the current browser. It does not change Roblox Studio or any account.</p><button id="reset-progress" type="button" class="button button-danger">Reset Prototype Progress</button></section>
+  <div class="grid grid-2 section"><section class="card card-pad"><h2>Approved missions</h2><div id="parent-approved" class="inline-links"></div></section><section class="card card-pad"><h2>Last shared activity</h2><p id="parent-last-activity"></p></section></div>
+  <section class="card card-pad section"><div class="section-head"><div><div class="eyebrow">Shared review history</div><h2>Recent reviews</h2></div></div><div id="parent-attempts" class="attempt-list"></div></section>
+  <section class="card card-pad section"><h2>Parent session</h2><p class="muted">Signing out removes only the parent login session from this browser. It does not delete shared progress or change anything in Roblox Studio.</p><button id="reset-progress" type="button" class="button button-danger">Sign out</button></section>
 </div></main>
-<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · WEBSITE MVP BUILD 1 · LOCAL PROTOTYPE</div></footer>
+<footer class="footer"><div class="site-shell">NICK // WORLDMAKER · SHARED BUILD SYSTEM</div></footer>
 <script src="assets/js/missions-data.js"></script>
 <script src="assets/js/storage.js"></script>
 <script src="assets/js/mock-evaluator.js"></script>
