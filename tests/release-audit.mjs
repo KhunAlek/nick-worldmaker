@@ -89,7 +89,8 @@ for (let number = 3; number <= 15; number += 1) {
   const approval = validReview(id, config);
   assert.equal(validateReview(approval, id, config, 1), null, `${id}: valid approval contract rejected`);
   if (config.next) {
-    const wrongNext = { ...approval, next_mission_id:missionId(Math.min(number + 2, 15)) };
+    const wrongNumber = number === 14 ? 13 : Math.min(number + 2, 15);
+    const wrongNext = { ...approval, next_mission_id:missionId(wrongNumber) };
     assert.equal(validateReview(wrongNext, id, config, 1), "Invalid next-mission unlock", `${id}: wrong next mission was not rejected`);
   } else {
     assert.equal(approval.unlock_next_mission, false, "V1-M15 must not unlock another mission");
