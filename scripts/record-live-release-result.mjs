@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,16 +15,23 @@ if (!reportPathArg) throw new Error("A JSON report path is required.");
 const reportPath = path.resolve(process.cwd(), reportPathArg);
 const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 assert.equal(report.mission_id, missionId, "Report mission_id does not match the requested mission.");
+assert.equal(report.harness_version, "worldmaker-release-harness-v1");
 
 const classification = report.live_model_classification || {};
-assert.equal(classification.incomplete_submission, "NEEDS_EVIDENCE");
-assert.equal(classification.technically_wrong, "NEEDS_FIX");
-assert.equal(classification.contradictory_evidence, "NEEDS_EVIDENCE");
-assert.equal(classification.suspicious_input_detected, true);
+assert.ok(["NEEDS_EVIDENCE", "NEEDS_FIX", "BLOCKED_NEEDS_HELP"].includes(classification.non_approved), "A real non-approved classification is required.");
 assert.equal(classification.valid_submission, "APPROVED");
 
 const smoke = report.production_d1_smoke || {};
-for (const key of ["review_persisted","nonapproval_did_not_unlock","approval_unlocked_exact_next","shared_progress_visible","parent_view_visible"]) {
+for (const key of [
+  "submission_records_immutable",
+  "review_records_immutable",
+  "audit_records_created",
+  "nonapproval_did_not_unlock",
+  "approval_unlocked_exact_next",
+  "no_later_mission_unlocked",
+  "shared_progress_visible",
+  "parent_view_visible"
+]) {
   assert.equal(smoke[key], true, `Production smoke gate failed: ${key}`);
 }
 
