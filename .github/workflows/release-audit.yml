@@ -20,4 +20,14 @@ jobs:
         with:
           node-version: 22
       - name: Run executable release audit
-        run: node tests/release-audit.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/release-audit.mjs 2>&1 | tee release-audit.log
+      - name: Upload audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-release-audit-log
+          path: release-audit.log
+          if-no-files-found: error
