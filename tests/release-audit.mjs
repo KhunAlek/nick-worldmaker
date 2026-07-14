@@ -16,6 +16,12 @@ function loadLessons() {
   return context.window.WORLDMAKER_LESSONS;
 }
 
+function loadBrowserObject(relative, key) {
+  const context = vm.createContext({ window: {} });
+  vm.runInContext(read(relative), context, { filename: relative });
+  return context.window[key];
+}
+
 async function loadBackendInternals() {
   const source = read("backend/src/index.js") + "\nexport { missionRegistry, deterministicPrecheck, validateReview };";
   return import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
@@ -123,7 +129,15 @@ assert.match(app, /access === "unreleased"/, "Unlocked-but-unreleased UI missing
 assert.match(app, /renderParent/, "Parent View renderer missing");
 assert.match(app, /\/api\/progress/, "Shared progress API missing");
 
-const manifest = read("assets/js/mission-release-manifest.js");
-assert.match(manifest, /release_state:number===3\?"released":"unreleased"/, "Sequential release manifest drift");
+const manifest = loadBrowserObject("assets/js/mission-release-manifest.js", "WORLDMAKER_RELEASE_MANIFEST");
+assert.deepEqual(Array.from(manifest.released_ids), ["V1-M03"], "Unexpected released mission set");
+assert.deepEqual(Array.from(manifest.live_passed_ids), ["V1-M03"], "Unexpected live-passed mission set");
+for (const id of manifest.released_ids) {
+  assert.ok(manifest.live_passed_ids.includes(id), `${id}: released without live gates`);
+  assert.equal(manifest.missions[id].release_tests.live_model_classification, true, `${id}: live model gate missing`);
+  assert.equal(manifest.missions[id].release_tests.production_d1_smoke, true, `${id}: D1 smoke gate missing`);
+}
+assert.ok(fs.existsSync(path.join(root, "scripts/record-live-release-result.mjs")), "Live result recorder missing");
+assert.ok(fs.existsSync(path.join(root, "scripts/promote-mission.mjs")), "Sequential promoter missing");
 
 console.log("PASS: Missions V1-M03 through V1-M15 passed the executable source release audit.");
