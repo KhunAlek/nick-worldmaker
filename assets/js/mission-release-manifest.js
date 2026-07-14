@@ -1,10 +1,13 @@
 (function(){
   "use strict";
   const releasedIds=["V1-M03"];
+  const livePassedIds=["V1-M03"];
   const released=new Set(releasedIds);
+  const livePassed=new Set(livePassedIds);
   window.WORLDMAKER_RELEASE_MANIFEST={
-    version:"2026-07-14.3",
+    version:"2026-07-14.4",
     released_ids:releasedIds,
+    live_passed_ids:livePassedIds,
     required_live_gates:["live_model_classification","production_d1_smoke"],
     audit:{
       workflow:"Mission release audit",
@@ -31,8 +34,8 @@
           shared_progress_source_contract:true,
           parent_view_source_contract:true,
           beginner_readiness:true,
-          live_model_classification:id==="V1-M03",
-          production_d1_smoke:id==="V1-M03"
+          live_model_classification:livePassed.has(id),
+          production_d1_smoke:livePassed.has(id)
         },
         release_state:released.has(id)?"released":"unreleased"
       }];
