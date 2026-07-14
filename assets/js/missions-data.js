@@ -22,5 +22,6 @@ window.WORLDMAKER_MISSIONS=[{"id":"V1-M01","order":1,"title":"Studio Ready","dif
 
 if(document.body.dataset.page==="mission"){
   document.write('<script src="assets/js/mission-lessons.js"><\/script>');
+  document.write('<script src="assets/js/mission-lessons-m04.js"><\/script>');
   document.write('<script src="assets/js/mission-runtime.js"><\/script>');
 }
