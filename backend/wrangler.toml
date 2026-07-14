@@ -1,11 +1,11 @@
 name = "nick-worldmaker-api"
-main = "src/index.js"
+main = "src/release-test-wrapper.js"
 compatibility_date = "2026-07-13"
 
 [vars]
 ALLOWED_ORIGIN = "https://khunalek.github.io"
 OPENAI_MODEL = "gpt-4.1-mini"
-EVALUATOR_VERSION = "v1-m02-2026-07-13"
+EVALUATOR_VERSION = "v1-release-engine-2026-07-14"
 SESSION_TTL_HOURS = "720"
 
 RELEASE_TEST_FAMILY_ID = "1225785f-3bdb-4847-bdca-4bdcc9c27788"
