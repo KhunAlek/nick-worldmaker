@@ -13,23 +13,6 @@
   }
   function token() { return sessionStorage.getItem("worldmaker_token_learner"); }
 
-  function installRuntimeStyles() {
-    if (document.getElementById("worldmaker-runtime-styles")) return;
-    const style = document.createElement("style");
-    style.id = "worldmaker-runtime-styles";
-    style.textContent = `
-      .evidence-upload{position:relative;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px;min-height:76px;padding:14px;border:1px dashed rgba(86,246,255,.48);border-radius:16px;background:rgba(9,11,30,.82);cursor:pointer;transition:border-color .18s ease,background .18s ease,transform .18s ease}
-      .evidence-upload:hover,.evidence-upload:focus-within{border-color:var(--cyan);background:rgba(86,246,255,.07);transform:translateY(-1px)}
-      .evidence-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-      .evidence-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border-radius:11px;color:#071018;background:linear-gradient(100deg,var(--cyan),#9dc7ff 52%,#d9a9ff);font-weight:950;white-space:nowrap}
-      .evidence-upload-copy{min-width:0}.evidence-upload-title{display:block;color:var(--text);font-weight:850}.evidence-upload-name{display:block;margin-top:4px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .evidence-upload.has-file{border-style:solid;border-color:rgba(151,255,130,.55);background:rgba(151,255,130,.07)}
-      .evidence-upload.has-file .evidence-upload-name{color:#b8ffac}
-      @media(max-width:620px){.evidence-upload{grid-template-columns:1fr}.evidence-upload-button{width:100%}}
-    `;
-    document.head.appendChild(style);
-  }
-
   async function api(path, options = {}) {
     const headers = { ...(options.headers || {}) };
     if (token()) headers.Authorization = `Bearer ${token()}`;
@@ -51,9 +34,59 @@
     });
   }
 
+  function installUploadStyles() {
+    if (document.getElementById("worldmaker-upload-styles")) return;
+    const style = document.createElement("style");
+    style.id = "worldmaker-upload-styles";
+    style.textContent = `
+      .evidence-upload{display:grid;gap:10px;padding:16px;border:1px dashed rgba(86,246,255,.45);border-radius:16px;background:rgba(9,11,30,.82)}
+      .evidence-upload.has-file{border-style:solid;border-color:rgba(151,255,130,.55);background:rgba(151,255,130,.07)}
+      .evidence-upload input[type=file]{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+      .evidence-upload-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+      .evidence-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 17px;border:0;border-radius:11px;background:linear-gradient(100deg,var(--cyan),#9dc7ff 52%,#d9a9ff);color:#071018;font-weight:900;cursor:pointer}
+      .evidence-upload-name{color:var(--muted);overflow-wrap:anywhere}.evidence-upload.has-file .evidence-upload-name{color:#b8ffac;font-weight:800}
+      .evidence-upload-note{margin:0;color:var(--muted);font-size:.9rem}
+      @media(max-width:620px){.evidence-upload-row{align-items:stretch;flex-direction:column}.evidence-upload-button{width:100%}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function buildUpload(field) {
+    installUploadStyles();
+    const box = element("div", "evidence-upload");
+    const input = element("input", "");
+    input.id = `evidence-${field.key}`;
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp";
+    input.required = true;
+
+    const row = element("div", "evidence-upload-row");
+    const choose = element("label", "evidence-upload-button", "Choose screenshot");
+    choose.htmlFor = input.id;
+    const name = element("span", "evidence-upload-name", "No screenshot selected");
+    const note = element("p", "evidence-upload-note", "PNG, JPG, or WebP. Crop to about 120 KB or less.");
+    row.append(choose, name);
+    box.append(input, row, note);
+
+    input.addEventListener("change", () => {
+      const file = input.files[0];
+      if (!file) {
+        box.classList.remove("has-file");
+        choose.textContent = "Choose screenshot";
+        name.textContent = "No screenshot selected";
+        return;
+      }
+      box.classList.add("has-file");
+      choose.textContent = "Change screenshot";
+      name.textContent = `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB`;
+    });
+    return box;
+  }
+
   function addLesson(panel, lesson, status) {
     panel.className = "card content-card";
     panel.textContent = "";
+
     const header = element("section", "mission-header");
     const meta = element("div", "mission-meta");
     const statusBadge = element("span", "status status-" + String(status || "NOT_SUBMITTED").toLowerCase().replaceAll("_", "-"), status === "APPROVED" ? "Approved" : "Ready");
@@ -88,12 +121,11 @@
       const body = element("div", "step-body");
       const list = element("ol", "");
       step.actions.forEach(action => list.appendChild(element("li", "", action)));
-      body.appendChild(list);
       const checkpoint = element("div", "checkpoint");
       checkpoint.innerHTML = `<strong>Stop and check:</strong> ${text(step.checkpoint)}`;
       const recovery = element("div", "try-it");
       recovery.innerHTML = `<strong>Something went wrong?</strong> ${text(step.recovery)}`;
-      body.append(checkpoint, recovery);
+      body.append(list, checkpoint, recovery);
       details.appendChild(body);
       path.appendChild(details);
     });
@@ -121,31 +153,11 @@
     panel.appendChild(buildForm(lesson));
   }
 
-  function buildUpload(field) {
-    const upload = element("label", "evidence-upload");
-    upload.htmlFor = `evidence-${field.key}`;
-    const input = element("input", "");
-    input.id = `evidence-${field.key}`;
-    input.type = "file";
-    input.accept = "image/png,image/jpeg,image/webp";
-    input.required = true;
-    const button = element("span", "evidence-upload-button", "Choose screenshot");
-    const copy = element("span", "evidence-upload-copy");
-    copy.append(element("span", "evidence-upload-title", "Add a current Play screenshot"), element("span", "evidence-upload-name", "PNG, JPG, or WebP · about 120 KB or less"));
-    upload.append(input, button, copy);
-    input.addEventListener("change", () => {
-      const file = input.files[0];
-      upload.classList.toggle("has-file", Boolean(file));
-      upload.querySelector(".evidence-upload-button").textContent = file ? "Change screenshot" : "Choose screenshot";
-      upload.querySelector(".evidence-upload-name").textContent = file ? `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB` : "PNG, JPG, or WebP · about 120 KB or less";
-    });
-    return upload;
-  }
-
   function buildForm(lesson) {
     const form = element("form", "form-grid");
     form.id = "registry-mission-form";
     form.appendChild(element("h2", "", "Send current evidence"));
+
     lesson.submission.fields.forEach((field, index) => {
       const wrap = element("div", "field");
       const label = element("label", "", `${index + 1}. ${field.label}`);
@@ -157,6 +169,7 @@
         input.id = `evidence-${field.key}`;
         input.required = true;
         input.minLength = 10;
+        if (field.key === "code") input.setAttribute("spellcheck", "false");
         wrap.appendChild(input);
       }
       wrap.appendChild(element("p", "field-help", field.help));
@@ -197,21 +210,18 @@
       button.disabled = true;
       error.textContent = "Preparing evidence…";
       try {
-        const screenshot = document.getElementById("evidence-screenshot").files[0];
-        if (!screenshot) throw new Error("Choose a current Play screenshot.");
-        if (screenshot.size > 130000) throw new Error("Crop or resize the screenshot to about 120 KB or less.");
-        const dataUrl = await fileAsDataUrl(screenshot);
-        const checklist = {};
-        lesson.tests.forEach(test => { checklist[test.id] = document.getElementById(`test-${test.id}`).checked; });
-        const payload = {
-          mission_id: lesson.id,
-          explorer_summary: document.getElementById("evidence-explorer_summary").value,
-          properties: document.getElementById("evidence-properties").value,
-          output: document.getElementById("evidence-output").value,
-          screenshots: [{ name: screenshot.name, mime_type: screenshot.type, data_url: dataUrl }],
-          checklist,
-          understanding: document.getElementById("evidence-understanding").value
-        };
+        const payload = { mission_id: lesson.id, checklist: {}, understanding: understandingInput.value };
+        for (const field of lesson.submission.fields) {
+          const input = document.getElementById(`evidence-${field.key}`);
+          if (field.key === "screenshot") {
+            const screenshot = input.files[0];
+            if (!screenshot) throw new Error("Choose a current screenshot.");
+            if (!/^image\/(png|jpeg|webp)$/.test(screenshot.type)) throw new Error("Use a PNG, JPG, or WebP screenshot.");
+            if (screenshot.size > 130000) throw new Error("Crop or resize the screenshot to about 120 KB or less.");
+            payload.screenshots = [{ name: screenshot.name, mime_type: screenshot.type, data_url: await fileAsDataUrl(screenshot) }];
+          } else payload[field.key] = input.value;
+        }
+        lesson.tests.forEach(test => { payload.checklist[test.id] = document.getElementById(`test-${test.id}`).checked; });
         error.textContent = "The evaluator is reviewing the evidence…";
         const result = await api(`/api/missions/${lesson.id}/submissions`, {
           method: "POST",
@@ -231,7 +241,6 @@
 
   async function init() {
     if (document.body.dataset.page !== "mission") return;
-    installRuntimeStyles();
     const id = new URLSearchParams(location.search).get("id");
     const lesson = lessons[id];
     if (!lesson || !token()) return;
