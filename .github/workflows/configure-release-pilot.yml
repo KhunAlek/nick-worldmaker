@@ -1,0 +1,30 @@
+name: Configure release pilot
+
+on:
+  push:
+    paths:
+      - .github/workflows/configure-release-pilot.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Configure isolated M4 pilot
+        run: node scripts/configure-release-pilot.mjs 1225785f-3bdb-4847-bdca-4bdcc9c27788 V1-M04
+      - name: Validate source audit
+        run: node tests/release-audit.mjs
+      - name: Commit pilot configuration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/src/index.js backend/wrangler.toml
+          git diff --cached --quiet || git commit -m "Enable isolated V1-M04 release pilot"
+          git push
