@@ -94,7 +94,7 @@ for (let number = 3; number <= 15; number += 1) {
 
   if (config.next) {
     const wrongNext = { ...approval, next_mission_id: missionId(Math.min(number + 2, 15)) };
-    assert.equal(validateReview(wrongNext, id, config, 1), "Invalid approval invariants", `${id}: wrong next mission was not rejected`);
+    assert.equal(validateReview(wrongNext, id, config, 1), "Invalid next-mission unlock", `${id}: wrong next mission was not rejected`);
   } else {
     assert.equal(approval.unlock_next_mission, false, "V1-M15 must not unlock another mission");
     assert.equal(approval.next_mission_id, null, "V1-M15 next mission must be null");
