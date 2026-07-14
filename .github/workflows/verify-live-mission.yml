@@ -1,0 +1,55 @@
+name: Verify live mission result
+
+on:
+  workflow_dispatch:
+    inputs:
+      mission_id:
+        description: Mission to verify
+        required: true
+        default: V1-M04
+        type: string
+      expected_status:
+        description: Expected latest review status
+        required: true
+        default: APPROVED
+        type: choice
+        options:
+          - APPROVED
+          - NEEDS_FIX
+          - NEEDS_EVIDENCE
+          - BLOCKED_NEEDS_HELP
+      expected_next_mission_id:
+        description: Exact next mission for APPROVED; leave empty otherwise
+        required: false
+        default: V1-M05
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Query isolated release-test family
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MISSION_ID: ${{ inputs.mission_id }}
+          NEXT_ID: ${{ inputs.expected_next_mission_id }}
+          FAMILY_ID: 1225785f-3bdb-4847-bdca-4bdcc9c27788
+        run: |
+          SQL="SELECT s.mission_id, s.attempt_number, json_extract(r.response_json, '$.status') AS status, json_extract(r.response_json, '$.unlock_next_mission') AS unlock_next_mission, json_extract(r.response_json, '$.next_mission_id') AS next_mission_id, (SELECT mp.mission_id FROM mission_progress mp WHERE mp.family_id=s.family_id AND mp.mission_id='${NEXT_ID}' LIMIT 1) AS next_progress_mission_id, (SELECT mp.status FROM mission_progress mp WHERE mp.family_id=s.family_id AND mp.mission_id='${NEXT_ID}' LIMIT 1) AS next_progress_status, (SELECT COUNT(*) FROM mission_progress mp WHERE mp.family_id=s.family_id AND mp.mission_id>'${NEXT_ID}') AS later_progress_count FROM submissions s LEFT JOIN reviews r ON r.submission_id=s.id WHERE s.family_id='${FAMILY_ID}' AND s.mission_id='${MISSION_ID}' ORDER BY s.attempt_number DESC LIMIT 1;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../live-result.json
+      - name: Validate status and exact-next behavior
+        run: node scripts/verify-live-mission-progress.mjs "${{ inputs.mission_id }}" "1225785f-3bdb-4847-bdca-4bdcc9c27788" "${{ inputs.expected_status }}" "${{ inputs.expected_next_mission_id }}" live-result.json
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.mission_id }}-live-verification
+          path: live-result.json
