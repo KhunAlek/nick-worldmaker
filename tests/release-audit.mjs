@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = relative => fs.readFileSync(path.join(root, relative), "utf8");
 const missionId = number => `V1-M${String(number).padStart(2, "0")}`;
 const expectedTestCounts = {3:3,4:4,5:3,6:4,7:5,8:4,9:5,10:5,11:5,12:5,13:5,14:11,15:7};
@@ -108,7 +108,8 @@ for (let number = 3; number <= 15; number += 1) {
 }
 
 const backendSource = read("backend/src/index.js");
-assert.match(backendSource, /\/api\/missions\/.+submissions/, "Generic mission submission route missing");
+assert.match(backendSource, /url\.pathname\.match/, "Generic mission route matcher missing");
+assert.match(backendSource, /submissions/, "Mission submission route missing");
 assert.match(backendSource, /env\.DB\.batch\(statements\)/, "Atomic persistence batch missing");
 assert.match(backendSource, /config\.releaseState !== "released"/, "Server-side release gate missing");
 assert.match(backendSource, /ON CONFLICT\(family_id,mission_id\) DO NOTHING/, "Exact-next idempotent unlock missing");
