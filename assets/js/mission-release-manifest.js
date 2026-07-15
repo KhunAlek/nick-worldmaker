@@ -5,7 +5,7 @@
   const released=new Set(releasedIds);
   const livePassed=new Set(livePassedIds);
   window.WORLDMAKER_RELEASE_MANIFEST={
-    version:"2026-07-14.4",
+    version:"2026-07-15.1",
     released_ids:releasedIds,
     live_passed_ids:livePassedIds,
     required_live_gates:["live_model_classification","production_d1_smoke"],
