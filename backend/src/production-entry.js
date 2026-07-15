@@ -16,6 +16,7 @@ export default {
 
     return new Response(JSON.stringify({
       ...payload,
+      entrypoint: "production",
       source_version: env.SOURCE_VERSION || "unknown",
       evaluator_version: env.EVALUATOR_VERSION || "unknown"
     }), {
