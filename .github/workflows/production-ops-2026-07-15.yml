@@ -41,7 +41,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           mkdir -p production-ops-evidence
-          (cd backend && npx wrangler d1 export worldmaker-db --remote --output ../production-ops-evidence/worldmaker-db-2026-07-15.sql --yes)
+          touch production-ops-evidence/workflow-started.txt
+          (cd backend && npx wrangler d1 export worldmaker-db --remote --output ../production-ops-evidence/worldmaker-db-2026-07-15.sql --skip-confirmation)
           (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;" --json) > production-ops-evidence/real-family-before.raw.json
           jq -S '.[0].results' production-ops-evidence/real-family-before.raw.json > production-ops-evidence/real-family-before.json
 
@@ -92,9 +93,15 @@ jobs:
           set -Eeuo pipefail
           (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;" --json) > production-ops-evidence/real-family-after.raw.json
           jq -S '.[0].results' production-ops-evidence/real-family-after.raw.json > production-ops-evidence/real-family-after.json
-          diff -u production-ops-evidence/real-family-before.json production-ops-evidence/real-family-after.json | tee production-ops-evidence/real-family-diff.txt
+          if diff -u production-ops-evidence/real-family-before.json production-ops-evidence/real-family-after.json > production-ops-evidence/real-family-diff.txt; then
+            printf 'No real-family progress changes detected.\n' >> production-ops-evidence/real-family-diff.txt
+          else
+            cat production-ops-evidence/real-family-diff.txt
+            exit 1
+          fi
 
       - name: Restore and deploy production entrypoint
+        if: always()
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -105,10 +112,11 @@ jobs:
           jq -e '.ok == true and .service == "nick-worldmaker-api" and .entrypoint == "production"' production-ops-evidence/production-health-after-deploy.json
 
       - name: Revoke RELEASE_TEST_TOKEN and verify absence
+        if: always()
         shell: bash
         run: |
           set -Eeuo pipefail
-          printf 'y\n' | (cd backend && npx wrangler secret delete RELEASE_TEST_TOKEN)
+          (cd backend && npx wrangler secret delete RELEASE_TEST_TOKEN --force) || true
           (cd backend && npx wrangler secret list --json) > production-ops-evidence/secrets-after-revocation.json
           jq -e 'map(.name) | index("RELEASE_TEST_TOKEN") == null' production-ops-evidence/secrets-after-revocation.json
           curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/final-health.json
@@ -120,5 +128,5 @@ jobs:
         with:
           name: production-ops-2026-07-15-${{ github.run_id }}-${{ github.run_attempt }}
           path: production-ops-evidence/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
