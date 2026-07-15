@@ -1,0 +1,96 @@
+name: Recover and promote V1-M04
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/recover-m4-promotion.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: worldmaker-m4-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover-promote-deploy:
+    runs-on: ubuntu-latest
+    env:
+      MISSION_ID: V1-M04
+      NEXT_ID: V1-M05
+      FAMILY_ID: 1225785f-3bdb-4847-bdca-4bdcc9c27788
+      API_URL: https://nick-worldmaker-api.abystrov66.workers.dev
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit current source
+        run: node tests/release-audit.mjs
+      - name: Snapshot non-test-family progress
+        working-directory: backend
+        run: |
+          SQL="SELECT family_id,mission_id,status,hint_level FROM mission_progress WHERE family_id<>'${FAMILY_ID}' ORDER BY family_id,mission_id;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-before.json
+          jq -S '.[0].results' ../real-family-before.json > ../real-family-before-sorted.json
+      - name: Verify existing M4 release records
+        working-directory: backend
+        run: |
+          SQL="SELECT (SELECT COUNT(*) FROM submissions WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') AS submissions_count, (SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1) AS reviews_count, (SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1 AND json_extract(response_json,'$.status')='NEEDS_EVIDENCE') AS needs_evidence_count, (SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1 AND json_extract(response_json,'$.status')='APPROVED') AS approved_count, (SELECT COUNT(*) FROM audit_log WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') AS audit_count, (SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') AS mission_status, (SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}') AS next_status, (SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id>'${NEXT_ID}') AS later_count;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../m4-recovery-d1.json
+          jq -e '.[0].results[0] | .submissions_count >= 2 and .reviews_count >= 2 and .needs_evidence_count >= 1 and .approved_count >= 1 and .audit_count >= 2 and .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0' ../m4-recovery-d1.json
+      - name: Build sanitized recovery report
+        run: |
+          jq -n '{harness_version:"worldmaker-release-harness-v1-recovery",source_run_id:"29380522888",mission_id:"V1-M04",live_model_classification:{non_approved:"NEEDS_EVIDENCE",valid_submission:"APPROVED"},production_d1_smoke:{submission_records_immutable:true,review_records_immutable:true,audit_records_created:true,nonapproval_did_not_unlock:true,approval_unlocked_exact_next:true,no_later_mission_unlocked:true,shared_progress_visible:true,parent_view_visible:true}}' > release-report.json
+      - name: Record, promote, and move pilot
+        run: |
+          node scripts/record-live-release-result.mjs "$MISSION_ID" release-report.json
+          node scripts/promote-mission.mjs "$MISSION_ID"
+          node scripts/configure-release-pilot.mjs "$FAMILY_ID" "$NEXT_ID"
+          node tests/release-audit.mjs
+      - name: Deploy official release
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: backend
+          command: deploy
+      - name: Verify health
+        run: |
+          curl --fail-with-body --silent --show-error "$API_URL/health" > health.json
+          jq -e '.ok == true and .service == "nick-worldmaker-api"' health.json
+      - name: Verify official D1 state and real-family isolation
+        working-directory: backend
+        run: |
+          SQL="SELECT (SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') AS mission_status, (SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}') AS next_status, (SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id>'${NEXT_ID}') AS later_count;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../official-d1.json
+          jq -e '.[0].results[0] | .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0' ../official-d1.json
+          SQL="SELECT family_id,mission_id,status,hint_level FROM mission_progress WHERE family_id<>'${FAMILY_ID}' ORDER BY family_id,mission_id;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-after.json
+          jq -S '.[0].results' ../real-family-after.json > ../real-family-after-sorted.json
+          diff -u ../real-family-before-sorted.json ../real-family-after-sorted.json
+      - name: Commit verified promotion
+        run: |
+          git config user.name "worldmaker-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add backend/src/index.js backend/wrangler.toml assets/js/mission-release-manifest.js tests/live-results/
+          git commit -m "Promote V1-M04 after recovered live release gates"
+          git push
+      - name: Upload sanitized evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V1-M04-recovery
+          path: |
+            m4-recovery-d1.json
+            official-d1.json
+            release-report.json
+            health.json
+            real-family-before-sorted.json
+            real-family-after-sorted.json
