@@ -33,7 +33,7 @@ jobs:
           node-version: 22
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Release every remaining Version 1 mission
         shell: bash
         run: bash scripts/release-all-unreleased.sh
