@@ -14,12 +14,12 @@ on:
       mission_id:
         description: Pilot mission to test and promote
         required: true
-        default: V1-M06
+        default: V1-M07
         type: string
       next_mission_id:
         description: Exact next mission
         required: true
-        default: V1-M07
+        default: V1-M08
         type: string
 
 permissions:
@@ -33,8 +33,8 @@ jobs:
   release-test:
     runs-on: ubuntu-latest
     env:
-      MISSION_ID: ${{ inputs.mission_id || 'V1-M06' }}
-      NEXT_ID: ${{ inputs.next_mission_id || 'V1-M07' }}
+      MISSION_ID: ${{ inputs.mission_id || 'V1-M07' }}
+      NEXT_ID: ${{ inputs.next_mission_id || 'V1-M08' }}
       API_URL: https://nick-worldmaker-api.abystrov66.workers.dev
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -45,10 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Run source and contract audit
         run: node tests/release-audit.mjs
-
       - name: Create fresh isolated release family
         working-directory: backend
         shell: bash
@@ -62,7 +60,6 @@ jobs:
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-before.json
           jq -S '.[0].results' ../real-family-before.json > ../real-family-before-sorted.json
           node ../scripts/configure-release-pilot.mjs "$FAMILY_ID" "$MISSION_ID"
-
       - name: Rotate isolated harness token
         working-directory: backend
         shell: bash
@@ -71,7 +68,6 @@ jobs:
           TOKEN="$(openssl rand -hex 32)"
           echo "RELEASE_TEST_TOKEN=$TOKEN" >> "$GITHUB_ENV"
           printf '%s' "$TOKEN" | npx wrangler secret put RELEASE_TEST_TOKEN
-
       - name: Deploy isolated pilot
         uses: cloudflare/wrangler-action@v3
         with:
@@ -79,7 +75,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: backend
           command: deploy
-
       - name: Run non-approved evaluator gate
         shell: bash
         run: |
@@ -91,34 +86,29 @@ jobs:
             sleep 5
           done
           jq -e '.review.status != "APPROVED" and .review.unlock_next_mission == false and .review.next_mission_id == null' non-approved.json
-
       - name: Verify non-approval isolation
         working-directory: backend
         run: |
           SQL="SELECT COUNT(*) AS next_count FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}';"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../non-approved-d1.json
           jq -e '.[0].results[0].next_count == 0' ../non-approved-d1.json
-
       - name: Run approved evaluator gate
         shell: bash
         run: |
           set -euo pipefail
           curl --fail-with-body --silent --show-error -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H "Content-Type: application/json" -X POST "$API_URL/internal/release-test/$MISSION_ID/approved" > approved.json
           jq -e --arg next "$NEXT_ID" '.review.status == "APPROVED" and .review.unlock_next_mission == true and .review.next_mission_id == $next' approved.json
-
       - name: Verify immutable records and exact-next unlock
         working-directory: backend
         run: |
           SQL="SELECT (SELECT COUNT(*) FROM submissions WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') submissions_count,(SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1) reviews_count,(SELECT COUNT(*) FROM audit_log WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') audit_count,(SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') mission_status,(SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}') next_status,(SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id>'${NEXT_ID}') later_count;"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../approved-d1.json
           jq -e '.[0].results[0] | .submissions_count == 2 and .reviews_count == 2 and .audit_count >= 2 and .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0' ../approved-d1.json
-
       - name: Verify learner and parent shared views
         shell: bash
         run: |
           curl --fail-with-body --silent --show-error -H "Authorization: Bearer $RELEASE_TEST_TOKEN" "$API_URL/internal/release-test/views" > views.json
           jq -e --arg mission "$MISSION_ID" --arg next "$NEXT_ID" '.learner.status == 200 and .parent.status == 200 and ([.learner.body.progress[] | select(.mission_id == $mission and .status == "APPROVED")] | length == 1) and ([.parent.body.progress[] | select(.mission_id == $mission and .status == "APPROVED")] | length == 1) and ([.learner.body.progress[] | select(.mission_id == $next and .status == "NOT_SUBMITTED")] | length == 1) and ([.parent.body.progress[] | select(.mission_id == $next and .status == "NOT_SUBMITTED")] | length == 1)' views.json
-
       - name: Record and promote verified mission
         shell: bash
         run: |
@@ -129,7 +119,6 @@ jobs:
           node scripts/promote-mission.mjs "$MISSION_ID"
           node scripts/configure-release-pilot.mjs "$FAMILY_ID" "$NEXT_ID"
           node tests/release-audit.mjs
-
       - name: Deploy official release and advance pilot
         uses: cloudflare/wrangler-action@v3
         with:
@@ -137,7 +126,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: backend
           command: deploy
-
       - name: Verify production and real-family isolation
         working-directory: backend
         shell: bash
@@ -149,7 +137,6 @@ jobs:
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-after.json
           jq -S '.[0].results' ../real-family-after.json > ../real-family-after-sorted.json
           diff -u ../real-family-before-sorted.json ../real-family-after-sorted.json
-
       - name: Commit verified promotion
         shell: bash
         run: |
@@ -159,7 +146,6 @@ jobs:
           git add backend/src/index.js backend/wrangler.toml assets/js/mission-release-manifest.js tests/live-results/
           git commit -m "Promote $MISSION_ID with fresh-family release gates"
           git push
-
       - name: Upload sanitized release evidence
         if: always()
         uses: actions/upload-artifact@v4
