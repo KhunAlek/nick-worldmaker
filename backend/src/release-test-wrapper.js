@@ -84,6 +84,7 @@ function delay(milliseconds) {
 function buildFixture(missionId, fixtureType) {
   if (missionId === "V1-M04") return buildM4Fixture(fixtureType);
   if (missionId === "V1-M05") return buildM5Fixture(fixtureType);
+  if (missionId === "V1-M06") return buildM6Fixture(fixtureType);
   throw new Error(`No controlled fixture is registered for ${missionId}`);
 }
 
@@ -135,6 +136,32 @@ function buildM5Fixture(fixtureType) {
     screenshots: ["release-test-oracle://V1-M05/T01-hierarchy", "release-test-oracle://V1-M05/T02-properties", "release-test-oracle://V1-M05/T03-routes-and-restart"],
     checklist,
     understanding: "A separate TargetPoint is safer because pathfinding targets a simple reachable invisible part instead of the possibly blocked center of decorative geometry.",
+    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
+  };
+}
+
+function buildM6Fixture(fixtureType) {
+  const checklist = Object.fromEntries([1, 2, 3, 4].map(number => [`V1-M06-T0${number}`, fixtureType === "approved"]));
+  if (fixtureType === "needs_evidence") {
+    return {
+      mission_id: "V1-M06",
+      code: "-- controlled release fixture: HUD names are listed, but button feedback and selected-label behavior are not proven",
+      explorer_summary: "CONTROLLED RELEASE TEST: CommandHUD, SelectedLabel, and four command buttons are claimed, but the exact hierarchy and single CommandClient ownership are not verified.",
+      output: "CONTROLLED RELEASE TEST: no fresh Play output or button interaction proof supplied.",
+      screenshots: ["release-test-oracle://V1-M06/missing-hud-runtime-proof"],
+      checklist,
+      understanding: "The client script changes HUD feedback; later the server decides whether a real command is allowed.",
+      release_test_attestation: { kind: "controlled_fixture", expected_status: "NEEDS_EVIDENCE", visual_runtime_observed: false, note: "This is not visual proof." }
+    };
+  }
+  return {
+    mission_id: "V1-M06",
+    code: "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal hud = playerGui:WaitForChild(\"CommandHUD\")\nlocal selectedLabel = hud:WaitForChild(\"SelectedLabel\")\nlocal buttons = { hud:WaitForChild(\"GatherWoodButton\"), hud:WaitForChild(\"GatherStoneButton\"), hud:WaitForChild(\"BuildHutButton\"), hud:WaitForChild(\"ResetButton\") }\nlocal function showFeedback(button)\n  local old = button.Text\n  button.Text = \"Ready\"\n  task.delay(0.4, function() button.Text = old end)\nend",
+    explorer_summary: "CONTROLLED RELEASE TEST ORACLE: StarterGui contains one CommandHUD with SelectedLabel, GatherWoodButton, GatherStoneButton, BuildHutButton, and ResetButton; one CommandClient LocalScript references all controls safely.",
+    output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; selecting NPC_1 then NPC_2 updated SelectedLabel correctly; each of the four buttons showed temporary feedback and changed no Wood, Stone, HutBuilt, NPC position, or server state.",
+    screenshots: ["release-test-oracle://V1-M06/T01-hierarchy", "release-test-oracle://V1-M06/T02-selected-label", "release-test-oracle://V1-M06/T03-four-button-feedback", "release-test-oracle://V1-M06/T04-no-state-change"],
+    checklist,
+    understanding: "CommandClient changes the local HUD, while the server must later validate and authorize commands that affect shared game state.",
     release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
   };
 }
