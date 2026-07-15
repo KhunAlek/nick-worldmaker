@@ -57,6 +57,17 @@ jobs:
           SQL="INSERT INTO families(id,display_name) VALUES('${FAMILY_ID}','Release Test Production Ops 2026-07-15'); INSERT INTO mission_progress(family_id,mission_id,status,hint_level) VALUES('${FAMILY_ID}','V1-M04','NOT_SUBMITTED',0);"
           (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json) > production-ops-evidence/isolated-family-seed.json
           node scripts/configure-release-pilot.mjs "$FAMILY_ID" V1-M04
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('backend/wrangler.toml')
+          text = path.read_text()
+          old = 'main = "src/production-entry.js"'
+          new = 'main = "src/release-test-wrapper.js"'
+          if old not in text:
+              raise SystemExit('Production entrypoint marker was not found.')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          grep -q 'main = "src/release-test-wrapper.js"' backend/wrangler.toml
           RELEASE_TEST_TOKEN="$(openssl rand -hex 32)"
           echo "token=$RELEASE_TEST_TOKEN" >> "$GITHUB_OUTPUT"
           printf '%s' "$RELEASE_TEST_TOKEN" | (cd backend && npx wrangler secret put RELEASE_TEST_TOKEN >/dev/null)
@@ -105,7 +116,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          git checkout -- backend/wrangler.toml
+          git checkout -- backend/wrangler.toml backend/src/index.js
           grep -q 'main = "src/production-entry.js"' backend/wrangler.toml
           (cd backend && npx wrangler deploy)
           curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/production-health-after-deploy.json
@@ -116,7 +127,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          (cd backend && npx wrangler secret delete RELEASE_TEST_TOKEN --force) || true
+          printf 'y\n' | (cd backend && npx wrangler secret delete RELEASE_TEST_TOKEN) || true
           (cd backend && npx wrangler secret list --json) > production-ops-evidence/secrets-after-revocation.json
           jq -e 'map(.name) | index("RELEASE_TEST_TOKEN") == null' production-ops-evidence/secrets-after-revocation.json
           curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/final-health.json
