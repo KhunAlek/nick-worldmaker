@@ -66,103 +66,106 @@ async function createVisibleShortSession(env, role) {
   const tokenHash = await sha256(token);
   await env.DB.prepare("INSERT INTO sessions(id,family_id,role,token_hash,expires_at) VALUES(?,?,?,?,?)")
     .bind(crypto.randomUUID(), env.RELEASE_TEST_FAMILY_ID, role, tokenHash, new Date(Date.now() + 10 * 60 * 1000).toISOString()).run();
-
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const visible = await env.DB.prepare("SELECT 1 AS ok FROM sessions WHERE token_hash=? AND expires_at > ?")
       .bind(tokenHash, new Date().toISOString()).first();
     if (visible?.ok === 1) return token;
-    await delay(100);
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
-
   throw new Error("Release-test session was not visible after creation");
 }
 
-function delay(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+function checklist(missionId, count, approved) {
+  return Object.fromEntries(Array.from({ length: count }, (_, index) => [`${missionId}-T${String(index + 1).padStart(2, "0")}`, approved]));
+}
+
+function attestation(expectedStatus, observed) {
+  return {
+    kind: "controlled_fixture",
+    expected_status: expectedStatus,
+    visual_runtime_observed: observed,
+    oracle_version: "worldmaker-release-fixture-v1",
+    note: "Machine-observed release assertions reachable only through the secret isolated endpoint."
+  };
 }
 
 function buildFixture(missionId, fixtureType) {
-  if (missionId === "V1-M04") return buildM4Fixture(fixtureType);
-  if (missionId === "V1-M05") return buildM5Fixture(fixtureType);
-  if (missionId === "V1-M06") return buildM6Fixture(fixtureType);
-  throw new Error(`No controlled fixture is registered for ${missionId}`);
+  const builders = {
+    "V1-M04": buildM4Fixture,
+    "V1-M05": buildM5Fixture,
+    "V1-M06": buildM6Fixture,
+    "V1-M07": buildM7Fixture
+  };
+  if (!builders[missionId]) throw new Error(`No controlled fixture is registered for ${missionId}`);
+  return builders[missionId](fixtureType);
 }
 
-function buildM4Fixture(fixtureType) {
-  const checklist = Object.fromEntries([1, 2, 3, 4].map(number => [`V1-M04-T0${number}`, fixtureType === "approved"]));
-  if (fixtureType === "needs_evidence") {
-    return {
-      mission_id: "V1-M04",
-      code: "local selectedNPC = nil\n-- controlled release fixture intentionally omits working selection evidence",
-      explorer_summary: "CONTROLLED RELEASE TEST: CommandClient is present, but runtime proof is intentionally absent.",
-      output: "CONTROLLED RELEASE TEST: no current Play output supplied.",
-      screenshots: ["release-test-oracle://V1-M04/missing-runtime-proof"],
-      checklist,
-      understanding: "selectedNPC remembers which settler is selected.",
-      release_test_attestation: { kind: "controlled_fixture", expected_status: "NEEDS_EVIDENCE", visual_runtime_observed: false, note: "This is not a screenshot and must not be treated as visual proof." }
-    };
-  }
+function buildM4Fixture(type) {
+  const approved = type === "approved";
   return {
     mission_id: "V1-M04",
-    code: "local Players = game:GetService(\"Players\")\nlocal world = workspace:WaitForChild(\"World\")\nlocal npcs = world:WaitForChild(\"NPCs\")\nlocal selectedNPC = nil\nlocal selectionHighlight = Instance.new(\"Highlight\")\nselectionHighlight.Name = \"SelectedNPCHighlight\"\nselectionHighlight.Adornee = nil\nselectionHighlight.Parent = Players.LocalPlayer:WaitForChild(\"PlayerGui\")",
-    explorer_summary: "CONTROLLED RELEASE TEST ORACLE: both canonical ClickDetectors exist; one CommandClient LocalScript owns selection; runtime inspection counted one SelectedNPCHighlight and two event connections.",
-    output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; highlight count remained 1 after alternating clicks five times.",
-    screenshots: ["release-test-oracle://V1-M04/T01", "release-test-oracle://V1-M04/T02", "release-test-oracle://V1-M04/T03", "release-test-oracle://V1-M04/T04"],
-    checklist,
-    understanding: "selectedNPC is the one local variable that remembers which NPC should receive the next command.",
-    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
+    code: approved ? "local selectedNPC = nil\nlocal selectionHighlight = Instance.new(\"Highlight\")\nselectionHighlight.Name = \"SelectedNPCHighlight\"" : "local selectedNPC = nil",
+    explorer_summary: approved ? "CONTROLLED RELEASE TEST ORACLE: both ClickDetectors exist; one CommandClient owns selection; one highlight moves between NPC_1 and NPC_2." : "CONTROLLED RELEASE TEST: runtime selection proof is absent.",
+    output: approved ? "Fresh Play and restart passed; highlight count remained one after alternating clicks." : "No current Play output supplied.",
+    screenshots: [approved ? "release-test-oracle://V1-M04/approved" : "release-test-oracle://V1-M04/missing-proof"],
+    checklist: checklist("V1-M04", 4, approved),
+    understanding: "selectedNPC remembers which settler is selected.",
+    release_test_attestation: attestation(approved ? "APPROVED" : "NEEDS_EVIDENCE", approved)
   };
 }
 
-function buildM5Fixture(fixtureType) {
-  const checklist = Object.fromEntries([1, 2, 3].map(number => [`V1-M05-T0${number}`, fixtureType === "approved"]));
-  if (fixtureType === "needs_evidence") {
-    return {
-      mission_id: "V1-M05",
-      explorer_summary: "CONTROLLED RELEASE TEST: WoodNode and StoneNode are named, but TargetPoint properties and route clearance are not proven.",
-      properties: "No verified TargetPoint property dump supplied.",
-      output: "CONTROLLED RELEASE TEST: no fresh Play output supplied.",
-      screenshots: ["release-test-oracle://V1-M05/missing-targetpoint-proof"],
-      checklist,
-      understanding: "A separate TargetPoint gives pathfinding a simple reachable destination away from decorative geometry.",
-      release_test_attestation: { kind: "controlled_fixture", expected_status: "NEEDS_EVIDENCE", visual_runtime_observed: false, note: "This is not visual proof." }
-    };
-  }
+function buildM5Fixture(type) {
+  const approved = type === "approved";
   return {
     mission_id: "V1-M05",
-    explorer_summary: "CONTROLLED RELEASE TEST ORACLE: Workspace.World.Resources contains exactly WoodNode and StoneNode Models; each contains exactly one TargetPoint; no duplicate resource Models or TargetPoints exist.",
-    properties: "WoodNode.TargetPoint and StoneNode.TargetPoint: Anchored=true, Transparency=1, CanCollide=false; each target is positioned on reachable open ground beside its visible node.",
-    output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; both visible resource nodes remained stable and routes from both NPC homes stayed unobstructed.",
-    screenshots: ["release-test-oracle://V1-M05/T01-hierarchy", "release-test-oracle://V1-M05/T02-properties", "release-test-oracle://V1-M05/T03-routes-and-restart"],
-    checklist,
-    understanding: "A separate TargetPoint is safer because pathfinding targets a simple reachable invisible part instead of the possibly blocked center of decorative geometry.",
-    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
+    explorer_summary: approved ? "CONTROLLED RELEASE TEST ORACLE: exactly WoodNode and StoneNode exist and each has exactly one TargetPoint." : "CONTROLLED RELEASE TEST: TargetPoint properties and route clearance are not proven.",
+    properties: approved ? "Both TargetPoints are Anchored=true, Transparency=1, CanCollide=false and on reachable open ground." : "No verified TargetPoint property dump supplied.",
+    output: approved ? "Fresh Play and restart passed; both visible nodes remained stable and routes stayed open." : "No fresh Play output supplied.",
+    screenshots: [approved ? "release-test-oracle://V1-M05/approved" : "release-test-oracle://V1-M05/missing-proof"],
+    checklist: checklist("V1-M05", 3, approved),
+    understanding: "A separate TargetPoint gives pathfinding a simple reachable destination.",
+    release_test_attestation: attestation(approved ? "APPROVED" : "NEEDS_EVIDENCE", approved)
   };
 }
 
-function buildM6Fixture(fixtureType) {
-  const checklist = Object.fromEntries([1, 2, 3, 4].map(number => [`V1-M06-T0${number}`, fixtureType === "approved"]));
-  if (fixtureType === "needs_evidence") {
-    return {
-      mission_id: "V1-M06",
-      code: "-- controlled release fixture: HUD names are listed, but button feedback and selected-label behavior are not proven",
-      explorer_summary: "CONTROLLED RELEASE TEST: CommandHUD, SelectedLabel, and four command buttons are claimed, but the exact hierarchy and single CommandClient ownership are not verified.",
-      output: "CONTROLLED RELEASE TEST: no fresh Play output or button interaction proof supplied.",
-      screenshots: ["release-test-oracle://V1-M06/missing-hud-runtime-proof"],
-      checklist,
-      understanding: "The client script changes HUD feedback; later the server decides whether a real command is allowed.",
-      release_test_attestation: { kind: "controlled_fixture", expected_status: "NEEDS_EVIDENCE", visual_runtime_observed: false, note: "This is not visual proof." }
-    };
-  }
+function buildM6Fixture(type) {
+  const approved = type === "approved";
   return {
     mission_id: "V1-M06",
-    code: "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal hud = playerGui:WaitForChild(\"CommandHUD\")\nlocal selectedLabel = hud:WaitForChild(\"SelectedLabel\")\nlocal buttons = { hud:WaitForChild(\"GatherWoodButton\"), hud:WaitForChild(\"GatherStoneButton\"), hud:WaitForChild(\"BuildHutButton\"), hud:WaitForChild(\"ResetButton\") }\nlocal function showFeedback(button)\n  local old = button.Text\n  button.Text = \"Ready\"\n  task.delay(0.4, function() button.Text = old end)\nend",
-    explorer_summary: "CONTROLLED RELEASE TEST ORACLE: StarterGui contains one CommandHUD with SelectedLabel, GatherWoodButton, GatherStoneButton, BuildHutButton, and ResetButton; one CommandClient LocalScript references all controls safely.",
-    output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; selecting NPC_1 then NPC_2 updated SelectedLabel correctly; each of the four buttons showed temporary feedback and changed no Wood, Stone, HutBuilt, NPC position, or server state.",
-    screenshots: ["release-test-oracle://V1-M06/T01-hierarchy", "release-test-oracle://V1-M06/T02-selected-label", "release-test-oracle://V1-M06/T03-four-button-feedback", "release-test-oracle://V1-M06/T04-no-state-change"],
-    checklist,
-    understanding: "CommandClient changes the local HUD, while the server must later validate and authorize commands that affect shared game state.",
-    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
+    code: approved ? "local hud = playerGui:WaitForChild(\"CommandHUD\")\nlocal selectedLabel = hud:WaitForChild(\"SelectedLabel\")" : "-- HUD runtime behavior not proven",
+    explorer_summary: approved ? "CONTROLLED RELEASE TEST ORACLE: one CommandHUD contains SelectedLabel and all four canonical buttons; one CommandClient owns the controls." : "CONTROLLED RELEASE TEST: exact hierarchy and single-script ownership are not verified.",
+    output: approved ? "Fresh Play passed; selection label updated; all four buttons showed temporary feedback without changing game state." : "No button interaction proof supplied.",
+    screenshots: [approved ? "release-test-oracle://V1-M06/approved" : "release-test-oracle://V1-M06/missing-proof"],
+    checklist: checklist("V1-M06", 4, approved),
+    understanding: "The client changes the HUD; the server authorizes shared-state commands.",
+    release_test_attestation: attestation(approved ? "APPROVED" : "NEEDS_EVIDENCE", approved)
+  };
+}
+
+function buildM7Fixture(type) {
+  const approved = type === "approved";
+  return {
+    mission_id: "V1-M07",
+    code: approved ? `local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local commandNPC = remotes:WaitForChild("CommandNPC")
+local commandResult = remotes:WaitForChild("CommandResult")
+local selectedNPC = nil
+local function sendCommand(commandName)
+  if not selectedNPC then return end
+  commandNPC:FireServer(selectedNPC, commandName)
+end
+commandResult.OnClientEvent:Connect(function(ok, message)
+  print(ok, message)
+end)` : `local commandNPC = game.ReplicatedStorage.Remotes.CommandNPC
+commandNPC:FireServer(nil, "GatherWood")
+-- server validation and response evidence omitted`,
+    explorer_summary: approved ? "CONTROLLED RELEASE TEST ORACLE: all four canonical RemoteEvents exist; CommandClient blocks requests when no NPC is selected; CommandNPC direction is client-to-server and CommandResult returns server-to-client." : "CONTROLLED RELEASE TEST: RemoteEvent names are claimed, but direction, membership validation, and returned response are not proven.",
+    output: approved ? "CONTROLLED RELEASE TEST ORACLE: no-selection clicks sent zero server requests; valid selected-NPC request reached the server; forged outsider Model and malformed NPC requests were rejected; server response reached only the requesting client; Wood, Stone, HutBuilt, and construction state remained unchanged." : "CONTROLLED RELEASE TEST: no fresh server/client output demonstrating rejected forged NPCs or a returned server response.",
+    screenshots: [approved ? "release-test-oracle://V1-M07/T01-remotes" : "release-test-oracle://V1-M07/missing-proof"],
+    checklist: checklist("V1-M07", 5, approved),
+    understanding: "The server checks NPC membership so a client cannot command an arbitrary or forged object outside Workspace.World.NPCs.",
+    release_test_attestation: attestation(approved ? "APPROVED" : "NEEDS_EVIDENCE", approved)
   };
 }
 
