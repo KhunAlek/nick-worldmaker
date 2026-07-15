@@ -72,6 +72,12 @@ jobs:
           echo "token=$RELEASE_TEST_TOKEN" >> "$GITHUB_OUTPUT"
           printf '%s' "$RELEASE_TEST_TOKEN" | (cd backend && npx wrangler secret put RELEASE_TEST_TOKEN >/dev/null)
           (cd backend && npx wrangler deploy)
+          for attempt in $(seq 1 20); do
+            code="$(curl --silent --output /dev/null --write-out '%{http_code}' -H "Authorization: Bearer $RELEASE_TEST_TOKEN" "$API_URL/internal/release-test/views" || true)"
+            if [ "$code" = "200" ]; then break; fi
+            if [ "$attempt" = "20" ]; then echo "Temporary release-test wrapper did not become ready; last HTTP status: $code"; exit 1; fi
+            sleep 3
+          done
 
       - name: Perform authenticated production submissions
         shell: bash
@@ -119,8 +125,12 @@ jobs:
           git checkout -- backend/wrangler.toml backend/src/index.js
           grep -q 'main = "src/production-entry.js"' backend/wrangler.toml
           (cd backend && npx wrangler deploy)
-          curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/production-health-after-deploy.json
-          jq -e '.ok == true and .service == "nick-worldmaker-api" and .entrypoint == "production"' production-ops-evidence/production-health-after-deploy.json
+          for attempt in $(seq 1 20); do
+            curl --silent --show-error "$API_URL/health" > production-ops-evidence/production-health-after-deploy.json || true
+            if jq -e '.ok == true and .service == "nick-worldmaker-api" and .entrypoint == "production"' production-ops-evidence/production-health-after-deploy.json >/dev/null 2>&1; then break; fi
+            if [ "$attempt" = "20" ]; then cat production-ops-evidence/production-health-after-deploy.json; exit 1; fi
+            sleep 3
+          done
 
       - name: Revoke RELEASE_TEST_TOKEN and verify absence
         if: always()
