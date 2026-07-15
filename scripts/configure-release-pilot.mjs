@@ -20,7 +20,7 @@ let source = fs.readFileSync(backendPath, "utf8");
 if (!source.includes("function isPilotMissionAvailable")) {
   source = source.replace(
     "async function getProgress(auth, env, cors) {",
-    `function isPilotMissionAvailable(auth, env, missionId, config) {\n  return config.releaseState === \"released\" || (\n    auth.family_id === env.RELEASE_TEST_FAMILY_ID &&\n    missionId === env.RELEASE_TEST_MISSION_ID\n  );\n}\n\nasync function getProgress(auth, env, cors) {`
+    `function isPilotMissionAvailable(auth, env, missionId, config) {\n  return config.releaseState === "released" || (\n    auth.family_id === env.RELEASE_TEST_FAMILY_ID &&\n    missionId === env.RELEASE_TEST_MISSION_ID\n  );\n}\n\nasync function getProgress(auth, env, cors) {`
   );
 
   source = source.replace(
@@ -34,7 +34,14 @@ if (!source.includes("function isPilotMissionAvailable")) {
   );
 }
 
-if (!source.includes("isPilotMissionAvailable")) {
+if (!source.includes("x-worldmaker-release-family")) {
+  source = source.replace(
+    `async function authenticate(request, env) {\n  const value = request.headers.get("authorization") || "";\n  if (!value.startsWith("Bearer ")) return null;`,
+    `async function authenticate(request, env) {\n  const value = request.headers.get("authorization") || "";\n  const internalFamily = request.headers.get("x-worldmaker-release-family");\n  const internalRole = request.headers.get("x-worldmaker-release-role");\n  if (\n    env.RELEASE_TEST_TOKEN &&\n    env.RELEASE_TEST_FAMILY_ID &&\n    env.RELEASE_TEST_MISSION_ID &&\n    value === \`Bearer \${env.RELEASE_TEST_TOKEN}\` &&\n    internalFamily === env.RELEASE_TEST_FAMILY_ID &&\n    (internalRole === "learner" || internalRole === "parent")\n  ) {\n    return { family_id: internalFamily, role: internalRole };\n  }\n  if (!value.startsWith("Bearer ")) return null;`
+  );
+}
+
+if (!source.includes("isPilotMissionAvailable") || !source.includes("x-worldmaker-release-family")) {
   throw new Error("Backend pilot patch could not be applied.");
 }
 fs.writeFileSync(backendPath, source);
