@@ -47,7 +47,7 @@ jobs:
           node-version: 22
 
       - name: Run source and contract audit
-        run: node scripts/audit-mission-releases.mjs
+        run: node tests/release-audit.mjs
 
       - name: Deploy pilot Worker
         uses: cloudflare/wrangler-action@v3
@@ -147,7 +147,7 @@ jobs:
           node scripts/record-live-release-result.mjs "$MISSION_ID" release-report.json
           node scripts/promote-mission.mjs "$MISSION_ID"
           node scripts/configure-release-pilot.mjs "$FAMILY_ID" "$NEXT_ID"
-          node scripts/audit-mission-releases.mjs
+          node tests/release-audit.mjs
 
       - name: Deploy official release and move pilot forward
         uses: cloudflare/wrangler-action@v3
