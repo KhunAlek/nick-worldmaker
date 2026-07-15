@@ -82,11 +82,16 @@ function delay(milliseconds) {
 }
 
 function buildFixture(missionId, fixtureType) {
-  if (missionId !== "V1-M04") throw new Error(`No controlled fixture is registered for ${missionId}`);
+  if (missionId === "V1-M04") return buildM4Fixture(fixtureType);
+  if (missionId === "V1-M05") return buildM5Fixture(fixtureType);
+  throw new Error(`No controlled fixture is registered for ${missionId}`);
+}
+
+function buildM4Fixture(fixtureType) {
   const checklist = Object.fromEntries([1, 2, 3, 4].map(number => [`V1-M04-T0${number}`, fixtureType === "approved"]));
   if (fixtureType === "needs_evidence") {
     return {
-      mission_id: missionId,
+      mission_id: "V1-M04",
       code: "local selectedNPC = nil\n-- controlled release fixture intentionally omits working selection evidence",
       explorer_summary: "CONTROLLED RELEASE TEST: CommandClient is present, but runtime proof is intentionally absent.",
       output: "CONTROLLED RELEASE TEST: no current Play output supplied.",
@@ -97,35 +102,40 @@ function buildFixture(missionId, fixtureType) {
     };
   }
   return {
-    mission_id: missionId,
-    code: `local Players = game:GetService("Players")
-local world = workspace:WaitForChild("World")
-local npcs = world:WaitForChild("NPCs")
-local selectedNPC = nil
-local selectionHighlight = Instance.new("Highlight")
-selectionHighlight.Name = "SelectedNPCHighlight"
-selectionHighlight.Adornee = nil
-selectionHighlight.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-local function selectNPC(npc)
-  selectedNPC = npc
-  selectionHighlight.Adornee = npc
-end
-for _, npcName in ipairs({"NPC_1", "NPC_2"}) do
-  local npc = npcs:WaitForChild(npcName)
-  local detector = npc:WaitForChild("HumanoidRootPart"):WaitForChild("ClickDetector")
-  detector.MouseClick:Connect(function() selectNPC(npc) end)
-end`,
+    mission_id: "V1-M04",
+    code: "local Players = game:GetService(\"Players\")\nlocal world = workspace:WaitForChild(\"World\")\nlocal npcs = world:WaitForChild(\"NPCs\")\nlocal selectedNPC = nil\nlocal selectionHighlight = Instance.new(\"Highlight\")\nselectionHighlight.Name = \"SelectedNPCHighlight\"\nselectionHighlight.Adornee = nil\nselectionHighlight.Parent = Players.LocalPlayer:WaitForChild(\"PlayerGui\")",
     explorer_summary: "CONTROLLED RELEASE TEST ORACLE: both canonical ClickDetectors exist; one CommandClient LocalScript owns selection; runtime inspection counted one SelectedNPCHighlight and two event connections.",
     output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; highlight count remained 1 after alternating clicks five times.",
-    screenshots: [
-      "release-test-oracle://V1-M04/T01-one-highlight-on-NPC_1",
-      "release-test-oracle://V1-M04/T02-same-highlight-moved-to-NPC_2",
-      "release-test-oracle://V1-M04/T03-one-highlight-after-five-alternations",
-      "release-test-oracle://V1-M04/T04-fresh-restart-NPC_2-first"
-    ],
+    screenshots: ["release-test-oracle://V1-M04/T01", "release-test-oracle://V1-M04/T02", "release-test-oracle://V1-M04/T03", "release-test-oracle://V1-M04/T04"],
     checklist,
     understanding: "selectedNPC is the one local variable that remembers which NPC should receive the next command.",
-    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1", note: "Machine-observed release assertions, not fabricated screenshots; reachable only through the secret isolated endpoint." }
+    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
+  };
+}
+
+function buildM5Fixture(fixtureType) {
+  const checklist = Object.fromEntries([1, 2, 3].map(number => [`V1-M05-T0${number}`, fixtureType === "approved"]));
+  if (fixtureType === "needs_evidence") {
+    return {
+      mission_id: "V1-M05",
+      explorer_summary: "CONTROLLED RELEASE TEST: WoodNode and StoneNode are named, but TargetPoint properties and route clearance are not proven.",
+      properties: "No verified TargetPoint property dump supplied.",
+      output: "CONTROLLED RELEASE TEST: no fresh Play output supplied.",
+      screenshots: ["release-test-oracle://V1-M05/missing-targetpoint-proof"],
+      checklist,
+      understanding: "A separate TargetPoint gives pathfinding a simple reachable destination away from decorative geometry.",
+      release_test_attestation: { kind: "controlled_fixture", expected_status: "NEEDS_EVIDENCE", visual_runtime_observed: false, note: "This is not visual proof." }
+    };
+  }
+  return {
+    mission_id: "V1-M05",
+    explorer_summary: "CONTROLLED RELEASE TEST ORACLE: Workspace.World.Resources contains exactly WoodNode and StoneNode Models; each contains exactly one TargetPoint; no duplicate resource Models or TargetPoints exist.",
+    properties: "WoodNode.TargetPoint and StoneNode.TargetPoint: Anchored=true, Transparency=1, CanCollide=false; each target is positioned on reachable open ground beside its visible node.",
+    output: "CONTROLLED RELEASE TEST ORACLE: fresh Play and restart completed with no project-code red errors; both visible resource nodes remained stable and routes from both NPC homes stayed unobstructed.",
+    screenshots: ["release-test-oracle://V1-M05/T01-hierarchy", "release-test-oracle://V1-M05/T02-properties", "release-test-oracle://V1-M05/T03-routes-and-restart"],
+    checklist,
+    understanding: "A separate TargetPoint is safer because pathfinding targets a simple reachable invisible part instead of the possibly blocked center of decorative geometry.",
+    release_test_attestation: { kind: "controlled_fixture", expected_status: "APPROVED", visual_runtime_observed: true, oracle_version: "worldmaker-release-fixture-v1" }
   };
 }
 
