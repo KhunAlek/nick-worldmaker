@@ -18,6 +18,7 @@ export default {
       ...payload,
       entrypoint: "production",
       source_version: env.SOURCE_VERSION || "unknown",
+      source_sha256: env.SOURCE_SHA256 || "unknown",
       evaluator_version: env.EVALUATOR_VERSION || "unknown"
     }), {
       status: response.status,
