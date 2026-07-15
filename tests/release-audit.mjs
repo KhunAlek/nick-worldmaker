@@ -134,12 +134,22 @@ assert.match(app, /renderParent/, "Parent View renderer missing");
 assert.match(app, /\/api\/progress/, "Shared progress API missing");
 
 const manifest = loadBrowserObject("assets/js/mission-release-manifest.js", "WORLDMAKER_RELEASE_MANIFEST");
-assert.deepEqual(Array.from(manifest.released_ids), ["V1-M03"], "Unexpected released mission set");
-assert.deepEqual(Array.from(manifest.live_passed_ids), ["V1-M03"], "Unexpected live-passed mission set");
-for (const id of manifest.released_ids) {
-  assert.ok(manifest.live_passed_ids.includes(id), `${id}: released without live gates`);
+const releasedIds = Array.from(manifest.released_ids);
+const livePassedIds = Array.from(manifest.live_passed_ids);
+assert.ok(releasedIds.length >= 1, "No released missions are recorded");
+const expectedReleasedPrefix = Array.from({ length: releasedIds.length }, (_, index) => missionId(index + 3));
+assert.deepEqual(releasedIds, expectedReleasedPrefix, "Released missions must form one contiguous sequence from V1-M03");
+assert.deepEqual(livePassedIds, releasedIds, "Every released mission must have verified live gates, with no unpromoted live result left behind");
+for (const id of releasedIds) {
+  assert.equal(manifest.missions[id].release_state, "released", `${id}: manifest release state mismatch`);
+  assert.equal(missionRegistry[id].releaseState, "released", `${id}: backend release state mismatch`);
   assert.equal(manifest.missions[id].release_tests.live_model_classification, true, `${id}: live model gate missing`);
   assert.equal(manifest.missions[id].release_tests.production_d1_smoke, true, `${id}: D1 smoke gate missing`);
+}
+for (let number = releasedIds.length + 3; number <= 15; number += 1) {
+  const id = missionId(number);
+  assert.equal(manifest.missions[id].release_state, "unreleased", `${id}: later mission released out of sequence`);
+  assert.equal(missionRegistry[id].releaseState, "unreleased", `${id}: backend later mission released out of sequence`);
 }
 assert.ok(fs.existsSync(path.join(root, "scripts/record-live-release-result.mjs")), "Live result recorder missing");
 assert.ok(fs.existsSync(path.join(root, "scripts/promote-mission.mjs")), "Sequential promoter missing");
