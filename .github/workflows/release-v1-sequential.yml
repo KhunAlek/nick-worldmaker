@@ -1,0 +1,47 @@
+name: Release Version 1 sequentially
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-v1-sequential.yml
+      - scripts/release-all-unreleased.sh
+
+permissions:
+  contents: write
+
+concurrency:
+  group: worldmaker-version-1-sequential-release
+  cancel-in-progress: false
+
+jobs:
+  release-all-unreleased:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      API_URL: https://nick-worldmaker-api.abystrov66.workers.dev
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+      - name: Release every remaining Version 1 mission
+        shell: bash
+        run: bash scripts/release-all-unreleased.sh
+      - name: Upload complete release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-1-sequential-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release-evidence/
+          if-no-files-found: warn
+          retention-days: 30
