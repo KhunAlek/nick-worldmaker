@@ -1,7 +1,7 @@
 (function(){
   "use strict";
-  const releasedIds=["V1-M03","V1-M04"];
-  const livePassedIds=["V1-M03","V1-M04"];
+  const releasedIds=["V1-M03","V1-M04","V1-M05"];
+  const livePassedIds=["V1-M03","V1-M04","V1-M05"];
   const released=new Set(releasedIds);
   const livePassed=new Set(livePassedIds);
   window.WORLDMAKER_RELEASE_MANIFEST={
