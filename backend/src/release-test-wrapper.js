@@ -15,8 +15,8 @@ export default {
     if (url.pathname === "/internal/release-test/views") {
       if (request.method !== "GET") return json({ error: "Method not allowed" }, 405);
       if (!authorized) return json({ error: "Unauthorized" }, 401);
-      const learner = await callProgressWithFreshSession(url.origin, env, ctx, "learner");
-      const parent = await callProgressWithFreshSession(url.origin, env, ctx, "parent");
+      const learner = await fetchProgress(url.origin, env, ctx, "learner");
+      const parent = await fetchProgress(url.origin, env, ctx, "parent");
       return json({ learner, parent });
     }
 
@@ -39,64 +39,32 @@ export default {
     }
 
     const fixture = buildFixture(missionId, fixtureType);
-    return callSubmissionWithFreshSession(url.origin, env, ctx, missionId, fixture);
+    const internalRequest = new Request(`${url.origin}/api/missions/${missionId}/submissions`, {
+      method: "POST",
+      headers: internalHeaders(env, "learner", true),
+      body: JSON.stringify(fixture)
+    });
+    return cloneJsonResponse(await app.fetch(internalRequest, env, ctx));
   }
 };
 
-async function callSubmissionWithFreshSession(origin, env, ctx, missionId, fixture) {
-  let lastResponse;
-  for (let attempt = 1; attempt <= 12; attempt += 1) {
-    const token = await createShortSession(env, "learner");
-    await delay(Math.min(250 * attempt, 1500));
-    const request = new Request(`${origin}/api/missions/${missionId}/submissions`, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json",
-        origin: env.ALLOWED_ORIGIN || ORIGIN
-      },
-      body: JSON.stringify(fixture)
-    });
-    lastResponse = await app.fetch(request, env, ctx);
-    if (lastResponse.status !== 401) return cloneJsonResponse(lastResponse);
-    await delay(300 * attempt);
-  }
-  return cloneJsonResponse(lastResponse || json({ error: "Synthetic session authentication failed" }, 500));
+async function fetchProgress(origin, env, ctx, role) {
+  const request = new Request(`${origin}/api/progress`, {
+    headers: internalHeaders(env, role, false)
+  });
+  const result = await app.fetch(request, env, ctx);
+  return { status: result.status, body: await result.json() };
 }
 
-async function callProgressWithFreshSession(origin, env, ctx, role) {
-  let lastResponse;
-  for (let attempt = 1; attempt <= 12; attempt += 1) {
-    const token = await createShortSession(env, role);
-    await delay(Math.min(250 * attempt, 1500));
-    const request = new Request(`${origin}/api/progress`, {
-      headers: {
-        authorization: `Bearer ${token}`,
-        origin: env.ALLOWED_ORIGIN || ORIGIN
-      }
-    });
-    lastResponse = await app.fetch(request, env, ctx);
-    if (lastResponse.status !== 401) {
-      return { status: lastResponse.status, body: await lastResponse.json() };
-    }
-    await delay(300 * attempt);
-  }
-  return { status: lastResponse?.status || 500, body: { error: "Synthetic session authentication failed" } };
-}
-
-async function createShortSession(env, role) {
-  const token = crypto.randomUUID() + crypto.randomUUID();
-  const tokenHash = await sha256(token);
-  await env.DB.prepare(
-    "INSERT INTO sessions(id,family_id,role,token_hash,expires_at) VALUES(?,?,?,?,?)"
-  ).bind(
-    crypto.randomUUID(),
-    env.RELEASE_TEST_FAMILY_ID,
-    role,
-    tokenHash,
-    new Date(Date.now() + 10 * 60 * 1000).toISOString()
-  ).run();
-  return token;
+function internalHeaders(env, role, includeContentType) {
+  const headers = {
+    authorization: `Bearer ${env.RELEASE_TEST_TOKEN}`,
+    origin: env.ALLOWED_ORIGIN || ORIGIN,
+    "x-worldmaker-release-family": env.RELEASE_TEST_FAMILY_ID,
+    "x-worldmaker-release-role": role
+  };
+  if (includeContentType) headers["content-type"] = "application/json";
+  return headers;
 }
 
 function buildFixture(missionId, fixtureType) {
@@ -137,15 +105,6 @@ async function cloneJsonResponse(response) {
     status: response.status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
   });
-}
-
-async function sha256(value) {
-  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return [...new Uint8Array(bytes)].map(value => value.toString(16).padStart(2, "0")).join("");
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function json(value, status = 200) {
