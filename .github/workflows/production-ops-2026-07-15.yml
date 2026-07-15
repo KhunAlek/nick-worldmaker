@@ -1,0 +1,124 @@
+name: Production operations 2026-07-15
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/production-ops-2026-07-15.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldmaker-production-ops-2026-07-15
+  cancel-in-progress: false
+
+jobs:
+  production-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      API_URL: https://nick-worldmaker-api.abystrov66.workers.dev
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install --no-audit --no-fund
+
+      - name: Export D1 and snapshot real-family state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p production-ops-evidence
+          (cd backend && npx wrangler d1 export worldmaker-db --remote --output ../production-ops-evidence/worldmaker-db-2026-07-15.sql --yes)
+          (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;" --json) > production-ops-evidence/real-family-before.raw.json
+          jq -S '.[0].results' production-ops-evidence/real-family-before.raw.json > production-ops-evidence/real-family-before.json
+
+      - name: Create isolated family and deploy temporary authenticated test wrapper
+        id: pilot
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          FAMILY_ID="$(python -c 'import uuid; print(uuid.uuid4())')"
+          echo "family_id=$FAMILY_ID" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$FAMILY_ID" > production-ops-evidence/isolated-family-id.txt
+          SQL="INSERT INTO families(id,display_name) VALUES('${FAMILY_ID}','Release Test Production Ops 2026-07-15'); INSERT INTO mission_progress(family_id,mission_id,status,hint_level) VALUES('${FAMILY_ID}','V1-M04','NOT_SUBMITTED',0);"
+          (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json) > production-ops-evidence/isolated-family-seed.json
+          node scripts/configure-release-pilot.mjs "$FAMILY_ID" V1-M04
+          RELEASE_TEST_TOKEN="$(openssl rand -hex 32)"
+          echo "token=$RELEASE_TEST_TOKEN" >> "$GITHUB_OUTPUT"
+          printf '%s' "$RELEASE_TEST_TOKEN" | (cd backend && npx wrangler secret put RELEASE_TEST_TOKEN >/dev/null)
+          (cd backend && npx wrangler deploy)
+
+      - name: Perform authenticated production submissions
+        shell: bash
+        env:
+          RELEASE_TEST_TOKEN: ${{ steps.pilot.outputs.token }}
+        run: |
+          set -Eeuo pipefail
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+            -H "Content-Type: application/json" \
+            -X POST "$API_URL/internal/release-test/V1-M04/needs_evidence" \
+            > production-ops-evidence/authenticated-needs-evidence.json
+          jq -e '.review.status != "APPROVED" and .review.unlock_next_mission == false and .review.next_mission_id == null' production-ops-evidence/authenticated-needs-evidence.json
+
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+            -H "Content-Type: application/json" \
+            -X POST "$API_URL/internal/release-test/V1-M04/approved" \
+            > production-ops-evidence/authenticated-approved.json
+          jq -e '.review.status == "APPROVED" and .review.unlock_next_mission == true and .review.next_mission_id == "V1-M05"' production-ops-evidence/authenticated-approved.json
+
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+            "$API_URL/internal/release-test/views" \
+            > production-ops-evidence/authenticated-shared-views.json
+
+      - name: Compare Nick and all real-family rows before and after
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          (cd backend && npx wrangler d1 execute worldmaker-db --remote --command "SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;" --json) > production-ops-evidence/real-family-after.raw.json
+          jq -S '.[0].results' production-ops-evidence/real-family-after.raw.json > production-ops-evidence/real-family-after.json
+          diff -u production-ops-evidence/real-family-before.json production-ops-evidence/real-family-after.json | tee production-ops-evidence/real-family-diff.txt
+
+      - name: Restore and deploy production entrypoint
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git checkout -- backend/wrangler.toml
+          grep -q 'main = "src/production-entry.js"' backend/wrangler.toml
+          (cd backend && npx wrangler deploy)
+          curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/production-health-after-deploy.json
+          jq -e '.ok == true and .service == "nick-worldmaker-api" and .entrypoint == "production"' production-ops-evidence/production-health-after-deploy.json
+
+      - name: Revoke RELEASE_TEST_TOKEN and verify absence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          printf 'y\n' | (cd backend && npx wrangler secret delete RELEASE_TEST_TOKEN)
+          (cd backend && npx wrangler secret list --json) > production-ops-evidence/secrets-after-revocation.json
+          jq -e 'map(.name) | index("RELEASE_TEST_TOKEN") == null' production-ops-evidence/secrets-after-revocation.json
+          curl --fail-with-body --silent --show-error "$API_URL/health" > production-ops-evidence/final-health.json
+          jq -e '.ok == true and .service == "nick-worldmaker-api" and .entrypoint == "production"' production-ops-evidence/final-health.json
+
+      - name: Upload operational evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-ops-2026-07-15-${{ github.run_id }}-${{ github.run_attempt }}
+          path: production-ops-evidence/
+          if-no-files-found: error
+          retention-days: 30
