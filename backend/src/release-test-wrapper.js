@@ -32,7 +32,7 @@ export default {
       return response({ error: "Refusing to regress an already approved release-test mission" }, 409);
     }
 
-    const sessionToken = await createShortSession(env, "learner");
+    const sessionToken = await createVisibleShortSession(env, "learner");
     const fixture = buildFixture(missionId, fixtureType);
     const internalRequest = new Request(`${url.origin}/api/missions/${missionId}/submissions`, {
       method: "POST",
@@ -53,7 +53,7 @@ export default {
 };
 
 async function fetchProgressForRole(origin, env, ctx, role) {
-  const token = await createShortSession(env, role);
+  const token = await createVisibleShortSession(env, role);
   const request = new Request(`${origin}/api/progress`, {
     headers: { authorization: `Bearer ${token}`, origin: env.ALLOWED_ORIGIN || "https://khunalek.github.io" }
   });
@@ -61,12 +61,24 @@ async function fetchProgressForRole(origin, env, ctx, role) {
   return { status: result.status, body: await result.json() };
 }
 
-async function createShortSession(env, role) {
+async function createVisibleShortSession(env, role) {
   const token = crypto.randomUUID() + crypto.randomUUID();
   const tokenHash = await sha256(token);
   await env.DB.prepare("INSERT INTO sessions(id,family_id,role,token_hash,expires_at) VALUES(?,?,?,?,?)")
     .bind(crypto.randomUUID(), env.RELEASE_TEST_FAMILY_ID, role, tokenHash, new Date(Date.now() + 10 * 60 * 1000).toISOString()).run();
-  return token;
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const visible = await env.DB.prepare("SELECT 1 AS ok FROM sessions WHERE token_hash=? AND expires_at > ?")
+      .bind(tokenHash, new Date().toISOString()).first();
+    if (visible?.ok === 1) return token;
+    await delay(100);
+  }
+
+  throw new Error("Release-test session was not visible after creation");
+}
+
+function delay(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
 function buildFixture(missionId, fixtureType) {
