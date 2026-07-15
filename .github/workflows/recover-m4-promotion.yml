@@ -47,7 +47,7 @@ jobs:
           jq -e '.[0].results[0] | .submissions_count >= 2 and .reviews_count >= 2 and .needs_evidence_count >= 1 and .approved_count >= 1 and .audit_count >= 2 and .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0' ../m4-recovery-d1.json
       - name: Build sanitized recovery report
         run: |
-          jq -n '{harness_version:"worldmaker-release-harness-v1-recovery",source_run_id:"29380522888",mission_id:"V1-M04",live_model_classification:{non_approved:"NEEDS_EVIDENCE",valid_submission:"APPROVED"},production_d1_smoke:{submission_records_immutable:true,review_records_immutable:true,audit_records_created:true,nonapproval_did_not_unlock:true,approval_unlocked_exact_next:true,no_later_mission_unlocked:true,shared_progress_visible:true,parent_view_visible:true}}' > release-report.json
+          jq -n '{harness_version:"worldmaker-release-harness-v1",source_run_id:"29380522888",mission_id:"V1-M04",live_model_classification:{non_approved:"NEEDS_EVIDENCE",valid_submission:"APPROVED"},production_d1_smoke:{submission_records_immutable:true,review_records_immutable:true,audit_records_created:true,nonapproval_did_not_unlock:true,approval_unlocked_exact_next:true,no_later_mission_unlocked:true,shared_progress_visible:true,parent_view_visible:true}}' > release-report.json
       - name: Record, promote, and move pilot
         run: |
           node scripts/record-live-release-result.mjs "$MISSION_ID" release-report.json
