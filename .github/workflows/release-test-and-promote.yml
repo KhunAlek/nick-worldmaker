@@ -49,14 +49,6 @@ jobs:
       - name: Run source and contract audit
         run: node tests/release-audit.mjs
 
-      - name: Deploy pilot Worker
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: backend
-          command: deploy
-
       - name: Rotate isolated harness token
         working-directory: backend
         shell: bash
@@ -66,15 +58,33 @@ jobs:
           echo "RELEASE_TEST_TOKEN=$TOKEN" >> "$GITHUB_ENV"
           printf '%s' "$TOKEN" | npx wrangler secret put RELEASE_TEST_TOKEN
 
+      - name: Deploy pilot Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: backend
+          command: deploy
+
       - name: Run non-approved evaluator smoke test
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
-            -H "Content-Type: application/json" \
-            -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence" \
-            > non-approved.json
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --silent --show-error -o non-approved.json -w '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+              -H "Content-Type: application/json" \
+              -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"
+            if [ "$status" = "200" ]; then
+              break
+            fi
+            if [ "$status" != "401" ] || [ "$attempt" = "6" ]; then
+              cat non-approved.json
+              echo "Release-test endpoint returned HTTP $status"
+              exit 1
+            fi
+            sleep 5
+          done
           jq -e '.review.status == "NEEDS_EVIDENCE" and .review.unlock_next_mission == false and .review.next_mission_id == null' non-approved.json
 
       - name: Verify non-approval did not unlock next mission
