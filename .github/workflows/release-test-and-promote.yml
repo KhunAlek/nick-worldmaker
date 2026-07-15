@@ -75,9 +75,7 @@ jobs:
               -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
               -H "Content-Type: application/json" \
               -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"
-            if [ "$status" = "200" ]; then
-              break
-            fi
+            if [ "$status" = "200" ]; then break; fi
             if [ "$status" != "401" ] || [ "$attempt" = "6" ]; then
               cat non-approved.json
               echo "Release-test endpoint returned HTTP $status"
@@ -100,11 +98,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
-            -H "Content-Type: application/json" \
-            -X POST "$API_URL/internal/release-test/$MISSION_ID/approved" \
-            > approved.json
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --silent --show-error -o approved.json -w '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+              -H "Content-Type: application/json" \
+              -X POST "$API_URL/internal/release-test/$MISSION_ID/approved")"
+            if [ "$status" = "200" ]; then break; fi
+            if [ "$status" != "401" ] || [ "$attempt" = "6" ]; then
+              cat approved.json
+              echo "Approved release-test endpoint returned HTTP $status"
+              exit 1
+            fi
+            sleep 5
+          done
           jq -e --arg next "$NEXT_ID" '.review.status == "APPROVED" and .review.unlock_next_mission == true and .review.next_mission_id == $next' approved.json
 
       - name: Verify immutable records and exact-next D1 state
@@ -120,9 +126,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
-            "$API_URL/internal/release-test/views" > views.json
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --silent --show-error -o views.json -w '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
+              "$API_URL/internal/release-test/views")"
+            if [ "$status" = "200" ]; then break; fi
+            if [ "$status" != "401" ] || [ "$attempt" = "6" ]; then
+              cat views.json
+              echo "Release-test views endpoint returned HTTP $status"
+              exit 1
+            fi
+            sleep 5
+          done
           jq -e --arg mission "$MISSION_ID" --arg next "$NEXT_ID" '
             .learner.status == 200 and .parent.status == 200 and
             ([.learner.body.progress[] | select(.mission_id == $mission and .status == "APPROVED")] | length == 1) and
