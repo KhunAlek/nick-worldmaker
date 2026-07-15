@@ -45,3 +45,5 @@ jobs:
           path: release-evidence/
           if-no-files-found: warn
           retention-days: 30
+
+# This workflow intentionally releases all remaining missions in one resumable run.
