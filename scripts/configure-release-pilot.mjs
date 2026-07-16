@@ -8,8 +8,10 @@ const wranglerPath = path.join(root, "backend/wrangler.toml");
 const familyId = process.argv[2];
 const missionId = process.argv[3] || "V1-M04";
 
-if (!/^[0-9a-f-]{36}$/i.test(familyId || "")) {
-  throw new Error("Usage: node scripts/configure-release-pilot.mjs <family-uuid> [mission-id]");
+const isUuid = /^[0-9a-f-]{36}$/i.test(familyId || "");
+const isClosureFamily = /^closure-m3-[0-9]+-[0-9]+$/.test(familyId || "");
+if (!isUuid && !isClosureFamily) {
+  throw new Error("Usage: node scripts/configure-release-pilot.mjs <family-uuid-or-closure-id> [mission-id]");
 }
 if (!/^V1-M(?:0[3-9]|1[0-5])$/.test(missionId)) {
   throw new Error("Invalid pilot mission ID.");
