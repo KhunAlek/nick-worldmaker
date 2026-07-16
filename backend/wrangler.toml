@@ -3,10 +3,11 @@ main = "src/production-entry.js"
 compatibility_date = "2026-07-15"
 
 [vars]
+SOURCE_SHA256 = "8adcd3bb3a6c8121243f286e8ceb34a7d11b9b32a1cb71d7c1fde1f245b1ed38"
 ALLOWED_ORIGIN = "https://khunalek.github.io"
 OPENAI_MODEL = "gpt-4.1-mini"
 EVALUATOR_VERSION = "v1-release-engine-2026-07-15"
-SOURCE_VERSION = "github-main-2026-07-15"
+SOURCE_VERSION = "2a98d9efc809d991a05801c967f8ce99a58ebf2a"
 SESSION_TTL_HOURS = "720"
 
 [[d1_databases]]

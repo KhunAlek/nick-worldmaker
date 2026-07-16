@@ -1,0 +1,23 @@
+[
+  {
+    "approved_review_id": null,
+    "family_id": "family-nick",
+    "hint_level": 0,
+    "mission_id": "V1-M01",
+    "status": "APPROVED"
+  },
+  {
+    "approved_review_id": "0ea8eee2-d485-4cf7-b8fe-c38e59d8b266",
+    "family_id": "family-nick",
+    "hint_level": 0,
+    "mission_id": "V1-M02",
+    "status": "APPROVED"
+  },
+  {
+    "approved_review_id": null,
+    "family_id": "family-nick",
+    "hint_level": 0,
+    "mission_id": "V1-M03",
+    "status": "NOT_SUBMITTED"
+  }
+]
