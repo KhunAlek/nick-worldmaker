@@ -1,6 +1,7 @@
 # Nick // Worldmaker — Comprehensive Project Tracker
 
 **Tracker date:** 15 July 2026  
+**Last updated:** 16 July 2026  
 **Status:** **15 July 2026 — Complete and formally closed.**  
 **Project owner:** Olga  
 **Technical operator:** Alex Bystrov  
@@ -9,7 +10,8 @@
 **Production website:** `https://khunalek.github.io/nick-worldmaker/`  
 **Production API:** `https://nick-worldmaker-api.abystrov66.workers.dev`  
 **Current learner state:** M1 and M2 approved; M3 is next and `NOT_SUBMITTED`.  
-**Current release state:** M3–M6 released and live-passed; M7 is first unreleased.
+**Current release state:** M3–M6 released and live-passed; M7 is first unreleased.  
+**Current learner-content state:** M3 learner instructions repaired and human re-review completed; Nick may proceed with M3.
 
 ---
 
@@ -47,10 +49,22 @@ All formal closure acceptance items were proven and retained in source-controlle
 
 Alex Bystrov completed Parts 1–2 on 16 July 2026.
 
+Initial review:
+
 - Learner login and visible progress were correct.
 - Parent View: **PASS WITH MINOR ISSUES**.
 - Learner View / M3: **FAIL — needs correction before Nick continues**.
-- The M3 lesson does not explain where to find/open Rig Generator and uses misleading object-movement wording.
+- The original M3 lesson did not explain where to find/open Rig Generator and used misleading object-movement wording.
+
+Follow-up repair and re-review:
+
+- The learner-facing `V1-M03 — Add Two Settlers` lesson was repaired in repository commit `56c1f50bd27e862bb8564da0e00eb7402f9e7d27` (`Repair M3 learner instructions`).
+- Only `assets/js/mission-lessons.js` changed in that repair.
+- The corrected lesson now uses the sequence **Understand → Do → Observe → Experiment → Fix → Prove**.
+- It explicitly explains Edit mode, Rig Builder location and fallbacks, inserting and identifying a complete R15 rig, moving the complete Model in Explorer, renaming, checking Humanoid and HumanoidRootPart, setting PrimaryPart, removing only unwanted Scripts, duplication, safe placement, anchoring checks, home-marker creation, pre-Play checks, recovery, and minimal evidence submission.
+- Alex reopened the production M3 learner page and completed the requested human re-review.
+- **M3 learner-instruction re-review: PASSED.**
+- The learner-content blocker is closed. Nick may continue with M3.
 
 ### Cleaned up
 
@@ -85,14 +99,24 @@ Alex Bystrov completed Parts 1–2 on 16 July 2026.
 
 No related red run remains unexplained.
 
-## Unresolved learner-content item
+## Learner-content follow-up — resolved
 
-The M3 learner lesson must be corrected and human re-reviewed before Nick continues. This is a blocking lesson-content defect, but it is not an unproven 15 July closure item and does not reopen the completed infrastructure and operational closure.
+The blocking M3 learner-instruction defect discovered during Alex's first human review was repaired and human re-reviewed on 16 July 2026.
 
-No M7 release work was performed in this task.
+Resolution:
+
+- repair commit: `56c1f50bd27e862bb8564da0e00eb7402f9e7d27`;
+- affected production content: `V1-M03 — Add Two Settlers` learner lesson only;
+- re-review result: **PASS**;
+- Nick's database progress was not changed;
+- M3 remains his next genuine mission and `NOT_SUBMITTED` until he completes and submits it;
+- no M4–M15 content, evaluator logic, acceptance tests, D1 data, release state, or July 15 closure workflow was changed;
+- no M7 release work was performed.
 
 ---
 
 ## Formal status
 
 **15 July 2026 — Complete and formally closed.**
+
+**M3 learner-content repair — Complete and human-approved on 16 July 2026.**
