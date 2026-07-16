@@ -27,10 +27,15 @@ export default {
       return json({ error: "M3 closure pilot is not configured" }, 409);
     }
 
-    const type = match[1];
-    const fixture = buildFixture(type);
-    const review = await persistControlledReview(env, fixture, type === "approved");
-    return json({ review });
+    try {
+      const type = match[1];
+      const fixture = buildFixture(type);
+      const review = await persistControlledReview(env, fixture, type === "approved");
+      return json({ review });
+    } catch (error) {
+      console.error("Controlled M3 closure fixture failed", error);
+      return json({ error: "Controlled M3 closure fixture failed", detail: String(error?.message || error) }, 500);
+    }
   }
 };
 
@@ -82,14 +87,19 @@ async function persistControlledReview(env, body, approved) {
     block_type: null
   };
   const evidenceHash = await sha256(JSON.stringify(body));
-  const statements = [
-    env.DB.prepare("INSERT INTO submissions(id,family_id,mission_id,attempt_number,payload_json,evidence_hash,suspicious_input_detected,evaluator_version) VALUES(?,?,?,?,?,?,?,?)").bind(submissionId, familyId, "V1-M03", attempt, JSON.stringify(body), evidenceHash, 0, env.EVALUATOR_VERSION),
-    env.DB.prepare("INSERT INTO reviews(id,submission_id,family_id,mission_id,attempt_number,model,response_json,validated,prompt_version) VALUES(?,?,?,?,?,?,?,?,?)").bind(reviewId, submissionId, familyId, "V1-M03", attempt, "controlled-closure-oracle", JSON.stringify(review), 1, env.EVALUATOR_VERSION),
-    env.DB.prepare("INSERT INTO mission_progress(family_id,mission_id,status,hint_level,approved_review_id,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(family_id,mission_id) DO UPDATE SET status=excluded.status,hint_level=excluded.hint_level,approved_review_id=excluded.approved_review_id,updated_at=excluded.updated_at").bind(familyId, "V1-M03", status, 0, approved ? reviewId : null, now),
-    env.DB.prepare("INSERT INTO audit_log(id,family_id,action,mission_id,submission_id,review_id,details_json) VALUES(?,?,?,?,?,?,?)").bind(crypto.randomUUID(), familyId, approved ? "MISSION_APPROVED" : "MISSION_REVIEWED", "V1-M03", submissionId, reviewId, JSON.stringify({ status, evidence_hash: evidenceHash, controlled_fixture: true }))
-  ];
-  if (approved) statements.push(env.DB.prepare("INSERT INTO mission_progress(family_id,mission_id,status,hint_level,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(family_id,mission_id) DO NOTHING").bind(familyId, "V1-M04", "NOT_SUBMITTED", 0, now));
-  await env.DB.batch(statements);
+
+  await env.DB.prepare("INSERT INTO submissions(id,family_id,mission_id,attempt_number,payload_json,evidence_hash,suspicious_input_detected,evaluator_version) VALUES(?,?,?,?,?,?,?,?)")
+    .bind(submissionId, familyId, "V1-M03", attempt, JSON.stringify(body), evidenceHash, 0, env.EVALUATOR_VERSION).run();
+  await env.DB.prepare("INSERT INTO reviews(id,submission_id,family_id,mission_id,attempt_number,model,response_json,validated,prompt_version) VALUES(?,?,?,?,?,?,?,?,?)")
+    .bind(reviewId, submissionId, familyId, "V1-M03", attempt, "controlled-closure-oracle", JSON.stringify(review), 1, env.EVALUATOR_VERSION).run();
+  await env.DB.prepare("INSERT INTO mission_progress(family_id,mission_id,status,hint_level,approved_review_id,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(family_id,mission_id) DO UPDATE SET status=excluded.status,hint_level=excluded.hint_level,approved_review_id=excluded.approved_review_id,updated_at=excluded.updated_at")
+    .bind(familyId, "V1-M03", status, 0, approved ? reviewId : null, now).run();
+  await env.DB.prepare("INSERT INTO audit_log(id,family_id,action,mission_id,submission_id,review_id,details_json) VALUES(?,?,?,?,?,?,?)")
+    .bind(crypto.randomUUID(), familyId, approved ? "MISSION_APPROVED" : "MISSION_REVIEWED", "V1-M03", submissionId, reviewId, JSON.stringify({ status, evidence_hash: evidenceHash, controlled_fixture: true })).run();
+  if (approved) {
+    await env.DB.prepare("INSERT INTO mission_progress(family_id,mission_id,status,hint_level,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(family_id,mission_id) DO NOTHING")
+      .bind(familyId, "V1-M04", "NOT_SUBMITTED", 0, now).run();
+  }
   return review;
 }
 
@@ -103,7 +113,7 @@ function buildFixture(type) {
     screenshots: [approved ? "controlled://m3/approved" : "controlled://m3/missing"],
     checklist: Object.fromEntries(TESTS.map(id => [id, approved])),
     understanding: "A movable NPC rig needs character components that an ordinary statue Model does not provide.",
-    release_test_attestation: { kind: "controlled_fixture", expected_status: approved ? "APPROVED" : "NEEDS_EVIDENCE", oracle_version: "worldmaker-15-july-closure-m3-v2" }
+    release_test_attestation: { kind: "controlled_fixture", expected_status: approved ? "APPROVED" : "NEEDS_EVIDENCE", oracle_version: "worldmaker-15-july-closure-m3-v3" }
   };
 }
 
