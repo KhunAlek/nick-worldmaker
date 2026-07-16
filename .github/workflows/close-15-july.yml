@@ -31,6 +31,14 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: bash scripts/close-15-july.sh
+      - name: Remove closure test-family residue
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          cd backend
+          npx wrangler d1 execute worldmaker-db --remote --command "DELETE FROM sessions WHERE family_id LIKE 'closure-m3-%'; DELETE FROM reviews WHERE family_id LIKE 'closure-m3-%'; DELETE FROM submissions WHERE family_id LIKE 'closure-m3-%'; DELETE FROM audit_log WHERE family_id LIKE 'closure-m3-%'; DELETE FROM mission_progress WHERE family_id LIKE 'closure-m3-%'; DELETE FROM families WHERE id LIKE 'closure-m3-%';"
       - name: Copy human visual-review evidence
         run: |
           mkdir -p release-evidence/2026-07-15-closure
@@ -65,7 +73,8 @@ jobs:
           - prior isolated release-test families inventoried;
           - a fresh isolated M3 negative fixture remained non-approved and did not unlock;
           - a fresh isolated M3 approved fixture unlocked exactly M4 and no later mission;
-          - Nick's real family mission-progress snapshot was byte-for-byte unchanged.
+          - Nick's real family mission-progress snapshot was byte-for-byte unchanged;
+          - closure test-family rows were deleted after verification.
 
           Human review status:
 
@@ -90,3 +99,4 @@ jobs:
             release-evidence/2026-07-15-closure/
             docs/operations/
           if-no-files-found: warn
+# trigger: 2026-07-16T05:44Z
