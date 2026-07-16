@@ -1,5 +1,7 @@
 # D1 Backup Register
 
+**Register status:** Complete — included in the formally closed 15 July 2026 record.
+
 ## 15 July 2026 closure backup
 
 - **Database:** `worldmaker-db`
@@ -10,6 +12,8 @@
 - **Workflow run URL:** https://github.com/KhunAlek/nick-worldmaker/actions/runs/29475820894
 - **Source commit SHA:** `2a98d9efc809d991a05801c967f8ce99a58ebf2a`
 - **Evidence commit SHA:** `6014250bf360fd047f4b628240ad5fbd547ed31d`
+- **Formal closure report commit:** `fb8a6b6d0b1bb3b1b25a577b718b853f7aee64d3`
+- **Sanitized closure ledger commit:** `e7159f4a6708ba57e31c3540b44e4b05a7744c38`
 - **Artifact:** `worldmaker-15-july-closure-29475820894`
 - **Artifact ID:** `8366520728`
 - **Artifact size:** `573,491 bytes`
@@ -23,7 +27,7 @@
 
 ## Content verification
 
-The artifact ZIP was downloaded and opened through the connected GitHub tools. The SQL file is present and readable. It contains the expected D1 export rather than a placeholder: table definitions for `families`, `access_codes`, `sessions`, `mission_progress`, `submissions`, `reviews`, and `audit_log`, together with data `INSERT` statements including the real `family-nick` records and isolated release-test records.
+The artifact ZIP was downloaded and opened through the connected GitHub tools. The SQL file is present and readable. It contains the expected D1 export rather than a placeholder: table definitions for `families`, `access_codes`, `sessions`, `mission_progress`, `submissions`, `reviews`, and `audit_log`, together with data `INSERT` statements including the real learner-family records and isolated release-test records.
 
 ## Local human download recommendation
 
