@@ -24,10 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
       - name: Install backend dependencies
-        run: npm ci --prefix backend
+        run: npm install --prefix backend
       - name: Execute Parts 3–8
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -92,4 +90,3 @@ jobs:
             release-evidence/2026-07-15-closure/
             docs/operations/
           if-no-files-found: warn
-# trigger: 2026-07-16T05:35Z
