@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "closure_date": "2026-07-15",
+  "formal_status": "15 July 2026 — Complete and formally closed.",
+  "production": {
+    "health_ok": true,
+    "entrypoint": "production",
+    "source_commit": "2a98d9efc809d991a05801c967f8ce99a58ebf2a",
+    "source_sha256": "8adcd3bb3a6c8121243f286e8ceb34a7d11b9b32a1cb71d7c1fde1f245b1ed38",
+    "repository_deployment_match": true,
+    "source_drift_found": false
+  },
+  "release_state": {
+    "released": ["V1-M03", "V1-M04", "V1-M05", "V1-M06"],
+    "live_passed": ["V1-M03", "V1-M04", "V1-M05", "V1-M06"],
+    "first_unreleased": "V1-M07",
+    "frontend_matches_manifest": true
+  },
+  "nick_progress": {
+    "before": {"V1-M01": "APPROVED", "V1-M02": "APPROVED", "V1-M03": "NOT_SUBMITTED"},
+    "after": {"V1-M01": "APPROVED", "V1-M02": "APPROVED", "V1-M03": "NOT_SUBMITTED"},
+    "unchanged": true,
+    "later_missions_completed": false
+  },
+  "isolated_m3": {
+    "negative_status": "NEEDS_EVIDENCE",
+    "negative_unlock_count": 0,
+    "approved_status": "APPROVED",
+    "approved_unlock": "V1-M04",
+    "later_unlock_count": 0,
+    "fixture_removed": true
+  },
+  "cleanup": {
+    "temporary_access_absent": true,
+    "pilot_configuration_absent": true,
+    "unauthorized_internal_status": 401,
+    "production_entrypoint_restored": true,
+    "temporary_repository_files_removed": true
+  },
+  "backup": {
+    "database": "worldmaker-db",
+    "created_utc": "2026-07-16T06:08:30Z",
+    "workflow_run_id": 29475820894,
+    "artifact_name": "worldmaker-15-july-closure-29475820894",
+    "artifact_id": 8366520728,
+    "artifact_expires_at": "2026-10-14T06:08:04Z",
+    "sql_export_bytes": 859116,
+    "sql_export_sha256": "a7a6391cef25da8bca14b249195dd5daf2e2014e3a9f55891b0c40842924342a",
+    "artifact_contents_verified": true
+  },
+  "human_review": {
+    "reviewer": "Alex Bystrov",
+    "learner_view": "FAIL — needs correction before Nick continues",
+    "parent_view": "PASS WITH MINOR ISSUES"
+  },
+  "workflow": {
+    "successful_run_id": 29475820894,
+    "failed_runs_explained": [29473941742, 29474251249, 29474598054, 29474986681, 29475238619]
+  },
+  "unresolved_item": "M3 beginner instructions require correction and human re-review before Nick continues.",
+  "m7_release_work_performed": false
+}
