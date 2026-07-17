@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SOURCE="$ROOT/scripts/run-m7-release.sh"
-PATCHED="$ROOT/release-runner-patched.sh"
+PATCHED="$ROOT/scripts/release-runner-patched.sh"
 PATCH_LOG="$ROOT/release-runner-patch.log"
 rm -f "$PATCHED" "$PATCH_LOG"
 
@@ -92,5 +92,5 @@ grep -q 'local original_dir="$PWD"' "$PATCHED"
 grep -q 'ready_streak=0' "$PATCHED"
 grep -q 'test "$PWD" = "$ROOT"' "$PATCHED"
 
-echo "Patched runner syntax and regression guards verified." | tee -a "$PATCH_LOG"
+echo "Patched runner syntax, repository root, and regression guards verified." | tee -a "$PATCH_LOG"
 exec bash "$PATCHED"
