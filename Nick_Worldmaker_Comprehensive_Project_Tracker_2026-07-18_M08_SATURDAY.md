@@ -91,7 +91,8 @@ The rewrite was pushed to the existing M8 branch through commits including:
 - `270a55e4f9d478ecaaf0e08bbcf3d6242d0067a7` — add M8 visual beginner rendering;
 - `4ef7601e45a0cba84be6a3a0c9b81dcb911a2544` — load the complete corrected lesson;
 - `b9a7e52c22330d86edc6f453a9710d142d9d0a2a` — strengthen automated tests;
-- `a0a7068d47b3489ba17898fafd9f35e7448075a1` — rebuild the sanitized review.
+- `a0a7068d47b3489ba17898fafd9f35e7448075a1` — rebuild the sanitized review;
+- `46dd076aae275f88c6bf7442f9358b407f97f90f` — record the completed rewrite and verification in this tracker.
 
 ## Scope and safety confirmation
 
