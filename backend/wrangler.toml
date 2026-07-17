@@ -10,6 +10,8 @@ EVALUATOR_VERSION = "v1-release-engine-2026-07-15"
 SOURCE_VERSION = "2a98d9efc809d991a05801c967f8ce99a58ebf2a"
 SESSION_TTL_HOURS = "720"
 
+
+
 [[d1_databases]]
 binding = "DB"
 database_name = "worldmaker-db"

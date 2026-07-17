@@ -1,7 +1,7 @@
 (function(){
   "use strict";
-  const releasedIds=["V1-M03","V1-M04","V1-M05","V1-M06"];
-  const livePassedIds=["V1-M03","V1-M04","V1-M05","V1-M06"];
+  const releasedIds=["V1-M03","V1-M04","V1-M05","V1-M06","V1-M07"];
+  const livePassedIds=["V1-M03","V1-M04","V1-M05","V1-M06","V1-M07"];
   // Stable machine-readable audit markers used by the release workflow.
   // "V1-M03" "livePassed":true
   // "V1-M04" "livePassed":true

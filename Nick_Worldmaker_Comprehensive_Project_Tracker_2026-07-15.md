@@ -160,3 +160,8 @@ UX follow-up task:
 **M3 learner-content repair — Complete and human-approved on 16 July 2026.**
 
 **Nick's genuine M3 completion — APPROVED on 17 July 2026; M4 unlocked.**
+
+
+## M7 release — 17 July 2026
+
+V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: 29570600067.

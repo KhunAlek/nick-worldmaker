@@ -1,0 +1,23 @@
+{
+  "mission_id": "V1-M07",
+  "next_mission_id": "V1-M08",
+  "workflow_run": "29570600067",
+  "fixtures": {
+    "missing_evidence": "NEEDS_EVIDENCE",
+    "technical_failure": "NEEDS_FIX",
+    "wrong_ids": "REJECTED",
+    "suspicious": "IGNORED_NOT_APPROVED",
+    "no_selection": "REJECTED_BEFORE_SERVER",
+    "valid_wood": "ACCEPTED",
+    "valid_stone": "ACCEPTED",
+    "invalid_resource": "REJECTED",
+    "invalid_npc": "REJECTED",
+    "complete": "APPROVED"
+  },
+  "exact_next_unlock": true,
+  "no_later_unlock": true,
+  "real_family_unchanged": true,
+  "temporary_records_removed": true,
+  "temporary_access_revoked": true,
+  "unauthorized_after_cleanup": 401
+}
