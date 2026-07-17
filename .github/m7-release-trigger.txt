@@ -1,2 +1,3 @@
 Trigger the complete V1-M07 isolated release, promotion, production verification, and cleanup workflow.
 Rerun after stabilizing M3-M6 release audit markers.
+Rerun after accepting the complete M7 release evidence schema.
