@@ -165,3 +165,8 @@ UX follow-up task:
 ## M7 release — 17 July 2026
 
 V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: 29570600067.
+
+
+## M7 release — 17 July 2026
+
+V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: 29571404259.
