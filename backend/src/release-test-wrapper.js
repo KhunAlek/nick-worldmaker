@@ -7,7 +7,7 @@ const ORIGIN = "https://khunalek.github.io";
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const authorized = Boolean(env.RELEASE_TEST_TOKEN && request.headers.get("authorization") === `Bearer ${env.RELEASE_TEST_TOKEN}`);
+    const authorized = await isAuthorized(request, env);
 
     if (url.pathname === "/internal/release-test/views") {
       if (request.method !== "GET") return json({ error: "Method not allowed" }, 405);
@@ -41,6 +41,22 @@ export default {
     return cloneJsonResponse(await app.fetch(internalRequest, env, ctx));
   }
 };
+
+async function isAuthorized(request, env) {
+  const value = request.headers.get("authorization") || "";
+  if (!value.startsWith("Bearer ") || !env.RELEASE_TEST_FAMILY_ID) return false;
+  const token = value.slice(7);
+  const tokenHash = await sha256(token);
+  if (env.RELEASE_TEST_TOKEN && token === env.RELEASE_TEST_TOKEN) {
+    const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    await env.DB.prepare("INSERT OR IGNORE INTO sessions(id,family_id,role,token_hash,expires_at) VALUES(?,?,?,?,?)")
+      .bind(`release-test-${tokenHash.slice(0, 24)}`, env.RELEASE_TEST_FAMILY_ID, "release-test", tokenHash, expires).run();
+    return true;
+  }
+  const session = await env.DB.prepare("SELECT 1 ok FROM sessions WHERE family_id=? AND role='release-test' AND token_hash=? AND expires_at>?")
+    .bind(env.RELEASE_TEST_FAMILY_ID, tokenHash, new Date().toISOString()).first();
+  return Boolean(session?.ok);
+}
 
 async function fetchProgress(origin, env, ctx, role) {
   const result = await app.fetch(new Request(`${origin}/api/progress`, { headers: internalHeaders(env, role, false) }), env, ctx);
@@ -88,6 +104,11 @@ function runtimeOutcome(type) {
     invalid_npc:{accepted:false,npc:"Workspace.Baseplate",rejected:true,state_changed:false}
   };
   return map[type];
+}
+
+async function sha256(value) {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
 async function cloneJsonResponse(response) { return new Response(await response.text(), { status: response.status, headers: { "content-type":"application/json; charset=utf-8", "cache-control":"no-store" } }); }
