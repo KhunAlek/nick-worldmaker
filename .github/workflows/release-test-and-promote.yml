@@ -51,6 +51,8 @@ jobs:
         with:
           name: V1-M07-complete-release-${{ github.run_id }}
           path: |
+            release-runner-patch.log
+            release-runner-patched.sh
             family-seed.json
             readiness.json
             needs-evidence.json
