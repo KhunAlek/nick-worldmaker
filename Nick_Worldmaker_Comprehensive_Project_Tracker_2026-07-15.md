@@ -1,7 +1,7 @@
 # Nick // Worldmaker — Comprehensive Project Tracker
 
 **Tracker date:** 15 July 2026  
-**Last updated:** 16 July 2026  
+**Last updated:** 17 July 2026  
 **Status:** **15 July 2026 — Complete and formally closed.**  
 **Project owner:** Olga  
 **Technical operator:** Alex Bystrov  
@@ -9,9 +9,9 @@
 **Repository:** `KhunAlek/nick-worldmaker`  
 **Production website:** `https://khunalek.github.io/nick-worldmaker/`  
 **Production API:** `https://nick-worldmaker-api.abystrov66.workers.dev`  
-**Current learner state:** M1 and M2 approved; M3 is next and `NOT_SUBMITTED`.  
+**Current learner state:** M1, M2, and M3 approved; M4 is unlocked and is Nick's next genuine mission.  
 **Current release state:** M3–M6 released and live-passed; M7 is first unreleased.  
-**Current learner-content state:** M3 learner instructions repaired and human re-review completed; Nick may proceed with M3.
+**Current learner-content state:** M3 learner instructions repaired, human re-review passed, and Nick genuinely completed and received evaluator approval for M3.
 
 ---
 
@@ -41,7 +41,7 @@ All formal closure acceptance items were proven and retained in source-controlle
 - Frontend mission availability matches the release manifest.
 - Fresh isolated M3 negative fixture remained non-approved and unlocked nothing.
 - Fresh isolated M3 approved fixture unlocked exactly M4 and no later mission.
-- Nick's real progress was byte-for-byte unchanged: M1 and M2 approved, M3 `NOT_SUBMITTED`, no M4–M15 completion.
+- Nick's real progress was byte-for-byte unchanged during closure testing: M1 and M2 approved, M3 `NOT_SUBMITTED`, no M4–M15 completion.
 - Unauthorized internal access returned HTTP 401 with `Unauthorized`.
 - The D1 artifact was downloaded and inspected; it contains the actual 859,116-byte SQL export.
 
@@ -64,7 +64,7 @@ Follow-up repair and re-review:
 - It explicitly explains Edit mode, Rig Builder location and fallbacks, inserting and identifying a complete R15 rig, moving the complete Model in Explorer, renaming, checking Humanoid and HumanoidRootPart, setting PrimaryPart, removing only unwanted Scripts, duplication, safe placement, anchoring checks, home-marker creation, pre-Play checks, recovery, and minimal evidence submission.
 - Alex reopened the production M3 learner page and completed the requested human re-review.
 - **M3 learner-instruction re-review: PASSED.**
-- The learner-content blocker is closed. Nick may continue with M3.
+- The learner-content blocker was closed and Nick was cleared to start M3.
 
 ### Cleaned up
 
@@ -108,10 +108,48 @@ Resolution:
 - repair commit: `56c1f50bd27e862bb8564da0e00eb7402f9e7d27`;
 - affected production content: `V1-M03 — Add Two Settlers` learner lesson only;
 - re-review result: **PASS**;
-- Nick's database progress was not changed;
-- M3 remains his next genuine mission and `NOT_SUBMITTED` until he completes and submits it;
+- Nick's database progress was not changed by the repair;
 - no M4–M15 content, evaluator logic, acceptance tests, D1 data, release state, or July 15 closure workflow was changed;
 - no M7 release work was performed.
+
+## Genuine learner progress — 17 July 2026
+
+Nick completed `V1-M03 — Add Two Settlers` using his real Roblox Studio project and submitted his genuine evidence through the production website.
+
+Verified result:
+
+- production evaluator status: **APPROVED**;
+- M3 is now genuinely approved for Nick;
+- `V1-M04 — Select a Settler` unlocked as the exact next mission;
+- M5 and later missions were not marked completed;
+- this was learner work, not an isolated release-test fixture;
+- current learner progress is M1–M3 approved, with M4 next.
+
+### M3 lesson-quality observation
+
+Alex completed the mobile lesson-quality review on 17 July 2026 while Nick used the repaired lesson on his Windows 11 PC.
+
+Results:
+
+- 21 of 21 quality checks rated **Clear**;
+- automatic score: **100% — PASS**;
+- human verdict: **PASS WITH MINOR ISSUES**;
+- Nick asked what to do: **0 times**;
+- adult translation required: **No**;
+- adult Studio action required: **No**;
+- Nick's reaction: **Mostly comfortable**.
+
+Minor UX issue retained for follow-up:
+
+- Proof Test `V1-M03-T03` asks for excessive manual retyping of object property names and values;
+- this is repetitive clerical work rather than meaningful learning evidence;
+- the required proof should be simplified without weakening the canonical T03 acceptance meaning.
+
+UX follow-up task:
+
+- GitHub issue `#4 — Simplify V1-M03-T03 evidence collection`;
+- preferred replacement evidence: Explorer screenshot, Properties screenshot or guided checklist, and a short placement confirmation;
+- evaluator meaning, acceptance-test meaning, existing approval data, and later missions must remain unchanged.
 
 ---
 
@@ -120,3 +158,5 @@ Resolution:
 **15 July 2026 — Complete and formally closed.**
 
 **M3 learner-content repair — Complete and human-approved on 16 July 2026.**
+
+**Nick's genuine M3 completion — APPROVED on 17 July 2026; M4 unlocked.**
