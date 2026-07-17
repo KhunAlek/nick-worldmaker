@@ -1,0 +1,11 @@
+import fs from "node:fs";
+import vm from "node:vm";
+const source=fs.readFileSync("assets/js/mission-lesson-m08-walk-to-resource.js","utf8");
+const context={window:{}};vm.createContext(context);vm.runInContext(source,context);
+const mission=context.window.WORLDMAKER_LESSONS["V1-M08"];
+const expected=["V1-M08-T01","V1-M08-T02","V1-M08-T03","V1-M08-T04"];
+if(!mission)throw new Error("V1-M08 lesson missing");
+if(JSON.stringify(mission.tests.map(test=>test.id))!==JSON.stringify(expected))throw new Error("M8 canonical test IDs changed");
+for(const term of ["PathfindingService","Enum.PathStatus.Success","GetWaypoints","Enum.PathWaypointAction.Jump","MoveToFinished","Anchored","NEEDS_EVIDENCE","NEEDS_FIX"])if(!source.includes(term))throw new Error(`Missing required M8 topic: ${term}`);
+if(!source.includes("Do not add resource awards"))throw new Error("M8/M9 boundary missing");
+console.log("V1-M08 lesson contract PASS");
