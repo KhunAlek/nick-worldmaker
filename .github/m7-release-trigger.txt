@@ -8,3 +8,4 @@ Rerun with deterministic generated-runner diagnostics retained in the workflow a
 Rerun after preserving the generated runner inside scripts/ so its repository root remains correct.
 Rerun after adding idempotent M7 preflight and a three-observation production identity readiness barrier.
 Rerun with the complete standalone execution log retained for direct diagnosis.
+Rerun after making promotion idempotent following the earlier partial promotion commit.
