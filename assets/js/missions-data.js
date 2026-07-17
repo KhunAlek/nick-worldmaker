@@ -25,6 +25,7 @@ if(document.body.dataset.page==="mission"){
   document.write('<script src="assets/js/mission-lessons-m05.js"><\/script>');
   document.write('<script src="assets/js/mission-lessons-m06-m15.js"><\/script>');
   document.write('<script src="assets/js/mission-lesson-m07-safe-commands.js"><\/script>');
+  document.write('<script src="assets/js/mission-lesson-m08-walk-to-resource.js"><\/script>');
   document.write('<script src="assets/js/m03-evidence-simplification.js"><\/script>');
   document.write('<script src="assets/js/mission-runtime.js"><\/script>');
 }
