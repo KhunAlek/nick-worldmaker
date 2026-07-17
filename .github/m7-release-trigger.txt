@@ -3,3 +3,4 @@ Rerun after stabilizing M3-M6 release audit markers.
 Rerun after accepting the complete M7 release evidence schema.
 Rerun after stabilizing temporary token propagation.
 Run the final standalone release runner.
+Rerun after fixing cleanup working-directory drift and adding a three-observation Cloudflare readiness barrier.
