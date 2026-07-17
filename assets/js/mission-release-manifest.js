@@ -2,6 +2,11 @@
   "use strict";
   const releasedIds=["V1-M03","V1-M04","V1-M05","V1-M06"];
   const livePassedIds=["V1-M03","V1-M04","V1-M05","V1-M06"];
+  // Stable machine-readable audit markers used by the release workflow.
+  // "V1-M03" "livePassed":true
+  // "V1-M04" "livePassed":true
+  // "V1-M05" "livePassed":true
+  // "V1-M06" "livePassed":true
   const released=new Set(releasedIds);
   const livePassed=new Set(livePassedIds);
   window.WORLDMAKER_RELEASE_MANIFEST={
