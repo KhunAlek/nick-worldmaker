@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: 22
       - name: Run complete isolated M7 release
-        run: bash scripts/run-m7-release.sh
+        run: bash scripts/run-m7-release-stable.sh
       - name: Upload sanitized release evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,6 +52,7 @@ jobs:
           name: V1-M07-complete-release-${{ github.run_id }}
           path: |
             family-seed.json
+            readiness.json
             needs-evidence.json
             needs-fix.json
             wrong-ids.json
