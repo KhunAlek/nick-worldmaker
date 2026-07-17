@@ -26,6 +26,10 @@ if(document.body.dataset.page==="mission"){
   document.write('<script src="assets/js/mission-lessons-m06-m15.js"><\/script>');
   document.write('<script src="assets/js/mission-lesson-m07-safe-commands.js"><\/script>');
   document.write('<script src="assets/js/mission-lesson-m08-walk-to-resource.js"><\/script>');
+  document.write('<script src="assets/js/mission-lesson-m08-steps-a.js"><\/script>');
+  document.write('<script src="assets/js/mission-lesson-m08-steps-b.js"><\/script>');
+  document.write('<script src="assets/js/mission-lesson-m08-finish.js"><\/script>');
   document.write('<script src="assets/js/m03-evidence-simplification.js"><\/script>');
   document.write('<script src="assets/js/mission-runtime.js"><\/script>');
+  document.write('<script src="assets/js/mission-m08-beginner-render.js"><\/script>');
 }
