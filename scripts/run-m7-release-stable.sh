@@ -30,6 +30,11 @@ replacements = [
         'grep -Eq \'const releasedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"(,"V1-M07")?\\]\' assets/js/mission-release-manifest.js\ngrep -Eq \'const livePassedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"(,"V1-M07")?\\]\' assets/js/mission-release-manifest.js',
         'idempotent manifest preflight',
     ),
+    (
+        'node scripts/promote-mission.mjs "$MISSION_ID"',
+        'if grep -q \'const releasedIds=.*"V1-M07"\' assets/js/mission-release-manifest.js; then echo "V1-M07 is already promoted; preserving the existing release state."; else node scripts/promote-mission.mjs "$MISSION_ID"; fi',
+        'idempotent promotion',
+    ),
 ]
 for old, new, label in replacements:
     if source.count(old) != 1:
@@ -128,7 +133,8 @@ bash -n "$PATCHED"
 grep -q 'local original_dir="$PWD"' "$PATCHED"
 grep -q 'ready_streak=0' "$PATCHED"
 grep -q 'production_ready_streak=0' "$PATCHED"
+grep -q 'already promoted' "$PATCHED"
 grep -q 'test "$PWD" = "$ROOT"' "$PATCHED"
 
-echo "Patched runner syntax, idempotency, pilot readiness, production readiness, and cleanup guards verified." | tee -a "$PATCH_LOG"
+echo "Patched runner syntax, idempotent promotion, pilot readiness, production readiness, and cleanup guards verified." | tee -a "$PATCH_LOG"
 exec bash "$PATCHED"
