@@ -5,14 +5,19 @@
   const lessons = window.WORLDMAKER_LESSONS || {};
   const IMAGE_KEYS = new Set(["screenshot", "screenshots"]);
   const VIDEO_KEYS = new Set(["video", "videos"]);
+  const MAX_SOURCE_IMAGE_BYTES = 5 * 1024 * 1024;
+  const TARGET_IMAGE_BYTES = 105 * 1024;
+  const MAX_IMAGE_DIMENSION = 1600;
 
   const text = value => String(value == null ? "" : value);
+
   function element(tag, className, content) {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (content != null) node.textContent = text(content);
     return node;
   }
+
   const token = () => sessionStorage.getItem("worldmaker_token_learner");
 
   async function api(path, options = {}) {
@@ -34,6 +39,67 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("The browser could not prepare this screenshot.")), type, quality);
+    });
+  }
+
+  async function loadImage(file) {
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const image = new Image();
+      image.decoding = "async";
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("This image could not be opened. Try saving it as PNG or JPG."));
+        image.src = objectUrl;
+      });
+      return image;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
+  async function prepareScreenshot(file) {
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error("Use a PNG, JPG, or WebP screenshot.");
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) throw new Error("This screenshot is over 5 MB. Save a normal screenshot smaller than 5 MB and choose it again.");
+
+    const image = await loadImage(file);
+    let scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+    let bestBlob = null;
+
+    for (let resizeAttempt = 0; resizeAttempt < 5; resizeAttempt += 1) {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) throw new Error("The browser could not prepare this screenshot.");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      for (const quality of [0.86, 0.76, 0.66, 0.56, 0.46, 0.38]) {
+        const blob = await canvasToBlob(canvas, "image/webp", quality);
+        bestBlob = blob;
+        if (blob.size <= TARGET_IMAGE_BYTES) {
+          const safeName = file.name.replace(/\.[^.]+$/, "") + "-optimized.webp";
+          return {
+            name: safeName,
+            mime_type: "image/webp",
+            data_url: await fileAsDataUrl(blob),
+            original_bytes: file.size,
+            prepared_bytes: blob.size
+          };
+        }
+      }
+      scale *= 0.82;
+    }
+
+    if (!bestBlob) throw new Error("The screenshot could not be prepared.");
+    throw new Error("This screenshot contains too much detail to prepare safely. Capture only the Roblox Studio window and try again.");
   }
 
   function installUploadStyles() {
@@ -65,7 +131,7 @@
     const choose = element("label", "evidence-upload-button", "Choose screenshot");
     choose.htmlFor = input.id;
     const name = element("span", "evidence-upload-name", "No screenshot selected");
-    const note = element("p", "evidence-upload-note", "PNG, JPG, or WebP. Crop to about 120 KB or less.");
+    const note = element("p", "evidence-upload-note", "PNG, JPG, or WebP, up to 5 MB. The website will reduce the file size automatically.");
     row.append(choose, name);
     box.append(input, row, note);
     input.addEventListener("change", () => {
@@ -211,9 +277,9 @@
           if (IMAGE_KEYS.has(field.key)) {
             const screenshot = input.files[0];
             if (!screenshot) throw new Error("Choose a current screenshot.");
-            if (!/^image\/(png|jpeg|webp)$/.test(screenshot.type)) throw new Error("Use a PNG, JPG, or WebP screenshot.");
-            if (screenshot.size > 130000) throw new Error("Crop or resize the screenshot to about 120 KB or less.");
-            payload.screenshots = [{ name: screenshot.name, mime_type: screenshot.type, data_url: await fileAsDataUrl(screenshot) }];
+            error.textContent = "Optimizing the screenshot automatically…";
+            const prepared = await prepareScreenshot(screenshot);
+            payload.screenshots = [{ name: prepared.name, mime_type: prepared.mime_type, data_url: prepared.data_url }];
           } else if (VIDEO_KEYS.has(field.key)) {
             const evidence = input.value.trim();
             if (!evidence) throw new Error("Add the current video link and what it proves.");
