@@ -3,58 +3,43 @@ set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SOURCE="$ROOT/scripts/run-m7-release.sh"
-PATCHED="$(mktemp)"
-trap 'rm -f "$PATCHED"' EXIT
+PATCHED="$ROOT/release-runner-patched.sh"
+PATCH_LOG="$ROOT/release-runner-patch.log"
+rm -f "$PATCHED" "$PATCH_LOG"
 
-python - "$SOURCE" "$PATCHED" <<'PY'
+python - "$SOURCE" "$PATCHED" >"$PATCH_LOG" 2>&1 <<'PY'
 from pathlib import Path
 import sys
 
-source = Path(sys.argv[1]).read_text()
+source_path = Path(sys.argv[1])
+patched_path = Path(sys.argv[2])
+source = source_path.read_text()
 
-old_cleanup = '''cleanup() {
-  local exit_code=$?
-  set +e
-  cd "$ROOT/backend"'''
-new_cleanup = '''cleanup() {
-  local exit_code=$?
-  local original_dir="$PWD"
-  set +e
-  cd "$ROOT/backend"'''
-if old_cleanup not in source:
-    raise SystemExit("cleanup function marker changed; refusing an unverified release")
-source = source.replace(old_cleanup, new_cleanup, 1)
+replacements = [
+    (
+        'cleanup() {\n  local exit_code=$?\n  set +e\n  cd "$ROOT/backend"',
+        'cleanup() {\n  local exit_code=$?\n  local original_dir="$PWD"\n  set +e\n  cd "$ROOT/backend"',
+        'cleanup entry',
+    ),
+    (
+        '  CLEANED=1\n  set -e\n  return "$exit_code"\n}',
+        '  CLEANED=1\n  cd "$original_dir" || cd "$ROOT"\n  set -e\n  return "$exit_code"\n}',
+        'cleanup return',
+    ),
+]
+for old, new, label in replacements:
+    if source.count(old) != 1:
+        raise SystemExit(f'{label} marker count was {source.count(old)}, expected 1')
+    source = source.replace(old, new, 1)
 
-old_return = '''  CLEANED=1
-  set -e
-  return "$exit_code"
-}'''
-new_return = '''  CLEANED=1
-  cd "$original_dir" || cd "$ROOT"
-  set -e
-  return "$exit_code"
-}'''
-if old_return not in source:
-    raise SystemExit("cleanup return marker changed; refusing an unverified release")
-source = source.replace(old_return, new_return, 1)
-
-readiness_marker = '''sleep 35
-
-code="$(curl -sS -o unauthorized-before.json'''
-readiness = '''sleep 35
-
-# Require three consecutive authenticated observations of the same pilot family.
-# A single 200 can come from one Cloudflare edge while another still has stale
-# token or pilot configuration, so fixtures do not start until readiness is stable.
+old_line = '''code="$(curl -sS -o unauthorized-before.json -w '%{http_code}' -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"'''
+readiness = '''# Require three consecutive authenticated observations of the same pilot family.
+# This distinguishes Cloudflare propagation delay from a genuine endpoint failure.
 ready_streak=0
 last_status=""
 for readiness_attempt in $(seq 1 24); do
-  last_status="$(curl -sS -o readiness.json -w '%{http_code}' \
-    -H "Authorization: Bearer $RELEASE_TEST_TOKEN" \
-    "$API_URL/internal/release-test/views" || true)"
-  if [ "$last_status" = 200 ] && jq -e --arg mission "$MISSION_ID" \
-      '.learner.status == 200 and .parent.status == 200 and ([.learner.body.progress[] | select(.mission_id == $mission)] | length) == 1' \
-      readiness.json >/dev/null; then
+  last_status="$(curl -sS -o readiness.json -w '%{http_code}' -H "Authorization: Bearer $RELEASE_TEST_TOKEN" "$API_URL/internal/release-test/views" || true)"
+  if [ "$last_status" = 200 ] && jq -e --arg mission "$MISSION_ID" '.learner.status == 200 and .parent.status == 200 and ([.learner.body.progress[] | select(.mission_id == $mission)] | length) == 1' readiness.json >/dev/null; then
     ready_streak=$((ready_streak + 1))
     echo "Pilot readiness observation $ready_streak/3 succeeded."
     if [ "$ready_streak" -eq 3 ]; then break; fi
@@ -74,38 +59,38 @@ if [ "$ready_streak" -ne 3 ]; then
   exit 1
 fi
 
-code="$(curl -sS -o unauthorized-before.json'''
-if readiness_marker not in source:
-    raise SystemExit("readiness insertion marker changed; refusing an unverified release")
-source = source.replace(readiness_marker, readiness, 1)
+code="$(curl -sS -o unauthorized-before.json -w '%{http_code}' -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"'''
+if source.count(old_line) != 1:
+    raise SystemExit(f'readiness marker count was {source.count(old_line)}, expected 1')
+source = source.replace(old_line, readiness, 1)
 
-old_manual_cleanup = '''trap - ERR INT TERM
+old_cleanup_call = '''trap - ERR INT TERM
 cleanup
 
 # Confirm cleanup in D1 before promotion commit.
 cd backend'''
-new_manual_cleanup = '''trap - ERR INT TERM
+new_cleanup_call = '''trap - ERR INT TERM
 cleanup
 
-# Regression guard for run 29569402995: cleanup must not leave the caller in
-# backend/, otherwise the next `cd backend` resolves to backend/backend.
+# Regression guard for failed run 29569402995.
 test "$PWD" = "$ROOT"
 test -f "$ROOT/backend/wrangler.toml"
 
 # Confirm cleanup in D1 before promotion commit.
 cd backend'''
-if old_manual_cleanup not in source:
-    raise SystemExit("manual cleanup marker changed; refusing an unverified release")
-source = source.replace(old_manual_cleanup, new_manual_cleanup, 1)
+if source.count(old_cleanup_call) != 1:
+    raise SystemExit(f'manual-cleanup marker count was {source.count(old_cleanup_call)}, expected 1')
+source = source.replace(old_cleanup_call, new_cleanup_call, 1)
 
-Path(sys.argv[2]).write_text(source)
+patched_path.write_text(source)
+print('Patched runner created successfully.')
 PY
 
 chmod +x "$PATCHED"
 bash -n "$PATCHED"
-
 grep -q 'local original_dir="$PWD"' "$PATCHED"
 grep -q 'ready_streak=0' "$PATCHED"
 grep -q 'test "$PWD" = "$ROOT"' "$PATCHED"
 
+echo "Patched runner syntax and regression guards verified." | tee -a "$PATCH_LOG"
 exec bash "$PATCHED"
