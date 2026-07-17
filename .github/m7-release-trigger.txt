@@ -7,3 +7,4 @@ Rerun after fixing cleanup working-directory drift and adding a three-observatio
 Rerun with deterministic generated-runner diagnostics retained in the workflow artifact.
 Rerun after preserving the generated runner inside scripts/ so its repository root remains correct.
 Rerun after adding idempotent M7 preflight and a three-observation production identity readiness barrier.
+Rerun with the complete standalone execution log retained for direct diagnosis.
