@@ -11,9 +11,8 @@ python - "$SOURCE" "$PATCHED" >"$PATCH_LOG" 2>&1 <<'PY'
 from pathlib import Path
 import sys
 
-source_path = Path(sys.argv[1])
+source = Path(sys.argv[1]).read_text()
 patched_path = Path(sys.argv[2])
-source = source_path.read_text()
 
 replacements = [
     (
@@ -25,6 +24,11 @@ replacements = [
         '  CLEANED=1\n  set -e\n  return "$exit_code"\n}',
         '  CLEANED=1\n  cd "$original_dir" || cd "$ROOT"\n  set -e\n  return "$exit_code"\n}',
         'cleanup return',
+    ),
+    (
+        'grep -q \'const releasedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"\\]\' assets/js/mission-release-manifest.js\ngrep -q \'const livePassedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"\\]\' assets/js/mission-release-manifest.js',
+        'grep -Eq \'const releasedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"(,"V1-M07")?\\]\' assets/js/mission-release-manifest.js\ngrep -Eq \'const livePassedIds=\\["V1-M03","V1-M04","V1-M05","V1-M06"(,"V1-M07")?\\]\' assets/js/mission-release-manifest.js',
+        'idempotent manifest preflight',
     ),
 ]
 for old, new, label in replacements:
@@ -61,7 +65,7 @@ fi
 
 code="$(curl -sS -o unauthorized-before.json -w '%{http_code}' -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"'''
 if source.count(old_line) != 1:
-    raise SystemExit(f'readiness marker count was {source.count(old_line)}, expected 1')
+    raise SystemExit(f'pilot readiness marker count was {source.count(old_line)}, expected 1')
 source = source.replace(old_line, readiness, 1)
 
 old_cleanup_call = '''trap - ERR INT TERM
@@ -82,6 +86,39 @@ if source.count(old_cleanup_call) != 1:
     raise SystemExit(f'manual-cleanup marker count was {source.count(old_cleanup_call)}, expected 1')
 source = source.replace(old_cleanup_call, new_cleanup_call, 1)
 
+old_health = '''sleep 20
+
+curl --fail-with-body -sS "$API_URL/health" > health.json
+jq -e --arg version "$PROMOTION_COMMIT" --arg hash "$SOURCE_HASH" '.ok == true and .entrypoint == "production" and .source_version == $version and .source_sha256 == $hash' health.json'''
+new_health = '''# Require three consecutive production identity observations. A plain health 200
+# without production metadata is treated as propagation delay, not success.
+production_ready_streak=0
+production_last_status=""
+for production_attempt in $(seq 1 30); do
+  production_last_status="$(curl -sS -o health.json -w '%{http_code}' "$API_URL/health" || true)"
+  if [ "$production_last_status" = 200 ] && jq -e --arg version "$PROMOTION_COMMIT" --arg hash "$SOURCE_HASH" '.ok == true and .entrypoint == "production" and .source_version == $version and .source_sha256 == $hash' health.json >/dev/null; then
+    production_ready_streak=$((production_ready_streak + 1))
+    echo "Production identity observation $production_ready_streak/3 succeeded."
+    if [ "$production_ready_streak" -eq 3 ]; then break; fi
+  elif [ "$production_last_status" = 200 ] || [ "$production_last_status" = 404 ] || [ "$production_last_status" = 500 ]; then
+    echo "Production deployment propagation pending: HTTP $production_last_status; resetting readiness streak."
+    production_ready_streak=0
+  else
+    echo "Genuine production health failure: HTTP $production_last_status" >&2
+    cat health.json >&2 || true
+    exit 1
+  fi
+  sleep 5
+done
+if [ "$production_ready_streak" -ne 3 ]; then
+  echo "Production identity never became consistently observable." >&2
+  cat health.json >&2 || true
+  exit 1
+fi'''
+if source.count(old_health) != 1:
+    raise SystemExit(f'production health marker count was {source.count(old_health)}, expected 1')
+source = source.replace(old_health, new_health, 1)
+
 patched_path.write_text(source)
 print('Patched runner created successfully.')
 PY
@@ -90,7 +127,8 @@ chmod +x "$PATCHED"
 bash -n "$PATCHED"
 grep -q 'local original_dir="$PWD"' "$PATCHED"
 grep -q 'ready_streak=0' "$PATCHED"
+grep -q 'production_ready_streak=0' "$PATCHED"
 grep -q 'test "$PWD" = "$ROOT"' "$PATCHED"
 
-echo "Patched runner syntax, repository root, and regression guards verified." | tee -a "$PATCH_LOG"
+echo "Patched runner syntax, idempotency, pilot readiness, production readiness, and cleanup guards verified." | tee -a "$PATCH_LOG"
 exec bash "$PATCHED"
