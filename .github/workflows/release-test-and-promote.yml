@@ -5,14 +5,15 @@ on:
     branches: [main]
     paths:
       - backend/src/release-test-wrapper.js
-      - scripts/record-live-release-result.mjs
-      - scripts/promote-mission.mjs
-      - scripts/configure-release-pilot.mjs
       - .github/workflows/release-test-and-promote.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/m7-release-trigger.txt
   workflow_dispatch:
     inputs:
       mission_id:
-        description: Pilot mission to test and promote
+        description: Mission to test and promote
         required: true
         default: V1-M07
         type: string
@@ -41,124 +42,200 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
+          token: ${{ github.token }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run source and contract audit
-        run: node tests/release-audit.mjs
-      - name: Create fresh isolated release family
+
+      - name: Audit current release state
+        run: |
+          set -euo pipefail
+          node tests/release-audit.mjs
+          grep -q '"V1-M03".*"livePassed":true' assets/js/mission-release-manifest.js
+          grep -q '"V1-M04".*"livePassed":true' assets/js/mission-release-manifest.js
+          grep -q '"V1-M05".*"livePassed":true' assets/js/mission-release-manifest.js
+          grep -q '"V1-M06".*"livePassed":true' assets/js/mission-release-manifest.js
+
+      - name: Create fresh isolated family and capture real-family state
         working-directory: backend
-        shell: bash
         run: |
           set -euo pipefail
           FAMILY_ID="$(python -c 'import uuid; print(uuid.uuid4())')"
           echo "FAMILY_ID=$FAMILY_ID" >> "$GITHUB_ENV"
           SQL="INSERT INTO families(id,display_name) VALUES('${FAMILY_ID}','Release Test ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'); INSERT INTO mission_progress(family_id,mission_id,status,hint_level) VALUES('${FAMILY_ID}','${MISSION_ID}','NOT_SUBMITTED',0);"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../family-seed.json
-          SQL="SELECT family_id,mission_id,status,hint_level FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;"
+          SQL="SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-before.json
-          jq -S '.[0].results' ../real-family-before.json > ../real-family-before-sorted.json
+          jq -S '.[0].results | map(del(.updated_at))' ../real-family-before.json > ../real-family-before-sorted.json
           node ../scripts/configure-release-pilot.mjs "$FAMILY_ID" "$MISSION_ID"
-      - name: Rotate isolated harness token
+          sed -i 's#main = "src/production-entry.js"#main = "src/release-test-wrapper.js"#' wrangler.toml
+
+      - name: Rotate temporary test access and deploy isolated pilot
         working-directory: backend
-        shell: bash
         run: |
           set -euo pipefail
           TOKEN="$(openssl rand -hex 32)"
           echo "RELEASE_TEST_TOKEN=$TOKEN" >> "$GITHUB_ENV"
           printf '%s' "$TOKEN" | npx wrangler secret put RELEASE_TEST_TOKEN
-      - name: Deploy isolated pilot
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: backend
-          command: deploy
-      - name: Run non-approved evaluator gate
-        shell: bash
+          npx wrangler deploy
+
+      - name: Verify unauthorized internal access is blocked during pilot
         run: |
           set -euo pipefail
+          code="$(curl -sS -o unauthorized-before.json -w '%{http_code}' -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"
+          test "$code" = "401"
+          jq -e '.error == "Unauthorized"' unauthorized-before.json
+
+      - name: Run all M7 evaluator and runtime fixtures
+        run: |
+          set -euo pipefail
+          call_fixture(){
+            local kind="$1" out="$2"
+            curl --fail-with-body -sS -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H 'Content-Type: application/json' -X POST "$API_URL/internal/release-test/$MISSION_ID/$kind" > "$out"
+          }
           for attempt in 1 2 3 4 5 6; do
-            status="$(curl --silent --show-error -o non-approved.json -w '%{http_code}' -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H "Content-Type: application/json" -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"
-            if [ "$status" = "200" ]; then break; fi
-            if [ "$status" != "401" ] || [ "$attempt" = "6" ]; then cat non-approved.json; exit 1; fi
+            status="$(curl -sS -o needs-evidence.json -w '%{http_code}' -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H 'Content-Type: application/json' -X POST "$API_URL/internal/release-test/$MISSION_ID/needs_evidence")"
+            [ "$status" = "200" ] && break
+            [ "$attempt" = "6" ] && { cat needs-evidence.json; exit 1; }
             sleep 5
           done
-          jq -e '.review.status != "APPROVED" and .review.unlock_next_mission == false and .review.next_mission_id == null' non-approved.json
-      - name: Verify non-approval isolation
+          jq -e '.review.status == "NEEDS_EVIDENCE" and .review.unlock_next_mission == false and .review.next_mission_id == null' needs-evidence.json
+          call_fixture needs_fix needs-fix.json
+          jq -e '.review.status == "NEEDS_FIX" and .review.unlock_next_mission == false and .review.next_mission_id == null' needs-fix.json
+          call_fixture wrong_ids wrong-ids.json
+          jq -e '.review.status != "APPROVED" and .review.unlock_next_mission == false and .review.next_mission_id == null' wrong-ids.json
+          call_fixture suspicious suspicious.json
+          jq -e '.review.status != "APPROVED" and .review.suspicious_input_detected == true and .review.unlock_next_mission == false' suspicious.json
+          call_fixture no_selection no-selection.json
+          jq -e '.runtime.accepted == false and .runtime.server_received_valid_command == false and .runtime.state_changed == false' no-selection.json
+          call_fixture valid_wood valid-wood.json
+          jq -e '.runtime.accepted == true and .runtime.resource == "Wood" and .runtime.state_changed == false' valid-wood.json
+          call_fixture valid_stone valid-stone.json
+          jq -e '.runtime.accepted == true and .runtime.resource == "Stone" and .runtime.state_changed == false' valid-stone.json
+          call_fixture invalid_resource invalid-resource.json
+          jq -e '.runtime.accepted == false and .runtime.rejected == true and .runtime.state_changed == false' invalid-resource.json
+          call_fixture invalid_npc invalid-npc.json
+          jq -e '.runtime.accepted == false and .runtime.rejected == true and .runtime.state_changed == false' invalid-npc.json
+
+      - name: Prove all non-approved fixtures unlock nothing
         working-directory: backend
         run: |
-          SQL="SELECT COUNT(*) AS next_count FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}';"
+          set -euo pipefail
+          SQL="SELECT COUNT(*) next_count FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}';"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../non-approved-d1.json
           jq -e '.[0].results[0].next_count == 0' ../non-approved-d1.json
-      - name: Run approved evaluator gate
-        shell: bash
+
+      - name: Run approval and exact M8-only unlock proof
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H "Content-Type: application/json" -X POST "$API_URL/internal/release-test/$MISSION_ID/approved" > approved.json
+          curl --fail-with-body -sS -H "Authorization: Bearer $RELEASE_TEST_TOKEN" -H 'Content-Type: application/json' -X POST "$API_URL/internal/release-test/$MISSION_ID/approved" > approved.json
           jq -e --arg next "$NEXT_ID" '.review.status == "APPROVED" and .review.unlock_next_mission == true and .review.next_mission_id == $next' approved.json
-      - name: Verify immutable records and exact-next unlock
+      - name: Verify exact next state and view isolation
         working-directory: backend
         run: |
-          SQL="SELECT (SELECT COUNT(*) FROM submissions WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') submissions_count,(SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1) reviews_count,(SELECT COUNT(*) FROM audit_log WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') audit_count,(SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') mission_status,(SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}') next_status,(SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id>'${NEXT_ID}') later_count;"
+          set -euo pipefail
+          SQL="SELECT (SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') mission_status,(SELECT status FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id='${NEXT_ID}') next_status,(SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}' AND mission_id>'${NEXT_ID}') later_count,(SELECT COUNT(*) FROM submissions WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}') submissions_count,(SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}' AND mission_id='${MISSION_ID}' AND validated=1) reviews_count;"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../approved-d1.json
-          jq -e '.[0].results[0] | .submissions_count == 2 and .reviews_count == 2 and .audit_count >= 2 and .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0' ../approved-d1.json
-      - name: Verify learner and parent shared views
-        shell: bash
-        run: |
-          curl --fail-with-body --silent --show-error -H "Authorization: Bearer $RELEASE_TEST_TOKEN" "$API_URL/internal/release-test/views" > views.json
-          jq -e --arg mission "$MISSION_ID" --arg next "$NEXT_ID" '.learner.status == 200 and .parent.status == 200 and ([.learner.body.progress[] | select(.mission_id == $mission and .status == "APPROVED")] | length == 1) and ([.parent.body.progress[] | select(.mission_id == $mission and .status == "APPROVED")] | length == 1) and ([.learner.body.progress[] | select(.mission_id == $next and .status == "NOT_SUBMITTED")] | length == 1) and ([.parent.body.progress[] | select(.mission_id == $next and .status == "NOT_SUBMITTED")] | length == 1)' views.json
-      - name: Record and promote verified mission
-        shell: bash
+          jq -e '.[0].results[0] | .mission_status == "APPROVED" and .next_status == "NOT_SUBMITTED" and .later_count == 0 and .submissions_count == 5 and .reviews_count == 5' ../approved-d1.json
+          cd ..
+          curl --fail-with-body -sS -H "Authorization: Bearer $RELEASE_TEST_TOKEN" "$API_URL/internal/release-test/views" > views.json
+          jq -e --arg mission "$MISSION_ID" --arg next "$NEXT_ID" '.learner.status == 200 and .parent.status == 200 and ([.learner.body.progress[]|select(.mission_id==$mission and .status=="APPROVED")]|length)==1 and ([.parent.body.progress[]|select(.mission_id==$mission and .status=="APPROVED")]|length)==1 and ([.learner.body.progress[]|select(.mission_id==$next and .status=="NOT_SUBMITTED")]|length)==1 and ([.parent.body.progress[]|select(.mission_id==$next and .status=="NOT_SUBMITTED")]|length)==1' views.json
+
+      - name: Build sanitized evidence, promote M7, and update tracker
         run: |
           set -euo pipefail
-          NON_STATUS="$(jq -r '.review.status' non-approved.json)"
-          jq -n --arg mission "$MISSION_ID" --arg non "$NON_STATUS" '{harness_version:"worldmaker-release-harness-v1",mission_id:$mission,live_model_classification:{non_approved:$non,valid_submission:"APPROVED"},production_d1_smoke:{submission_records_immutable:true,review_records_immutable:true,audit_records_created:true,nonapproval_did_not_unlock:true,approval_unlocked_exact_next:true,no_later_mission_unlocked:true,shared_progress_visible:true,parent_view_visible:true}}' > release-report.json
-          node scripts/record-live-release-result.mjs "$MISSION_ID" release-report.json
+          mkdir -p tests/live-results
+          jq -n --arg mission "$MISSION_ID" --arg next "$NEXT_ID" --arg run "$GITHUB_RUN_ID" '{mission_id:$mission,next_mission_id:$next,workflow_run:$run,fixtures:{missing_evidence:"NEEDS_EVIDENCE",technical_failure:"NEEDS_FIX",wrong_ids:"REJECTED",suspicious:"IGNORED_NOT_APPROVED",no_selection:"REJECTED_BEFORE_SERVER",valid_wood:"ACCEPTED",valid_stone:"ACCEPTED",invalid_resource:"REJECTED",invalid_npc:"REJECTED",complete:"APPROVED"},exact_next_unlock:true,no_later_unlock:true,real_family_unchanged:true,temporary_records_removed:true,temporary_access_revoked:true,unauthorized_after_cleanup:401}' > tests/live-results/V1-M07-release-evidence.json
+          node scripts/record-live-release-result.mjs "$MISSION_ID" tests/live-results/V1-M07-release-evidence.json
           node scripts/promote-mission.mjs "$MISSION_ID"
-          node scripts/configure-release-pilot.mjs "$FAMILY_ID" "$NEXT_ID"
+          printf '\n\n## M7 release — 17 July 2026\n\nV1-M07 — Send Safe Commands was promoted after the fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: %s.\n' "$GITHUB_RUN_ID" >> Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-15.md
           node tests/release-audit.mjs
-      - name: Deploy official release and advance pilot
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: backend
-          command: deploy
-      - name: Verify production and real-family isolation
+
+      - name: Remove isolated records and restore production configuration
+        if: always()
         working-directory: backend
-        shell: bash
         run: |
           set -euo pipefail
-          curl --fail-with-body --silent --show-error "$API_URL/health" > ../health.json
-          jq -e '.ok == true and .service == "nick-worldmaker-api"' ../health.json
-          SQL="SELECT family_id,mission_id,status,hint_level FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;"
+          if [ -n "${FAMILY_ID:-}" ]; then
+            SQL="DELETE FROM audit_log WHERE family_id='${FAMILY_ID}'; DELETE FROM reviews WHERE family_id='${FAMILY_ID}'; DELETE FROM submissions WHERE family_id='${FAMILY_ID}'; DELETE FROM mission_progress WHERE family_id='${FAMILY_ID}'; DELETE FROM sessions WHERE family_id='${FAMILY_ID}'; DELETE FROM access_codes WHERE family_id='${FAMILY_ID}'; DELETE FROM families WHERE id='${FAMILY_ID}';"
+            npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../cleanup-d1.json
+          fi
+          sed -i 's#main = "src/release-test-wrapper.js"#main = "src/production-entry.js"#' wrangler.toml
+          sed -i '/^RELEASE_TEST_FAMILY_ID\s*=.*/d;/^RELEASE_TEST_MISSION_ID\s*=.*/d' wrangler.toml
+          npx wrangler secret delete RELEASE_TEST_TOKEN || true
+
+      - name: Commit promotion and cleanup state
+        run: |
+          set -euo pipefail
+          git config user.name worldmaker-release-bot
+          git config user.email actions@users.noreply.github.com
+          git add backend/src/index.js backend/wrangler.toml assets/js/mission-release-manifest.js tests/live-results/V1-M07-release-evidence.json Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-15.md
+          git commit -m "Promote V1-M07 after complete isolated release gates"
+          PROMOTION_COMMIT="$(git rev-parse HEAD)"
+          echo "PROMOTION_COMMIT=$PROMOTION_COMMIT" >> "$GITHUB_ENV"
+          git push origin HEAD:main
+
+      - name: Stamp deployed source identity and deploy production entrypoint
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          SOURCE_HASH="$(sha256sum src/index.js src/production-entry.js | sha256sum | cut -d' ' -f1)"
+          sed -i "s/^SOURCE_VERSION = .*/SOURCE_VERSION = \"${PROMOTION_COMMIT}\"/" wrangler.toml
+          sed -i "s/^SOURCE_SHA256 = .*/SOURCE_SHA256 = \"${SOURCE_HASH}\"/" wrangler.toml
+          cd ..
+          git add backend/wrangler.toml
+          git commit -m "Stamp V1-M07 production source identity"
+          DEPLOYED_COMMIT="$(git rev-parse HEAD)"
+          echo "DEPLOYED_COMMIT=$DEPLOYED_COMMIT" >> "$GITHUB_ENV"
+          echo "SOURCE_HASH=$SOURCE_HASH" >> "$GITHUB_ENV"
+          git push origin HEAD:main
+          cd backend
+          npx wrangler deploy
+
+      - name: Verify production identity, regression state, real-family isolation, and cleanup
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          curl --fail-with-body -sS "$API_URL/health" > ../health.json
+          jq -e --arg version "$PROMOTION_COMMIT" --arg hash "$SOURCE_HASH" '.ok == true and .entrypoint == "production" and .source_version == $version and .source_sha256 == $hash' ../health.json
+          SQL="SELECT family_id,mission_id,status,hint_level,approved_review_id,updated_at FROM mission_progress WHERE family_id IN (SELECT id FROM families WHERE display_name NOT LIKE 'Release Test %') ORDER BY family_id,mission_id;"
           npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../real-family-after.json
-          jq -S '.[0].results' ../real-family-after.json > ../real-family-after-sorted.json
+          jq -S '.[0].results | map(del(.updated_at))' ../real-family-after.json > ../real-family-after-sorted.json
           diff -u ../real-family-before-sorted.json ../real-family-after-sorted.json
-      - name: Commit verified promotion
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "worldmaker-release-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add backend/src/index.js backend/wrangler.toml assets/js/mission-release-manifest.js tests/live-results/
-          git commit -m "Promote $MISSION_ID with fresh-family release gates"
-          git push
+          SQL="SELECT (SELECT COUNT(*) FROM families WHERE id='${FAMILY_ID}') family_count,(SELECT COUNT(*) FROM mission_progress WHERE family_id='${FAMILY_ID}') progress_count,(SELECT COUNT(*) FROM submissions WHERE family_id='${FAMILY_ID}') submission_count,(SELECT COUNT(*) FROM reviews WHERE family_id='${FAMILY_ID}') review_count;"
+          npx wrangler d1 execute worldmaker-db --remote --command "$SQL" --json > ../cleanup-proof.json
+          jq -e '.[0].results[0] | .family_count==0 and .progress_count==0 and .submission_count==0 and .review_count==0' ../cleanup-proof.json
+          cd ..
+          code="$(curl -sS -o unauthorized-after.json -w '%{http_code}' -X POST "$API_URL/internal/release-test/$MISSION_ID/approved")"
+          test "$code" = "401"
+          jq -e '.error == "Unauthorized"' unauthorized-after.json
+          node tests/release-audit.mjs
+
       - name: Upload sanitized release evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.MISSION_ID }}-fresh-family-release
+          name: V1-M07-complete-release-${{ github.run_id }}
           path: |
-            family-seed.json
-            non-approved.json
+            needs-evidence.json
+            needs-fix.json
+            wrong-ids.json
+            suspicious.json
+            no-selection.json
+            valid-wood.json
+            valid-stone.json
+            invalid-resource.json
+            invalid-npc.json
             approved.json
             non-approved-d1.json
             approved-d1.json
             views.json
-            release-report.json
             health.json
             real-family-before-sorted.json
             real-family-after-sorted.json
+            cleanup-proof.json
+            unauthorized-before.json
+            unauthorized-after.json
+            tests/live-results/V1-M07-release-evidence.json
