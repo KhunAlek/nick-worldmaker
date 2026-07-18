@@ -1,0 +1,327 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "nick-worldmaker-state-v1",
+  "record_status": "active",
+  "as_of": "2026-07-18T08:55:18+07:00",
+  "repository": {
+    "full_name": "KhunAlek/nick-worldmaker",
+    "inspected_branch": "main",
+    "inspection_commit": "5ddd4c2"
+  },
+  "authority": {
+    "changing_state_authority": "data/state/Nick_Worldmaker_State_Record_v1.json after schema validation and evidence reconciliation; activation takes effect only when the adopting pull request is merged into main",
+    "permanent_rules_location": "docs/governance/permanent/ and future AGENTS.md; not duplicated here",
+    "conflict_policy": "Use evidence only within its proper state dimension; preserve older claims as history and mark same-scope conflicts unresolved instead of selecting by date alone."
+  },
+  "no_side_effects": {
+    "declarative_only": true,
+    "releases": false,
+    "unlocks": false,
+    "deploys": false,
+    "advances_learner": false,
+    "modifies_repository": false
+  },
+  "current_state": {
+    "learner_summary": {
+      "statement": "Nick has genuine validated approval for M1–M3; M4 is his exact next genuine mission, and no later learner completion is supported.",
+      "evidence": [
+        {"source_id": "main-tracker-2026-07-15", "scope": "learner", "claim": "Records genuine M1–M3 approval and M4 as Nick's next mission."},
+        {"source_id": "july18-tracker", "scope": "learner", "claim": "Confirms M1–M3 approved, M4 next, and no learner progress change during M8 preparation."}
+      ]
+    },
+    "release_summary": {
+      "statement": "At inspected main commit 5ddd4c2, M3–M7 are released and live-passed; M8 is the first mission not released from main.",
+      "evidence": [
+        {"source_id": "main-release-manifest", "scope": "release", "claim": "Lists M3–M7 as released and M8–M15 as unreleased."},
+        {"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists M3–M7 as live-passed."},
+        {"source_id": "m7-final-evidence", "scope": "live_pass", "claim": "Retains M7 workflow 29571404259 and successful isolation, unlock, and cleanup results."}
+      ]
+    },
+    "active_preparation": {
+      "status": "human_approved",
+      "mission_id": "V1-M08",
+      "branch": "agent/prepare-v1-m08-saturday",
+      "pull_request": 6,
+      "merged_to_inspected_main": false,
+      "evidence": [
+        {"source_id": "july18-tracker", "scope": "preparation", "claim": "Records M8 preparation on the named branch and draft PR #6."},
+        {"source_id": "july18-tracker", "scope": "human_usability", "claim": "Records human beginner-usability approval of the corrected M8 candidate."},
+        {"source_id": "july18-tracker", "scope": "implementation", "claim": "Explicitly records M8 as not released and the release manifest as unpromoted."}
+      ]
+    },
+    "missions": [
+      {
+        "mission_id": "V1-M01",
+        "learner_progress": {"status": "learner_approved", "note": "Genuinely approved for Nick.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "learner", "claim": "Current tracker includes M1 among Nick's genuine approvals."}]},
+        "unlock": {"status": "consumed", "note": "Earlier sequential unlock already used; M1 is complete.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "unlock", "claim": "Current tracker places Nick beyond M1 with M1 approved."}]},
+        "implementation": {"status": "unknown", "note": "Current implementation classification was not independently normalized for M1.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "Historical success exists but no current test classification was selected for this baseline.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No exact current human-review evidence was selected for M1.", "evidence": []},
+        "release": {"status": "unknown", "note": "The inspected M3–M15 release manifest does not classify M1.", "evidence": []},
+        "live_pass": {"status": "unknown", "note": "The inspected M3–M15 live-pass manifest does not classify M1.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M02",
+        "learner_progress": {"status": "learner_approved", "note": "Genuinely approved for Nick.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "learner", "claim": "Current tracker includes M2 among Nick's genuine approvals."}]},
+        "unlock": {"status": "consumed", "note": "Earlier sequential unlock already used; M2 is complete.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "unlock", "claim": "Current tracker places Nick beyond M2 with M2 approved."}]},
+        "implementation": {"status": "unknown", "note": "Current implementation classification was not independently normalized for M2.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "Historical success exists but no current test classification was selected for this baseline.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No exact current human-review evidence was selected for M2.", "evidence": []},
+        "release": {"status": "unknown", "note": "The inspected M3–M15 release manifest does not classify M2.", "evidence": []},
+        "live_pass": {"status": "unknown", "note": "The inspected M3–M15 live-pass manifest does not classify M2.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M03",
+        "learner_progress": {"status": "learner_approved", "note": "Genuine production evaluator approval reported on 17 July.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "learner", "claim": "Records Nick's genuine M3 work, production APPROVED result, and distinguishes it from fixtures."}]},
+        "unlock": {"status": "consumed", "note": "M3's approval produced the exact M4 unlock.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "unlock", "claim": "Records exact M4 unlock after genuine M3 approval and no later completion."}]},
+        "implementation": {"status": "merged", "note": "M3 implementation exists on inspected main.", "evidence": [{"source_id": "inspection-commit", "scope": "implementation", "claim": "Inspected main contains M3 lesson, runtime, evaluator, and release sources."}]},
+        "technical_test": {"status": "tested", "note": "Retained release and closure evidence supports technical testing.", "evidence": [{"source_id": "main-release-manifest", "scope": "technical_test", "claim": "Manifest records required source and release-test gates for M3."}]},
+        "human_usability": {"status": "human_approved", "note": "Repaired M3 lesson passed human re-review.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "human_usability", "claim": "Records repaired M3 lesson and passed human beginner-usability re-review."}]},
+        "release": {"status": "released", "note": "Released on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "Lists V1-M03 in released_ids."}]},
+        "live_pass": {"status": "live_passed", "note": "Live-passed on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists V1-M03 in live_passed_ids."}]}
+      },
+      {
+        "mission_id": "V1-M04",
+        "learner_progress": {"status": "not_started", "note": "Exact next genuine mission; no completion inferred.", "evidence": []},
+        "unlock": {"status": "unlocked", "note": "Exact next mission unlocked by genuine M3 approval.", "evidence": [{"source_id": "main-tracker-2026-07-15", "scope": "unlock", "claim": "Records M4 as the exact next genuine mission after M3 approval."}]},
+        "implementation": {"status": "merged", "note": "M4 implementation exists on inspected main.", "evidence": [{"source_id": "inspection-commit", "scope": "implementation", "claim": "Inspected main contains M4 learner and runtime sources."}]},
+        "technical_test": {"status": "tested", "note": "Retained release tests exist.", "evidence": [{"source_id": "main-release-manifest", "scope": "technical_test", "claim": "Manifest records required release-test gates for M4."}]},
+        "human_usability": {"status": "unknown", "note": "No exact current human-review evidence was selected for M4.", "evidence": []},
+        "release": {"status": "released", "note": "Released on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "Lists V1-M04 in released_ids."}]},
+        "live_pass": {"status": "live_passed", "note": "Live-passed on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists V1-M04 in live_passed_ids."}]}
+      },
+      {
+        "mission_id": "V1-M05",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine M4 approval supports unlocking M5.", "evidence": []},
+        "implementation": {"status": "merged", "note": "M5 implementation exists on inspected main.", "evidence": [{"source_id": "inspection-commit", "scope": "implementation", "claim": "Inspected main contains M5 learner and runtime sources."}]},
+        "technical_test": {"status": "tested", "note": "Retained release tests exist.", "evidence": [{"source_id": "main-release-manifest", "scope": "technical_test", "claim": "Manifest records required release-test gates for M5."}]},
+        "human_usability": {"status": "unknown", "note": "No exact current human-review evidence was selected for M5.", "evidence": []},
+        "release": {"status": "released", "note": "Released on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "Lists V1-M05 in released_ids."}]},
+        "live_pass": {"status": "live_passed", "note": "Live-passed on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists V1-M05 in live_passed_ids."}]}
+      },
+      {
+        "mission_id": "V1-M06",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports unlocking M6.", "evidence": []},
+        "implementation": {"status": "merged", "note": "M6 implementation exists on inspected main.", "evidence": [{"source_id": "inspection-commit", "scope": "implementation", "claim": "Inspected main contains M6 learner and runtime sources."}]},
+        "technical_test": {"status": "tested", "note": "Retained release tests exist.", "evidence": [{"source_id": "main-release-manifest", "scope": "technical_test", "claim": "Manifest records required release-test gates for M6."}]},
+        "human_usability": {"status": "unknown", "note": "No exact current human-review evidence was selected for M6.", "evidence": []},
+        "release": {"status": "released", "note": "Released on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "Lists V1-M06 in released_ids."}]},
+        "live_pass": {"status": "live_passed", "note": "Live-passed on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists V1-M06 in live_passed_ids."}]}
+      },
+      {
+        "mission_id": "V1-M07",
+        "learner_progress": {"status": "not_started", "note": "Release testing does not count as Nick's completion.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports unlocking M7 for Nick.", "evidence": []},
+        "implementation": {"status": "merged", "note": "M7 implementation exists on inspected main.", "evidence": [{"source_id": "inspection-commit", "scope": "implementation", "claim": "Inspected main contains M7 lesson, runtime, harness, and evidence."}]},
+        "technical_test": {"status": "tested", "note": "Final evidence-bearing release workflow passed.", "evidence": [{"source_id": "m7-final-evidence", "scope": "technical_test", "claim": "Records M7 fixture matrix and successful final workflow 29571404259."}]},
+        "human_usability": {"status": "unknown", "note": "No retained human-review artifact was selected as current authority in this baseline.", "evidence": []},
+        "release": {"status": "released", "note": "Released on inspected main.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "Lists V1-M07 in released_ids."}]},
+        "live_pass": {"status": "live_passed", "note": "Live-passed by final retained workflow.", "evidence": [{"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists V1-M07 in live_passed_ids."}, {"source_id": "m7-final-evidence", "scope": "live_pass", "claim": "Records final M7 workflow 29571404259, exact-next fixture proof, real-family protection, and cleanup."}]}
+      },
+      {
+        "mission_id": "V1-M08",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "M4, not M8, is Nick's exact next mission.", "evidence": []},
+        "implementation": {"status": "prepared", "note": "Prepared outside inspected main on the branch/PR reported by the July 18 tracker.", "evidence": [{"source_id": "july18-tracker", "scope": "implementation", "claim": "Records completed M8 candidate preparation on branch agent/prepare-v1-m08-saturday and draft PR #6."}]},
+        "technical_test": {"status": "tested", "note": "Candidate tests passed outside inspected main according to supplied tracker.", "evidence": [{"source_id": "july18-tracker", "scope": "technical_test", "claim": "Records automated lesson, registry, evidence, rendering, and M8/M9-boundary checks as passed."}]},
+        "human_usability": {"status": "human_approved", "note": "Corrected candidate passed human beginner-usability review; scope is lesson usability only.", "evidence": [{"source_id": "july18-tracker", "scope": "human_usability", "claim": "Records Alex's passed human review of the corrected M8 learner lesson."}]},
+        "release": {"status": "not_started", "note": "Not released from inspected main; independent production gates remain pending.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed; production release gates were not run.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M09",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M9 unlock.", "evidence": []},
+        "implementation": {"status": "not_started", "note": "July 18 tracker explicitly says M9 was not started.", "evidence": []},
+        "technical_test": {"status": "not_started", "note": "No M9 candidate test claim is made.", "evidence": []},
+        "human_usability": {"status": "not_started", "note": "No M9 human review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M10",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M10 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M11",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M11 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M12",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M12 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M13",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M13 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M14",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M14 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      },
+      {
+        "mission_id": "V1-M15",
+        "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
+        "unlock": {"status": "locked", "note": "No genuine sequential approval supports M15 unlock.", "evidence": []},
+        "implementation": {"status": "unknown", "note": "Later-mission source exists on main, but its preparation classification was not established for this baseline.", "evidence": []},
+        "technical_test": {"status": "unknown", "note": "No current positive test claim is made.", "evidence": []},
+        "human_usability": {"status": "unknown", "note": "No current human-review claim is made.", "evidence": []},
+        "release": {"status": "not_started", "note": "Unreleased on inspected main.", "evidence": []},
+        "live_pass": {"status": "not_started", "note": "Not live-passed on inspected main.", "evidence": []}
+      }
+    ],
+    "blockers": [
+      {
+        "id": "state-record-not-yet-adopted",
+        "status": "resolved",
+        "scope": "state_control",
+        "description": "Independent review passed and this pull-request candidate marks the record active; activation becomes effective only if and when the pull request is merged into main.",
+        "evidence": []
+      },
+      {
+        "id": "m8-production-gates-pending",
+        "status": "open",
+        "scope": "release",
+        "description": "M8 independent production release gates, exact-next isolated proof, real-family protection proof, cleanup, and retained evidence remain pending.",
+        "evidence": [{"source_id": "july18-tracker", "scope": "blocker", "claim": "Lists the independent M8 production release work as still pending."}]
+      }
+    ],
+    "required_next_actions": [
+      {
+        "scope": "state_control",
+        "action": "Review the governance-foundation pull request; merging it would activate this record on main, while leaving it unmerged has no effect on main authority.",
+        "authorized_actor": "Project owner or designated human operator",
+        "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
+      },
+      {
+        "scope": "learner",
+        "action": "When Nick chooses to continue genuine learner work, M4 is the only supported next mission.",
+        "authorized_actor": "Nick through the normal learner workflow",
+        "does_not_authorize": ["release", "deploy", "repository_change", "mission_creation"]
+      },
+      {
+        "scope": "release",
+        "action": "M8 may move toward release only through a separately authorized independent production-gate operation after this review; this draft does not authorize that operation.",
+        "authorized_actor": "Separately authorized release operator",
+        "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
+      }
+    ]
+  },
+  "unresolved_facts": [
+    {
+      "id": "genuine-state-direct-snapshot-unavailable",
+      "classification": "safe_unknown",
+      "fact": "The post-M3 live production-family state was not directly queried during the completed repository inspection.",
+      "impact": "The baseline relies on consistent current tracker claims for genuine M3 approval and exact M4 unlock.",
+      "required_evidence": "A read-only current production progress response or sanitized genuine-family state snapshot, obtained without changing progress."
+    },
+    {
+      "id": "m8-branch-pr-not-independently-reinspected",
+      "classification": "blocks_later_transition",
+      "fact": "The M8 branch and draft PR details come from the supplied July 18 tracker and were not independently re-inspected in the completed main-branch audit.",
+      "impact": "M8 is safely classified only as externally reported preparation and not as merged, released, or live-passed.",
+      "required_evidence": "Read-only inspection of branch agent/prepare-v1-m08-saturday and draft PR #6 at an identified head commit."
+    },
+    {
+      "id": "m1-m2-release-classification-unavailable",
+      "classification": "safe_unknown",
+      "fact": "The inspected release manifest covers M3–M15 and does not classify M1 or M2 release/live-pass state.",
+      "impact": "M1 and M2 release and live-pass fields remain unknown even though genuine learner approval is supported.",
+      "required_evidence": "An authoritative release-history or manifest source explicitly defining M1 and M2 under the current release terminology."
+    },
+    {
+      "id": "m7-human-review-artifact-not-selected",
+      "classification": "safe_unknown",
+      "fact": "The baseline did not identify a retained repository artifact that independently establishes M7 human beginner-usability approval.",
+      "impact": "M7 remains released and live-passed while its human-usability field is unknown; no learner completion is inferred.",
+      "required_evidence": "A dated human-review record tied to the exact released M7 learner lesson revision."
+    }
+  ],
+  "sources": [
+    {"source_id": "inspection-commit", "kind": "repository_commit", "location": "KhunAlek/nick-worldmaker main commit 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["implementation", "release", "live_pass", "history"], "authority_note": "Timestamp records this reconciliation, not commit creation. The source defines what was present on inspected main, not external production or genuine learner state by itself."},
+    {"source_id": "main-release-manifest", "kind": "repository_file", "location": "assets/js/mission-release-manifest.js at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation, not file creation. This is the inspected main release boundary for M3–M15 and does not prove genuine learner completion."},
+    {"source_id": "m7-final-evidence", "kind": "workflow_evidence", "location": "tests/live-results/V1-M07.json and V1-M07-release-evidence.json", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation because the exact evidence-file creation time was not established. Final retained M7 evidence-bearing run is 29571404259; fixture approval is not learner approval."},
+    {"source_id": "main-tracker-2026-07-15", "kind": "tracker", "location": "Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-15.md at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "unlock", "human_usability", "release", "history"], "authority_note": "Timestamp records this reconciliation, not tracker creation. The tracker supports current genuine learner claims but contains a stale header and duplicate M7 entries; manifest controls release state."},
+    {"source_id": "july18-tracker", "kind": "tracker", "location": "docs/governance/permanent/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "preparation", "implementation", "technical_test", "human_usability", "release", "blocker", "history"], "authority_note": "Timestamp records this reconciliation because the tracker provides a date but no exact creation time. It supports M8 branch/PR preparation, human review, and pending-gate blocker only; it is not evidence of merge, release, live-pass, or learner completion."},
+    {"source_id": "canonical-charter", "kind": "project_source", "location": "docs/governance/permanent/Worldmaker_Project_Charter_and_Canonical_Contract.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls permanent architecture, authority, state separation, learner ownership, and mission sequence."},
+    {"source_id": "canonical-mission-contracts", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Mission_Contracts.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls stable mission-specific technical boundaries and order."},
+    {"source_id": "canonical-acceptance-tests", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Acceptance_Test_Specification.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "technical_test"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls required test behavior and proof, not current pass state by itself."},
+    {"source_id": "canonical-evaluator-policy", "kind": "project_source", "location": "docs/governance/permanent/AI_Evaluator_Policy_and_Mission_Rubrics.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "learner", "unlock"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls evaluator decisions and exact-next unlock rules."},
+    {"source_id": "canonical-evaluator-schema", "kind": "project_source", "location": "docs/governance/permanent/AI_Evaluator_Response_Schema.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "learner", "unlock"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls machine-readable evaluator output and invariants."},
+    {"source_id": "canonical-beginner-standard", "kind": "project_source", "location": "docs/governance/permanent/Beginner_Lesson_and_Evidence_Standard.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "human_usability"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls learner-facing usability, recovery, evidence wording, and human review."},
+    {"source_id": "historical-closure-state", "kind": "production_snapshot", "location": "release-evidence/2026-07-15-closure/nick-before.json, nick-after.json, and closure reports", "as_of": "2026-07-16T06:08:30Z", "timestamp_basis": "source_timestamp", "scope": ["learner", "unlock", "history"], "authority_note": "This is the documented backup creation timestamp. The historical snapshot shows M3 not submitted then and must not overwrite later genuine M3 approval."}
+  ],
+  "superseded_claims": [
+    {
+      "claim": "M3 is Nick's next mission.",
+      "historical_context": "Correct for the retained July 15–16 closure snapshots before Nick's genuine M3 submission.",
+      "current_treatment": "Historical only; current supported learner state is M1–M3 approved with M4 next.",
+      "source_ids": ["historical-closure-state"]
+    },
+    {
+      "claim": "M7 is the first unreleased mission.",
+      "historical_context": "Correct before the final M7 release workflow and manifest promotion.",
+      "current_treatment": "Historical or stale; inspected main releases and live-passes M7, making M8 first unreleased.",
+      "source_ids": ["main-tracker-2026-07-15", "main-release-manifest", "m7-final-evidence"]
+    },
+    {
+      "claim": "M7 release workflow run 29570600067 is the controlling final run.",
+      "historical_context": "The main tracker contains an earlier duplicated M7 release entry with this run number.",
+      "current_treatment": "Not controlling; final retained evidence-bearing workflow run is 29571404259.",
+      "source_ids": ["main-tracker-2026-07-15", "m7-final-evidence"]
+    }
+  ],
+  "history": [
+    {
+      "recorded_at": "2026-07-18T08:39:36+07:00",
+      "actor": "ChatGPT draft prepared for human review",
+      "action": "corrected",
+      "changed_paths": ["/"],
+      "evidence": [
+        {"source_id": "inspection-commit", "scope": "history", "claim": "Baseline repository inspection commit."},
+        {"source_id": "july18-tracker", "scope": "history", "claim": "Baseline M8 preparation and human-review report."},
+        {"source_id": "canonical-charter", "scope": "governance", "claim": "Baseline state-separation and authority rules."}
+      ],
+      "note": "Corrected the draft baseline, timestamp provenance, schema strictness, blocker scope, and unresolved-fact classifications without changing any external state."
+    },
+    {
+      "recorded_at": "2026-07-18T08:55:18+07:00",
+      "actor": "Governance-foundation pull-request candidate",
+      "action": "updated",
+      "changed_paths": ["/record_status", "/authority", "/current_state/blockers/0", "/history"],
+      "evidence": [],
+      "note": "Marks the candidate record active and resolves the adoption blocker, but activation becomes effective only if this pull request is merged into main; the pull request is not claimed as merged."
+    }
+  ]
+}
