@@ -1,0 +1,20 @@
+{
+  "mission_id": "V1-M08",
+  "release_state": "unreleased",
+  "next_mission_id": "V1-M09",
+  "self_cleaning_required": true,
+  "fixtures": [
+    {"id":"path_wood","test_id":"V1-M08-T01","target":"Workspace.World.Resources.WoodNode.TargetPoint","expected":"success","resource_delta":{"Wood":0,"Stone":0}},
+    {"id":"path_stone","test_id":"V1-M08-T02","target":"Workspace.World.Resources.StoneNode.TargetPoint","expected":"success","resource_delta":{"Wood":0,"Stone":0}},
+    {"id":"blocked_target","test_id":"V1-M08-T03","setup":"temporary removable enclosure around one TargetPoint","expected":"safe_false_no_nick_code_error"},
+    {"id":"movement_timeout","test_id":"V1-M08-T03","setup":"controlled MoveToFinished false result","expected":"safe_false_no_later_waypoint"},
+    {"id":"no_award","test_id":"V1-M08-T04","expected":{"Wood":"unchanged","Stone":"unchanged"}},
+    {"id":"no_early_busy_state","expected":"no permanent busy state introduced in M8"}
+  ],
+  "evaluator_expectations": {
+    "code_present_missing_failure_proof":"NEEDS_EVIDENCE",
+    "proven_pathfinding_code_failure":"NEEDS_FIX",
+    "complete_current_success_and_failure_evidence":"APPROVED"
+  },
+  "cleanup": ["remove temporary enclosure","remove timeout hook","restore TargetPoint properties","leave production entrypoint unchanged","remove temporary records and release-test access"]
+}
