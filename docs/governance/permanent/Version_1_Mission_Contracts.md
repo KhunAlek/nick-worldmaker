@@ -18,7 +18,7 @@ Use it together with:
 - `docs/governance/permanent/AI_Evaluator_Policy_and_Mission_Rubrics.md` for evaluator decisions, hint escalation, approval rules, and feedback;
 - `docs/governance/permanent/AI_Evaluator_Response_Schema.md` for machine-readable evaluator output;
 - `docs/governance/permanent/Beginner_Lesson_and_Evidence_Standard.md` for learner-facing wording, recovery, evidence presentation, and beginner usability;
-- `docs/governance/permanent/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md` for actual learner, repository, release, and deployment state.
+- `docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md` for actual learner, repository, release, and deployment state.
 
 This document is not a learner lesson. It must not be displayed directly to Nick as step-by-step instruction.
 
