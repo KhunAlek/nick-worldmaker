@@ -233,7 +233,7 @@
       },
       {
         "scope": "release",
-        "action": "M8 may move toward release only through a separately authorized independent production-gate operation after this review; this draft does not authorize that operation.",
+        "action": "M8 may move toward release only through a separately authorized independent production-gate operation. This state record does not authorize that operation.",
         "authorized_actor": "Separately authorized release operator",
         "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
       }
