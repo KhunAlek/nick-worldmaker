@@ -127,7 +127,10 @@ History is append-only and cannot overwrite current state. State-record edits ar
 - Safe repository checks currently available for their applicable scopes are:
   - Backend unit and integration tests: `cd backend && npm test`
   - Repository release-source audit: `node tests/release-audit.mjs`
-  - Browser smoke test against its explicitly supplied target: `python3 tests/browser-smoke-test.py`
+  - Legacy local prototype UI smoke test: `python3 tests/browser-smoke-test.py`
+
+`tests/browser-smoke-test.py` exercises local historical prototype pages with simulated browser storage. It is not a production smoke test and must not be reported as production verification.
+
 - Confirm prerequisites and side effects before running any check. The browser smoke test is not proof of production release or learner completion.
 - Release and production checks are defined by the relevant files under `.github/workflows/`; inspect them and their called scripts before use. Run them only with explicit release or production authorization.
 - Validate state records against their schema and cross-check evidence references, source scopes, mission uniqueness, and positive claims whenever state is read or changed.
