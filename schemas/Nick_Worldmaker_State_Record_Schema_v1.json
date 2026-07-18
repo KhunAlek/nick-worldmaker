@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://khunalek.github.io/nick-worldmaker/schemas/Nick_Worldmaker_State_Record_Schema_v1.json",
+  "title": "Nick Worldmaker State Record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_id", "record_status", "as_of", "repository", "authority", "no_side_effects", "current_state", "unresolved_facts", "sources", "superseded_claims", "history"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "record_id": {"const": "nick-worldmaker-state-v1"},
+    "record_status": {"enum": ["draft", "active", "superseded", "invalid"]},
+    "as_of": {"type": "string", "format": "date-time"},
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_name", "inspected_branch", "inspection_commit"],
+      "properties": {
+        "full_name": {"const": "KhunAlek/nick-worldmaker"},
+        "inspected_branch": {"const": "main"},
+        "inspection_commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changing_state_authority", "permanent_rules_location", "conflict_policy"],
+      "properties": {
+        "changing_state_authority": {"const": "data/state/Nick_Worldmaker_State_Record_v1.json after schema validation and evidence reconciliation; activation takes effect only when the adopting pull request is merged into main"},
+        "permanent_rules_location": {"const": "docs/governance/permanent/ and future AGENTS.md; not duplicated here"},
+        "conflict_policy": {"type": "string", "minLength": 20}
+      }
+    },
+    "no_side_effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declarative_only", "releases", "unlocks", "deploys", "advances_learner", "modifies_repository"],
+      "properties": {
+        "declarative_only": {"const": true},
+        "releases": {"const": false},
+        "unlocks": {"const": false},
+        "deploys": {"const": false},
+        "advances_learner": {"const": false},
+        "modifies_repository": {"const": false}
+      }
+    },
+    "current_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["learner_summary", "release_summary", "active_preparation", "missions", "blockers", "required_next_actions"],
+      "properties": {
+        "learner_summary": {"$ref": "#/$defs/summary"},
+        "release_summary": {"$ref": "#/$defs/summary"},
+        "active_preparation": {"$ref": "#/$defs/activePreparation"},
+        "missions": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "items": {"$ref": "#/$defs/missionState"}
+        },
+        "blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},
+        "required_next_actions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nextAction"}}
+      }
+    },
+    "unresolved_facts": {"type": "array", "items": {"$ref": "#/$defs/unresolvedFact"}},
+    "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source"}},
+    "superseded_claims": {"type": "array", "items": {"$ref": "#/$defs/supersededClaim"}},
+    "history": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/historyEntry"}}
+  },
+  "$defs": {
+    "evidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "scope", "claim"],
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+        "scope": {"enum": ["learner", "unlock", "implementation", "technical_test", "human_usability", "release", "live_pass", "preparation", "blocker", "governance", "history"]},
+        "claim": {"type": "string", "minLength": 8}
+      }
+    },
+    "evidenceArray": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidenceRef"}},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "evidence"],
+      "properties": {"statement": {"type": "string", "minLength": 12}, "evidence": {"$ref": "#/$defs/evidenceArray"}}
+    },
+    "dimensionBase": {
+      "type": "object",
+      "required": ["status", "note", "evidence"],
+      "properties": {
+        "status": {"type": "string"},
+        "note": {"type": "string", "minLength": 3},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidenceRef"}}
+      }
+    },
+    "learnerState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "learner_approved", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"const": "learner_approved"}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "unlockState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "locked", "unlocked", "consumed", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"enum": ["unlocked", "consumed"]}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "implementationState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "prepared", "merged", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"enum": ["prepared", "merged"]}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "technicalTestState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "tested", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"const": "tested"}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "humanState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "human_approved", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"const": "human_approved"}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "releaseState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "released", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"const": "released"}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "livePassState": {
+      "allOf": [
+        {"$ref": "#/$defs/dimensionBase"},
+        {"type": "object", "additionalProperties": false, "properties": {"status": {"enum": ["unknown", "not_started", "live_passed", "blocked", "invalid"]}, "note": {}, "evidence": {}}},
+        {"if": {"type": "object", "properties": {"status": {"const": "live_passed"}}}, "then": {"type": "object", "properties": {"evidence": {"$ref": "#/$defs/evidenceArray"}}}}
+      ]
+    },
+    "missionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mission_id", "learner_progress", "unlock", "implementation", "technical_test", "human_usability", "release", "live_pass"],
+      "properties": {
+        "mission_id": {"type": "string", "pattern": "^V1-M(0[1-9]|1[0-5])$"},
+        "learner_progress": {"$ref": "#/$defs/learnerState"},
+        "unlock": {"$ref": "#/$defs/unlockState"},
+        "implementation": {"$ref": "#/$defs/implementationState"},
+        "technical_test": {"$ref": "#/$defs/technicalTestState"},
+        "human_usability": {"$ref": "#/$defs/humanState"},
+        "release": {"$ref": "#/$defs/releaseState"},
+        "live_pass": {"$ref": "#/$defs/livePassState"}
+      }
+    },
+    "activePreparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "mission_id", "branch", "pull_request", "merged_to_inspected_main", "evidence"],
+      "properties": {
+        "status": {"enum": ["unknown", "not_started", "prepared", "tested", "human_approved", "merged", "blocked", "invalid"]},
+        "mission_id": {"type": ["string", "null"], "pattern": "^V1-M(0[1-9]|1[0-5])$"},
+        "branch": {"type": ["string", "null"]},
+        "pull_request": {"type": ["integer", "null"], "minimum": 1},
+        "merged_to_inspected_main": {"type": ["boolean", "null"]},
+        "evidence": {"$ref": "#/$defs/evidenceArray"}
+      }
+    },
+    "blocker": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "status", "scope", "description", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "status": {"enum": ["open", "resolved", "unknown", "invalid"]},
+        "scope": {"enum": ["learner", "unlock", "implementation", "technical_test", "human_usability", "release", "live_pass", "state_control"]},
+        "description": {"type": "string", "minLength": 10},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidenceRef"}}
+      }
+    },
+    "nextAction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scope", "action", "authorized_actor", "does_not_authorize"],
+      "properties": {
+        "scope": {"enum": ["learner", "release", "state_control"]},
+        "action": {"type": "string", "minLength": 10},
+        "authorized_actor": {"type": "string", "minLength": 3},
+        "does_not_authorize": {"type": "array", "minItems": 1, "items": {"enum": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]}}
+      }
+    },
+    "unresolvedFact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "classification", "fact", "impact", "required_evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "classification": {"enum": ["blocks_adoption", "safe_unknown", "blocks_later_transition"]},
+        "fact": {"type": "string", "minLength": 10},
+        "impact": {"type": "string", "minLength": 10},
+        "required_evidence": {"type": "string", "minLength": 10}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "kind", "location", "as_of", "timestamp_basis", "scope", "authority_note"],
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+        "kind": {"enum": ["repository_file", "repository_commit", "project_source", "tracker", "workflow_evidence", "production_snapshot", "human_review"]},
+        "location": {"type": "string", "minLength": 3},
+        "as_of": {"type": "string", "format": "date-time"},
+        "timestamp_basis": {"enum": ["source_timestamp", "reconciliation_timestamp"]},
+        "scope": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["learner", "unlock", "implementation", "technical_test", "human_usability", "release", "live_pass", "preparation", "blocker", "governance", "history"]}},
+        "authority_note": {"type": "string", "minLength": 10}
+      }
+    },
+    "supersededClaim": {
+      "type": "object", "additionalProperties": false,
+      "required": ["claim", "historical_context", "current_treatment", "source_ids"],
+      "properties": {
+        "claim": {"type": "string", "minLength": 5},
+        "historical_context": {"type": "string", "minLength": 10},
+        "current_treatment": {"type": "string", "minLength": 10},
+        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    },
+    "historyEntry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["recorded_at", "actor", "action", "changed_paths", "evidence", "note"],
+      "properties": {
+        "recorded_at": {"type": "string", "format": "date-time"},
+        "actor": {"type": "string", "minLength": 3},
+        "action": {"enum": ["created", "updated", "corrected", "superseded", "validated", "marked_invalid"]},
+        "changed_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^/"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidenceRef"}},
+        "note": {"type": "string", "minLength": 10}
+      }
+    }
+  }
+}
