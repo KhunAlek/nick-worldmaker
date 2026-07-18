@@ -391,7 +391,7 @@ The permanent project-source package should contain:
 4. the current evaluator policy and mission rubrics;
 5. the evaluator response schema;
 6. the beginner lesson and evidence standard;
-7. `docs/governance/permanent/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`;
+7. `docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`;
 8. any temporary active release plan still in use.
 
 Historical trackers, completed handovers, fresh-chat prompts, checklists, transcripts, and one-time closure instructions belong in repository history or archive, not permanent Project Sources.
