@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "record_id": "nick-worldmaker-state-v1",
   "record_status": "active",
-  "as_of": "2026-07-18T08:55:18+07:00",
+  "as_of": "2026-07-18T09:05:24+07:00",
   "repository": {
     "full_name": "KhunAlek/nick-worldmaker",
     "inspected_branch": "main",
@@ -273,7 +273,7 @@
     {"source_id": "main-release-manifest", "kind": "repository_file", "location": "assets/js/mission-release-manifest.js at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation, not file creation. This is the inspected main release boundary for M3–M15 and does not prove genuine learner completion."},
     {"source_id": "m7-final-evidence", "kind": "workflow_evidence", "location": "tests/live-results/V1-M07.json and V1-M07-release-evidence.json", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation because the exact evidence-file creation time was not established. Final retained M7 evidence-bearing run is 29571404259; fixture approval is not learner approval."},
     {"source_id": "main-tracker-2026-07-15", "kind": "tracker", "location": "Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-15.md at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "unlock", "human_usability", "release", "history"], "authority_note": "Timestamp records this reconciliation, not tracker creation. The tracker supports current genuine learner claims but contains a stale header and duplicate M7 entries; manifest controls release state."},
-    {"source_id": "july18-tracker", "kind": "tracker", "location": "docs/governance/permanent/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "preparation", "implementation", "technical_test", "human_usability", "release", "blocker", "history"], "authority_note": "Timestamp records this reconciliation because the tracker provides a date but no exact creation time. It supports M8 branch/PR preparation, human review, and pending-gate blocker only; it is not evidence of merge, release, live-pass, or learner completion."},
+    {"source_id": "july18-tracker", "kind": "tracker", "location": "docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "preparation", "implementation", "technical_test", "human_usability", "release", "blocker", "history"], "authority_note": "Timestamp records this reconciliation because the tracker provides a date but no exact creation time. It supports M8 branch/PR preparation, human review, and pending-gate blocker only; it is not evidence of merge, release, live-pass, or learner completion."},
     {"source_id": "canonical-charter", "kind": "project_source", "location": "docs/governance/permanent/Worldmaker_Project_Charter_and_Canonical_Contract.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls permanent architecture, authority, state separation, learner ownership, and mission sequence."},
     {"source_id": "canonical-mission-contracts", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Mission_Contracts.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls stable mission-specific technical boundaries and order."},
     {"source_id": "canonical-acceptance-tests", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Acceptance_Test_Specification.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "technical_test"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls required test behavior and proof, not current pass state by itself."},
@@ -322,6 +322,14 @@
       "changed_paths": ["/record_status", "/authority", "/current_state/blockers/0", "/history"],
       "evidence": [],
       "note": "Marks the candidate record active and resolves the adoption blocker, but activation becomes effective only if this pull request is merged into main; the pull request is not claimed as merged."
+    },
+    {
+      "recorded_at": "2026-07-18T09:05:24+07:00",
+      "actor": "Governance-foundation pull-request correction",
+      "action": "corrected",
+      "changed_paths": ["/as_of", "/sources/july18-tracker/location", "/history"],
+      "evidence": [],
+      "note": "Moves the changing July 18 tracker reference from permanent governance to docs/tracking; learner, unlock, release, live-pass, and M8 states remain unchanged."
     }
   ]
 }
