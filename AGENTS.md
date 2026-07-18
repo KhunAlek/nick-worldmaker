@@ -131,7 +131,7 @@ History is append-only and cannot overwrite current state. State-record edits ar
 
 `tests/browser-smoke-test.py` exercises local historical prototype pages with simulated browser storage. It is not a production smoke test and must not be reported as production verification.
 
-- Confirm prerequisites and side effects before running any check. The browser smoke test is not proof of production release or learner completion.
+- Confirm prerequisites and side effects before running any check. The legacy browser script loads repository HTML locally, accepts no website target, does not contact or verify the current backend or any production system, and does not prove release state, deployment, learner progress, or production behavior.
 - Release and production checks are defined by the relevant files under `.github/workflows/`; inspect them and their called scripts before use. Run them only with explicit release or production authorization.
 - Validate state records against their schema and cross-check evidence references, source scopes, mission uniqueness, and positive claims whenever state is read or changed.
 - Do not run production, deployment, release, unlock, or learner-state-changing checks unless the user explicitly authorizes that action.
