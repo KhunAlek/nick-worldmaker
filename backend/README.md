@@ -1,5 +1,7 @@
 # Nick // Worldmaker shared backend
 
+> **Historical backend README warning:** This file describes the initial backend setup. Its manual D1 seeding, access-code setup, and deployment instructions are not current operating instructions. Do not follow them to change learner progress or redeploy the current system. Current permanent governance is under `docs/governance/permanent/`. Changing state is controlled by `data/state/Nick_Worldmaker_State_Record_v1.json` after PR #7 is merged. Current deployment operations require separately verified instructions.
+
 This is the first production backend slice for **V1-M02 — Build the Island**.
 
 ## Chosen stack

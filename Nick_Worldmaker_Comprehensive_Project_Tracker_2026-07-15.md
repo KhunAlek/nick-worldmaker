@@ -1,7 +1,9 @@
 # Nick // Worldmaker — Comprehensive Project Tracker
 
+> **Current-state correction:** Nick has genuinely completed M1–M3, and M4 is his exact next genuine mission. At inspected main commit `5ddd4c2`, M3–M7 are released and live-passed, and M8 is first unreleased. M8 preparation, testing, and human beginner-usability approval outside main do not mean merged, released, live-passed, unlocked, or learner-completed. After governance adoption, `data/state/Nick_Worldmaker_State_Record_v1.json` controls changing state.
+
 **Tracker date:** 15 July 2026  
-**Last updated:** 17 July 2026  
+**Last updated:** 18 July 2026  
 **Status:** **15 July 2026 — Complete and formally closed.**  
 **Project owner:** Olga  
 **Technical operator:** Alex Bystrov  
@@ -10,7 +12,7 @@
 **Production website:** `https://khunalek.github.io/nick-worldmaker/`  
 **Production API:** `https://nick-worldmaker-api.abystrov66.workers.dev`  
 **Current learner state:** M1, M2, and M3 approved; M4 is unlocked and is Nick's next genuine mission.  
-**Current release state:** M3–M6 released and live-passed; M7 is first unreleased.  
+**Current release state:** M3–M7 released and live-passed; M8 is first unreleased from inspected main.  
 **Current learner-content state:** M3 learner instructions repaired, human re-review passed, and Nick genuinely completed and received evaluator approval for M3.
 
 ---
@@ -37,7 +39,7 @@ All formal closure acceptance items were proven and retained in source-controlle
 - Deployed source SHA-256 is `8adcd3bb3a6c8121243f286e8ceb34a7d11b9b32a1cb71d7c1fde1f245b1ed38`.
 - Repository source and deployed Worker correspond; no undocumented Cloudflare-only source drift was found.
 - M3, M4, M5, and M6 remain released and live-passed.
-- M7 remains the first unreleased mission.
+- Historical closure state: M7 was then the first unreleased mission. This statement is superseded by the final M7 release evidence below.
 - Frontend mission availability matches the release manifest.
 - Fresh isolated M3 negative fixture remained non-approved and unlocked nothing.
 - Fresh isolated M3 approved fixture unlocked exactly M4 and no later mission.
@@ -161,12 +163,14 @@ UX follow-up task:
 
 **Nick's genuine M3 completion — APPROVED on 17 July 2026; M4 unlocked.**
 
-
 ## M7 release — 17 July 2026
 
-V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: 29570600067.
+V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08 inside the isolated release test; all non-approved fixtures unlocked nothing; Nick's real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed.
 
+**Controlling final evidence-bearing workflow run:** `29571404259`.
 
-## M7 release — 17 July 2026
+This release/live-pass evidence does not mean Nick completed M4, M5, M6, or M7. Nick's exact next genuine mission remains M4.
 
-V1-M07 — Send Safe Commands was promoted after fresh isolated-family release gates passed. The approved fixture unlocked exactly V1-M08; all non-approved fixtures unlocked nothing; Nick’s real-family progress was unchanged; temporary access, pilot configuration, and isolated records were removed. Workflow run: 29571404259.
+### Superseded M7 history
+
+An earlier duplicated tracker entry cited workflow `29570600067`. It is retained here only as superseded history and does not control final M7 evidence. The retained controlling run is `29571404259`.
