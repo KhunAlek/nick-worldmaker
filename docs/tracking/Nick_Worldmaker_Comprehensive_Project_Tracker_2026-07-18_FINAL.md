@@ -4,11 +4,11 @@
 
 **Updated:** 18 July 2026  
 **Repository:** `KhunAlek/nick-worldmaker`  
-**Working branch:** `agent/prepare-v1-m08-saturday`  
-**Draft PR:** `#6`  
+**M8 merge result:** PR `#6` closed and squash-merged into `main` at `f2409a01ab4c3adb135c6b35ddc00b794d856642`.
+**Approved PR head:** `c1ecb06c8085623bb9a7d2f563ec49fb33c25cca`
 **Learner state:** M1–M3 approved; M4 is Nick's next genuine mission.  
 **Release state:** M3–M7 released and live-passed; M8 remains unreleased pending the independent Sunday production release gates.
-**18 July closure state:** M8 lesson and test-harness preparation completed; automated verification passed; corrected learner lesson passed human beginner-usability review; M9 not started.
+**18 July closure state:** M8 lesson and test-harness preparation completed, corrected learner lesson passed human beginner-usability review, PR #6 merged, and the automatic main audit passed; M8 remains unreleased and M9 remains untouched.
 
 ## Human review result
 
@@ -153,8 +153,11 @@ Beginner-usability failure is a release blocker equal to:
 - unsafe changes to Nick's learner progress.
 
 
-## Changed files
+## PR #6 merged file scope
 
+PR #6 changed exactly these ten files. This authoritative tracker was not changed by PR #6:
+
+- `.github/workflows/release-audit.yml`
 - `assets/js/mission-lesson-m08-walk-to-resource.js`
 - `assets/js/mission-lesson-m08-steps-a.js`
 - `assets/js/mission-lesson-m08-steps-b.js`
@@ -162,8 +165,8 @@ Beginner-usability failure is a release blocker equal to:
 - `assets/js/mission-m08-beginner-render.js`
 - `assets/js/missions-data.js`
 - `review/V1-M08-sanitized-lesson-review.html`
+- `tests/fixtures/V1-M08-controlled-fixtures.json`
 - `tests/m08-lesson-contract.mjs`
-- this tracker
 
 ## Verification completed
 
@@ -180,10 +183,19 @@ Beginner-usability failure is a release blocker equal to:
 
 Verification covered JavaScript syntax, the complete twelve-stage lesson, exact M8 mission/test IDs, object paths, beginner explanations, failure setup and cleanup, no resource award, sanitized review mapping, and the M8/M9 boundary.
 
-## Commit and PR state
+## Verified merge and automatic repository runs
 
-Latest branch head: `fb4de838fd7cad2c580d62a9459536b3baeedee4`  
-Draft PR: `https://github.com/KhunAlek/nick-worldmaker/pull/6`
+PR #6 is closed and squash-merged.
+
+- approved PR head: `c1ecb06c8085623bb9a7d2f563ec49fb33c25cca`;
+- exact main merge commit: `f2409a01ab4c3adb135c6b35ddc00b794d856642`;
+- automatic main audit run `29630572145`: **PASSED**;
+- audit commands: `node tests/release-audit.mjs` and `node tests/m08-lesson-contract.mjs`;
+- automatic GitHub Pages build and deployment run `29630571746`: **PASSED**.
+
+The Pages deployment records that GitHub published the merged repository source. It is separate from mission release and production live-pass. Because the release manifest remained unchanged at M3–M7, M8 did not become a released learner mission.
+
+The earlier preparation commits below remain useful provenance for the human-approved candidate:
 
 Important correction commits include:
 
@@ -199,12 +211,14 @@ Important correction commits include:
 
 ## Scope and safety confirmation
 
+- The approved M8 candidate is merged into `main`.
 - M8 remains **unreleased and not live-passed**.
 - The release manifest was not promoted.
 - M3–M7 release state was preserved.
 - Nick's learner progress was not accessed or changed.
 - No test account, learner login, D1 query, production fixture, or Roblox Studio runtime test was used.
-- No production entrypoint, release-test access, pilot setting, wrapper, or learner record was changed.
+- Automatic GitHub Pages run `29630571746` deployed the merged repository source, but did not release or live-pass M8 because the manifest still exposes only M3–M7.
+- No production entrypoint, release-test access, pilot setting, wrapper, or learner record was manually changed.
 - M9 was not started.
 
 ## Still pending for Sunday
@@ -224,7 +238,9 @@ Completed:
 - corrected sanitized lesson reviewed by Alex;
 - human beginner-usability verdict: **PASS**;
 - tracker and checklist updated;
-- work pushed to draft PR #6.
+- approved candidate squash-merged through PR #6;
+- automatic main audit passed both the repository audit and focused M8 contract test;
+- automatic Pages build and deployment passed without changing the M8 release boundary.
 
 Not performed:
 
@@ -238,6 +254,7 @@ Not performed:
 
 **Original M8 learner lesson: FAILED beginner-usability review.**  
 **Complete M8 beginner-usability rewrite: IMPLEMENTED, SOURCE-VERIFIED, AND HUMAN-APPROVED.**  
+**M8 implementation: MERGED INTO MAIN AT `f2409a01ab4c3adb135c6b35ddc00b794d856642`.**
 **18 July preparation day: COMPLETE AND FORMALLY CLOSED.**  
 **M8 release/live-pass: PENDING INDEPENDENT SUNDAY GATES.**  
 **M9: NOT STARTED.**  

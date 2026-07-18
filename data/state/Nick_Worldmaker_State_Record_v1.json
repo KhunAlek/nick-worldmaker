@@ -2,11 +2,11 @@
   "schema_version": "1.0.0",
   "record_id": "nick-worldmaker-state-v1",
   "record_status": "active",
-  "as_of": "2026-07-18T09:05:24+07:00",
+  "as_of": "2026-07-18T11:34:02+07:00",
   "repository": {
     "full_name": "KhunAlek/nick-worldmaker",
     "inspected_branch": "main",
-    "inspection_commit": "5ddd4c2"
+    "inspection_commit": "f2409a01ab4c3adb135c6b35ddc00b794d856642"
   },
   "authority": {
     "changing_state_authority": "data/state/Nick_Worldmaker_State_Record_v1.json after schema validation and evidence reconciliation; activation takes effect only when the adopting pull request is merged into main",
@@ -30,7 +30,7 @@
       ]
     },
     "release_summary": {
-      "statement": "At inspected main commit 5ddd4c2, M3–M7 are released and live-passed; M8 is the first mission not released from main.",
+      "statement": "At inspected main commit f2409a01ab4c3adb135c6b35ddc00b794d856642, M3–M7 are released and live-passed; M8 is merged but remains the first unreleased mission.",
       "evidence": [
         {"source_id": "main-release-manifest", "scope": "release", "claim": "Lists M3–M7 as released and M8–M15 as unreleased."},
         {"source_id": "main-release-manifest", "scope": "live_pass", "claim": "Lists M3–M7 as live-passed."},
@@ -38,15 +38,16 @@
       ]
     },
     "active_preparation": {
-      "status": "human_approved",
+      "status": "merged",
       "mission_id": "V1-M08",
-      "branch": "agent/prepare-v1-m08-saturday",
+      "branch": null,
       "pull_request": 6,
-      "merged_to_inspected_main": false,
+      "merged_to_inspected_main": true,
       "evidence": [
-        {"source_id": "july18-tracker", "scope": "preparation", "claim": "Records M8 preparation on the named branch and draft PR #6."},
+        {"source_id": "m8-pr6-merged", "scope": "preparation", "claim": "PR #6 closed and squash-merged from approved head c1ecb06c8085623bb9a7d2f563ec49fb33c25cca."},
+        {"source_id": "m8-main-merge", "scope": "implementation", "claim": "Main contains the approved M8 candidate at merge commit f2409a01ab4c3adb135c6b35ddc00b794d856642."},
         {"source_id": "july18-tracker", "scope": "human_usability", "claim": "Records human beginner-usability approval of the corrected M8 candidate."},
-        {"source_id": "july18-tracker", "scope": "implementation", "claim": "Explicitly records M8 as not released and the release manifest as unpromoted."}
+        {"source_id": "main-release-manifest", "scope": "release", "claim": "Confirms that merging did not promote M8 into the released mission sequence."}
       ]
     },
     "missions": [
@@ -124,10 +125,10 @@
         "mission_id": "V1-M08",
         "learner_progress": {"status": "not_started", "note": "No genuine learner completion evidence.", "evidence": []},
         "unlock": {"status": "locked", "note": "M4, not M8, is Nick's exact next mission.", "evidence": []},
-        "implementation": {"status": "prepared", "note": "Prepared outside inspected main on the branch/PR reported by the July 18 tracker.", "evidence": [{"source_id": "july18-tracker", "scope": "implementation", "claim": "Records completed M8 candidate preparation on branch agent/prepare-v1-m08-saturday and draft PR #6."}]},
-        "technical_test": {"status": "tested", "note": "Candidate tests passed outside inspected main according to supplied tracker.", "evidence": [{"source_id": "july18-tracker", "scope": "technical_test", "claim": "Records automated lesson, registry, evidence, rendering, and M8/M9-boundary checks as passed."}]},
+        "implementation": {"status": "merged", "note": "Approved M8 candidate squash-merged through PR #6 at exact main commit f2409a01ab4c3adb135c6b35ddc00b794d856642.", "evidence": [{"source_id": "m8-pr6-merged", "scope": "implementation", "claim": "PR #6 closed and merged with the approved head and exact ten-file scope."}, {"source_id": "m8-main-merge", "scope": "implementation", "claim": "The resulting main commit contains the approved M8 implementation and focused test."}]},
+        "technical_test": {"status": "tested", "note": "Automatic main-branch audit passed the repository release audit and focused split M8 contract test.", "evidence": [{"source_id": "m8-main-audit", "scope": "technical_test", "claim": "Automatic run 29630572145 passed both node tests/release-audit.mjs and node tests/m08-lesson-contract.mjs at the M8 merge commit."}]},
         "human_usability": {"status": "human_approved", "note": "Corrected candidate passed human beginner-usability review; scope is lesson usability only.", "evidence": [{"source_id": "july18-tracker", "scope": "human_usability", "claim": "Records Alex's passed human review of the corrected M8 learner lesson."}]},
-        "release": {"status": "not_started", "note": "Not released from inspected main; independent production gates remain pending.", "evidence": []},
+        "release": {"status": "not_started", "note": "Merged source is not a mission release; the unchanged manifest still releases only M3–M7 and independent M8 production gates remain pending.", "evidence": [{"source_id": "main-release-manifest", "scope": "release", "claim": "At the M8 merge commit the release manifest lists M3–M7 only."}]},
         "live_pass": {"status": "not_started", "note": "Not live-passed; production release gates were not run.", "evidence": []}
       },
       {
@@ -220,7 +221,7 @@
     "required_next_actions": [
       {
         "scope": "state_control",
-        "action": "Review the governance-foundation pull request; merging it would activate this record on main, while leaving it unmerged has no effect on main authority.",
+        "action": "M8 is merged but remains unreleased. Any M8 release transition requires separate explicit authorization. Before release promotion, complete the full independent M8 release gates, isolated evaluator-status checks, exact M9-only unlock proof, genuine learner-state protection proof, fixture cleanup, retained evidence review, manifest promotion, governed deployment, and production verification in their proper sequence. This entry does not authorize release, manifest change, deployment, production verification, unlock, learner progression, M9 work, or any repository change.",
         "authorized_actor": "Project owner or designated human operator",
         "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
       },
@@ -232,7 +233,7 @@
       },
       {
         "scope": "release",
-        "action": "M8 may move toward release only through a separately authorized independent production-gate operation after this review; this draft does not authorize that operation.",
+        "action": "M8 may move toward release only through a separately authorized independent production-gate operation. This state record does not authorize that operation.",
         "authorized_actor": "Separately authorized release operator",
         "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
       }
@@ -245,13 +246,6 @@
       "fact": "The post-M3 live production-family state was not directly queried during the completed repository inspection.",
       "impact": "The baseline relies on consistent current tracker claims for genuine M3 approval and exact M4 unlock.",
       "required_evidence": "A read-only current production progress response or sanitized genuine-family state snapshot, obtained without changing progress."
-    },
-    {
-      "id": "m8-branch-pr-not-independently-reinspected",
-      "classification": "blocks_later_transition",
-      "fact": "The M8 branch and draft PR details come from the supplied July 18 tracker and were not independently re-inspected in the completed main-branch audit.",
-      "impact": "M8 is safely classified only as externally reported preparation and not as merged, released, or live-passed.",
-      "required_evidence": "Read-only inspection of branch agent/prepare-v1-m08-saturday and draft PR #6 at an identified head commit."
     },
     {
       "id": "m1-m2-release-classification-unavailable",
@@ -269,11 +263,15 @@
     }
   ],
   "sources": [
-    {"source_id": "inspection-commit", "kind": "repository_commit", "location": "KhunAlek/nick-worldmaker main commit 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["implementation", "release", "live_pass", "history"], "authority_note": "Timestamp records this reconciliation, not commit creation. The source defines what was present on inspected main, not external production or genuine learner state by itself."},
-    {"source_id": "main-release-manifest", "kind": "repository_file", "location": "assets/js/mission-release-manifest.js at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation, not file creation. This is the inspected main release boundary for M3–M15 and does not prove genuine learner completion."},
+    {"source_id": "inspection-commit", "kind": "repository_commit", "location": "KhunAlek/nick-worldmaker main commit f2409a01ab4c3adb135c6b35ddc00b794d856642", "as_of": "2026-07-18T11:34:02+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["implementation", "release", "live_pass", "history"], "authority_note": "Timestamp records this reconciliation. The inspected main commit contains the merged M8 source but does not by itself prove release, live-pass, unlock, deployment state, or learner completion."},
+    {"source_id": "main-release-manifest", "kind": "repository_file", "location": "assets/js/mission-release-manifest.js at f2409a01ab4c3adb135c6b35ddc00b794d856642", "as_of": "2026-07-18T11:34:02+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "At the inspected M8 merge commit this manifest still lists only M3–M7 as released and live-passed; it does not prove genuine learner completion."},
     {"source_id": "m7-final-evidence", "kind": "workflow_evidence", "location": "tests/live-results/V1-M07.json and V1-M07-release-evidence.json", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["technical_test", "release", "live_pass"], "authority_note": "Timestamp records this reconciliation because the exact evidence-file creation time was not established. Final retained M7 evidence-bearing run is 29571404259; fixture approval is not learner approval."},
     {"source_id": "main-tracker-2026-07-15", "kind": "tracker", "location": "Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-15.md at 5ddd4c2", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "unlock", "human_usability", "release", "history"], "authority_note": "Timestamp records this reconciliation, not tracker creation. The tracker supports current genuine learner claims but contains a stale header and duplicate M7 entries; manifest controls release state."},
-    {"source_id": "july18-tracker", "kind": "tracker", "location": "docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "preparation", "implementation", "technical_test", "human_usability", "release", "blocker", "history"], "authority_note": "Timestamp records this reconciliation because the tracker provides a date but no exact creation time. It supports M8 branch/PR preparation, human review, and pending-gate blocker only; it is not evidence of merge, release, live-pass, or learner completion."},
+    {"source_id": "july18-tracker", "kind": "tracker", "location": "docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md", "as_of": "2026-07-18T11:34:02+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["learner", "preparation", "implementation", "technical_test", "human_usability", "release", "blocker", "history"], "authority_note": "This updated supporting narrative records the verified M8 merge while preserving human approval and the pending independent release gates; operational evidence controls the merge, audit, deployment, release, and learner dimensions."},
+    {"source_id": "m8-pr6-merged", "kind": "repository_commit", "location": "https://github.com/KhunAlek/nick-worldmaker/pull/6; approved head c1ecb06c8085623bb9a7d2f563ec49fb33c25cca", "as_of": "2026-07-18T04:27:05Z", "timestamp_basis": "source_timestamp", "scope": ["preparation", "implementation", "history"], "authority_note": "PR #6 is closed and squash-merged. It proves the approved candidate transition into main, not mission release, deployment, live-pass, unlock, or learner completion."},
+    {"source_id": "m8-main-merge", "kind": "repository_commit", "location": "KhunAlek/nick-worldmaker main commit f2409a01ab4c3adb135c6b35ddc00b794d856642", "as_of": "2026-07-18T04:27:05Z", "timestamp_basis": "source_timestamp", "scope": ["implementation", "history"], "authority_note": "Exact squash-merge commit for PR #6 containing the approved M8 candidate and focused audit update; it does not change the release manifest or learner state."},
+    {"source_id": "m8-main-audit", "kind": "workflow_evidence", "location": "GitHub Actions run 29630572145 at f2409a01ab4c3adb135c6b35ddc00b794d856642", "as_of": "2026-07-18T11:34:02+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["implementation", "technical_test", "history"], "authority_note": "Automatic main-branch audit passed both the repository release audit and focused split M8 contract test. It is technical evidence only, not production live-pass or learner approval."},
+    {"source_id": "m8-pages-run", "kind": "workflow_evidence", "location": "GitHub Actions pages build and deployment run 29630571746 at f2409a01ab4c3adb135c6b35ddc00b794d856642", "as_of": "2026-07-18T11:34:02+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["implementation", "history"], "authority_note": "Automatic Pages build and deployment passed for the merged repository source. The unchanged release manifest kept M8 unreleased; this run is not M8 release or production live-pass evidence."},
     {"source_id": "canonical-charter", "kind": "project_source", "location": "docs/governance/permanent/Worldmaker_Project_Charter_and_Canonical_Contract.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls permanent architecture, authority, state separation, learner ownership, and mission sequence."},
     {"source_id": "canonical-mission-contracts", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Mission_Contracts.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls stable mission-specific technical boundaries and order."},
     {"source_id": "canonical-acceptance-tests", "kind": "project_source", "location": "docs/governance/permanent/Version_1_Acceptance_Test_Specification.md", "as_of": "2026-07-18T08:39:36+07:00", "timestamp_basis": "reconciliation_timestamp", "scope": ["governance", "technical_test"], "authority_note": "Timestamp records this reconciliation because no exact source creation time was established. This source controls required test behavior and proof, not current pass state by itself."},
@@ -330,6 +328,20 @@
       "changed_paths": ["/as_of", "/sources/july18-tracker/location", "/history"],
       "evidence": [],
       "note": "Moves the changing July 18 tracker reference from permanent governance to docs/tracking; learner, unlock, release, live-pass, and M8 states remain unchanged."
+    },
+    {
+      "recorded_at": "2026-07-18T11:34:02+07:00",
+      "actor": "M8 merge state reconciliation",
+      "action": "updated",
+      "changed_paths": ["/as_of", "/repository", "/current_state/release_summary", "/current_state/active_preparation", "/current_state/missions/7/implementation", "/current_state/missions/7/technical_test", "/current_state/missions/7/release", "/current_state/required_next_actions/0", "/unresolved_facts", "/sources", "/history"],
+      "evidence": [
+        {"source_id": "m8-pr6-merged", "scope": "implementation", "claim": "PR #6 closed and squash-merged from the approved head."},
+        {"source_id": "m8-main-merge", "scope": "implementation", "claim": "Exact M8 merge commit now exists on main."},
+        {"source_id": "m8-main-audit", "scope": "technical_test", "claim": "Automatic main audit passed both required source tests."},
+        {"source_id": "m8-pages-run", "scope": "history", "claim": "Automatic Pages build and deployment passed without changing the M8 release state."},
+        {"source_id": "main-release-manifest", "scope": "release", "claim": "Release manifest remains M3–M7 only at the merge commit."}
+      ],
+      "note": "Records the verified M8 technical merge and automatic repository events while keeping Pages deployment, mission release, live-pass, unlock, and learner completion separate. M8 remains unreleased, not live-passed, locked, and not started by Nick; M4 remains Nick's only unlocked next mission."
     }
   ]
 }
