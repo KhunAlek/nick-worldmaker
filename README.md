@@ -1,6 +1,6 @@
 # Nick // Worldmaker — Website MVP Build 1
 
-> **Historical README notice:** This file describes the repository's early MVP stage. Its browser-only evaluator, local-storage, initial backend, setup, reset, and deployment statements are not current authoritative operating instructions. Permanent governance is in `docs/governance/permanent/`; changing state is in `data/state/Nick_Worldmaker_State_Record_v1.json`; the state-control design is in `docs/governance/2026-07-18_Worldmaker_State_Control_Design.md`. Do not use this historical README to release, deploy, unlock, or change learner progress.
+> **Historical README notice:** This file describes the repository's early MVP stage. Its browser-only evaluator, local-storage, initial backend, setup, reset, and deployment statements are not current authoritative operating instructions. Permanent governance is in `docs/governance/permanent/`; the current narrative tracker is `docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`; changing state is in `data/state/Nick_Worldmaker_State_Record_v1.json`; the state-control design is in `docs/governance/2026-07-18_Worldmaker_State_Control_Design.md`. Do not use this historical README to release, deploy, unlock, or change learner progress.
 
 Static, repository-ready prototype for the first mission workflow of Nick’s Roblox tutor website.
 
