@@ -4,93 +4,91 @@ const lesson=window.WORLDMAKER_LESSONS&&window.WORLDMAKER_LESSONS["V1-M08"];
 if(!lesson)throw new Error("Load the V1-M08 core lesson first.");
 lesson.steps.push(...[
   {
-    "title":"Observe — test Wood, then test Stone",
+    "title":"Experiment — build one exact temporary enclosure",
     "actions":[
-      "Open Output from View > Output or Window > Output. Clear old messages.",
-      "Press Play. Select NPC_1. Press Gather Wood once.",
-      "Watch NPC_1 walk around the obstacle and stop at Workspace > World > Resources > WoodNode > TargetPoint.",
-      "The status label should report success. Output should include [M8] PATH SUCCESS NPC_1 -> Wood or the exact success wording used by your current WorldServer.",
-      "Wood must not increase. NPC_2 must not move because this command selected NPC_1.",
-      "Press Stop. Clear Output. Press Play again. Select NPC_2 and press Gather Stone once.",
-      "Watch NPC_2 reach StoneNode > TargetPoint. The status label should report success and Output should include [M8] PATH SUCCESS NPC_2 -> Stone.",
-      "Stone must not increase. Stop Play before editing anything."
+      "Stop Play. In Explorer, move the mouse over Workspace > World, click the small + button, choose Model, and rename it exactly M8_TemporaryBlock.",
+      "Choose the Stone TargetPoint for this experiment. Click it and copy its Position numbers X, Y, and Z from Properties onto paper. Do not change its Position.",
+      "Inside M8_TemporaryBlock, insert exactly five Parts. Rename them NorthWall, SouthWall, EastWall, WestWall, and Roof. Set Anchored = true and Orientation = 0, 0, 0 on all five.",
+      "Set NorthWall and SouthWall Size to 14, 8, 1. Use Position X, Y + 4, Z + 6.5 for NorthWall and X, Y + 4, Z - 6.5 for SouthWall.",
+      "Set EastWall and WestWall Size to 1, 8, 12. Use Position X + 6.5, Y + 4, Z for EastWall and X - 6.5, Y + 4, Z for WestWall.",
+      "Set Roof Size to 14, 1, 14 and Position to X, Y + 8, Z. The existing ground closes the bottom.",
+      "Set all five Parts CanCollide = false for the start of the continuous proof run. Temporarily set StoneNode > TargetPoint Transparency = 0.5 and check in the 3D view that it is centered inside four touching walls with the roof above and no NPC-sized gap. Return Transparency to 1.",
+      "Do not move, resize, rotate, or rename any permanent map object."
     ],
-    "checkpoint":"NPC_1 reaches Wood and NPC_2 reaches Stone in separate clean runs. Each run has a matching success message, no red WorldServer error, and unchanged totals.",
-    "recovery":"Wrong NPC or wrong resource means the TargetPoint-selection branch is wrong. No movement means check Anchored on the NPC body parts, Humanoid/HumanoidRootPart names, and the first red WorldServer line. Straight-line collision means confirm the function follows all waypoints instead of moving directly to the final target.",
+    "checkpoint":"M8_TemporaryBlock is one Model containing exactly five anchored Parts with the listed names, sizes, positions, and zero orientation; Stone TargetPoint is centered inside, and CanCollide is false before Play.",
+    "recovery":"If the walls do not form a closed square, recheck plus and minus signs and the 6.5 offsets. If the roof is beside the walls, recheck that only Y has + 8. If any permanent object moved, use Undo immediately and edit only the five Parts inside M8_TemporaryBlock.",
     "codeBlocks":[]
   },
   {
-    "title":"Experiment — block one route temporarily and restore it",
+    "title":"Observe — prove the enclosure really blocks the route",
     "actions":[
-      "Stop Play. In Explorer, move the mouse over Workspace > World > Ground and click +, then choose Part.",
-      "Rename the new Part exactly M8_TemporaryBlock. Set Anchored = true.",
-      "Make it large enough to form a closed box or solid barrier around one TargetPoint with no NPC-sized opening. Keep it separate from permanent map pieces.",
-      "For easier placement, temporarily set the chosen TargetPoint Transparency to 0.5. Do not move or rename the TargetPoint.",
-      "Clear Output and press Play. Select the matching NPC and command the blocked resource.",
-      "Expected result: the status label reports that the route failed, Output contains a PATH FAILED or MOVE FAILED line, the NPC stays safe, and no red WorldServer error appears.",
-      "Stop Play immediately after capturing the failure proof.",
-      "Delete M8_TemporaryBlock. Return TargetPoint Transparency to 1. Search Explorer for M8_TemporaryBlock and confirm nothing is found.",
-      "Remove any temporary test-only print or code that is not part of the final lesson result. Run one normal route again to prove the map is restored."
+      "Press Play. Keep this same Play run open until Stage 10 says to stop.",
+      "In Explorer, expand Workspace > World > M8_TemporaryBlock. Select all five Parts and change CanCollide from false to true in Properties.",
+      "Look around the enclosure in the 3D view. Confirm the four walls touch at the corners, the roof covers the full top, the ground closes the bottom, and Stone TargetPoint is inside. This visual check must happen before calling the route blocked.",
+      "Select NPC_2 and press Gather Stone once.",
+      "Wait up to 8 seconds for each attempted waypoint. NPC_2 must remain outside the enclosure and safe.",
+      "The status label must say NPC_2 could not reach Stone. Output must say [M8] PATH FAILED NPC_2 -> Stone. No red WorldServer error may appear.",
+      "If NPC_2 enters or reaches the TargetPoint, the route was not genuinely blocked. Do not keep that evidence. Press Stop and use Stage 7 recovery before trying again."
     ],
-    "checkpoint":"The temporary block causes a safe false result, then is deleted. The restored map completes a normal route again, and no temporary object or test code remains.",
-    "recovery":"If the NPC still reaches the target, the block left an opening or did not surround the destination. Stop Play, adjust only M8_TemporaryBlock, and retry. If deleting the block also deletes a permanent object, undo immediately and confirm you selected the exact temporary Part.",
+    "checkpoint":"The visible closed five-Part enclosure prevents NPC_2 from reaching Stone, and the exact status and Output failure agree on NPC_2 and Stone.",
+    "recovery":"If the NPC reaches Stone, stop Play and inspect every corner, the roof, and the ground contact. Correct only a gap or wrong Position, then restart the entire continuous proof from Stage 10's beginning.",
     "codeBlocks":[]
   },
   {
-    "title":"Fix — use the symptom to choose the next check",
+    "title":"Fix — restore the normal route inside the same run",
     "actions":[
-      "NPC does not move and Output says PATH FAILED: first check whether the TargetPoint is buried, enclosed, above empty space, or separated by a gap too narrow for the NPC. This is usually a map or destination problem.",
-      "Output shows a red error mentioning WorldServer: double-click the first red line and inspect that exact code line. This is usually a code or object-name problem.",
-      "NPC walks partway and then stops: read the MOVE FAILED waypoint number. Check the obstacle width near that place, the jump check, and the saved MoveToFinished result.",
-      "NPC never starts and no path message appears: confirm the existing CommandNPC handler calls moveNPCTo after the M7 validation succeeds.",
-      "NPC body stays still: expand the NPC and confirm HumanoidRootPart and body parts have Anchored = false.",
-      "Error path begins with cloud_, a plugin name, or an unrelated package: it is probably plugin noise. Do not rewrite WorldServer unless the error also points to WorldServer or CommandClient.",
-      "Wood NPC goes to Stone or Stone NPC goes to Wood: inspect only the small resourceName-to-TargetPoint selection block."
+      "Do not press Stop yet. Select all five Parts inside M8_TemporaryBlock and change CanCollide back to false.",
+      "Select NPC_2 and press Gather Stone once again.",
+      "NPC_2 must now reach StoneNode > TargetPoint.",
+      "The status label must say NPC_2 arrived at Stone. Output must say [M8] PATH SUCCESS NPC_2 -> Stone.",
+      "This failed-then-successful pair proves the controlled obstacle caused the failure and that the NPC can receive a later valid command."
     ],
-    "checkpoint":"Before changing code, you can name the likely area: map/TargetPoint, WorldServer code, NPC setup, or unrelated plugin noise.",
-    "recovery":"Change one likely cause at a time, clear Output, and repeat only the affected test. Do not replace the complete WorldServer because one path or one object is wrong.",
+    "checkpoint":"In one uninterrupted Play run, Stone fails while the five Parts collide and succeeds after those same Parts stop colliding.",
+    "recovery":"If the restored route still fails, confirm all five CanCollide values are false and the TargetPoint was not moved. If needed, stop and restart the complete continuous proof; do not edit WorldServer based only on an enclosure setup mistake.",
     "codeBlocks":[]
   },
   {
-    "title":"Prove — confirm this mission changes walking only",
+    "title":"Prove — capture unchanged totals without a Studio reset",
     "actions":[
-      "Before Play, open ReplicatedStorage > GameState and read Wood.Value and Stone.Value.",
-      "Run one successful Wood walk and one successful Stone walk.",
-      "Stop Play and check the totals again. They must match the values from before the tests.",
-      "Search the new M8 section of WorldServer for Wood.Value, Stone.Value, +=, or code that awards resources. Remove any new reward line from M8.",
-      "The HUD may say that movement succeeded or failed, but the Wood and Stone numbers must not increase.",
-      "Do not add collecting, returning home, busy flags, gathering delays, or resource rewards yet. Those features belong to later missions."
+      "Start this proof again from Play if Stages 8–9 were interrupted. Do not press Stop anywhere in the following before-and-after sequence.",
+      "At the start of the Play run, expand ReplicatedStorage > GameState. Record the visible Wood.Value and Stone.Value in the video or one screenshot. Say or label this BEFORE.",
+      "With the enclosure Parts CanCollide = false, command NPC_1 to Wood and NPC_2 to Stone and show both exact PATH SUCCESS lines.",
+      "Change all five enclosure Parts to CanCollide = true, command NPC_2 to Stone, and show the exact PATH FAILED line with NPC_2 remaining outside.",
+      "Change all five Parts back to CanCollide = false and command NPC_2 to Stone once more to show the restored PATH SUCCESS line.",
+      "Still without pressing Stop, return to ReplicatedStorage > GameState and show Wood.Value and Stone.Value again. Say or label this AFTER.",
+      "BEFORE and AFTER must be identical. Because Play never stopped between them, Studio could not reset the totals and create false proof.",
+      "Now press Stop. In Edit mode, delete the complete Workspace > World > M8_TemporaryBlock Model. Search Explorer for M8_TemporaryBlock and confirm no result. Confirm Stone TargetPoint Transparency = 1, save, and run one final normal Stone route."
     ],
-    "checkpoint":"Wood and Stone remain unchanged after both successful walks and the blocked-route experiment. M8 contains movement and status reporting only.",
-    "recovery":"If either total changes, stop. Remove the new award line, reset the test values to their correct starting state, and repeat the two walks before submitting.",
+    "checkpoint":"One continuous recording shows BEFORE totals, Wood success, Stone success, blocked Stone failure, restored Stone success, and identical AFTER totals before Stop; afterward the Model is deleted and a clean route works.",
+    "recovery":"If Play stopped before AFTER totals were shown, discard that totals proof and repeat the whole continuous sequence. If either total changes during the run, stop, remove any M8 award code, restore the correct starting state through the normal Studio reset, and repeat from BEFORE.",
     "codeBlocks":[]
   },
   {
-    "title":"Prove — show that the walking system works",
+    "title":"Fix — use the first wrong sign",
     "actions":[
-      "Walk NPC_1 to Wood and record the complete movement plus the success status. Supporting ID: V1-M08-T01.",
-      "Walk NPC_2 to Stone and record the complete movement plus the success status. Supporting ID: V1-M08-T02.",
-      "Add M8_TemporaryBlock, show one safe failure with no red Nick-code error, then delete the block and prove the normal route works again. Supporting ID: V1-M08-T03.",
-      "Show Wood and Stone before and after the movement tests so it is clear that neither total changed. Supporting ID: V1-M08-T04.",
-      "Before collecting evidence, confirm WorldServer is the only server Script changed for M8 and CommandClient still contains the working M7 request and status-display code."
+      "PATH FAILED on an open route: check TargetPoint placement, an NPC-sized opening, and all five temporary Parts being deleted or non-colliding.",
+      "A red WorldServer line: double-click the first red line and compare that exact area with the complete Stage 2 code.",
+      "No path message after a valid click: search for duplicate handlers and confirm the one M8 handler calls moveNPCTo after validation.",
+      "Wood goes to Stone or Stone goes to Wood: compare resourceName .. \"Node\" and targetPoint inside the chosen node.",
+      "The status and Output name different resources: restore the exact arrived/else branch from Stage 2; both messages must use the same resourceName.",
+      "An error beginning with cloud_, a plugin name, or an unrelated package is plugin noise unless it also points to WorldServer or CommandClient."
     ],
-    "checkpoint":"All four child-readable checks are current, consistent, and made from the same final code after temporary setup was removed.",
-    "recovery":"Missing safe-failure proof means the walking code may be good but the lesson is not fully proven. A red WorldServer error or a movement branch that continues after false must be fixed before submission.",
+    "checkpoint":"Every likely problem points to one exact place: destination setup, complete movement function, one validated handler, or temporary enclosure.",
+    "recovery":"Change one likely cause, clear Output, and repeat the affected test. After any code change, rerun the complete continuous proof before submitting.",
     "codeBlocks":[]
   },
   {
-    "title":"Prove — send a small, clear submission",
+    "title":"Prove — send one current, cleaned M8 evidence set",
     "actions":[
-      "Code: copy the complete current moveNPCTo function and the complete small WorldServer command section that chooses WoodNode or StoneNode TargetPoint and uses the true-or-false result. Do not crop out the failure branches.",
-      "Explorer picture: expand Workspace > World > NPCs, Resources > WoodNode > TargetPoint, Resources > StoneNode > TargetPoint, and ServerScriptService > WorldServer in one or two screenshots. Show the TargetPoint Properties in a second picture only when one picture cannot show them clearly.",
-      "Output: paste the current Wood success line, Stone success line, and one blocked-route PATH FAILED or MOVE FAILED line. Include any red line that mentions WorldServer; do not copy unrelated old Output.",
-      "Success video: show selecting NPC_1, pressing Wood, the complete walk, and the success status; then show NPC_2 doing the same for Stone. One labelled combined video is fine.",
-      "Blocked-route video: show M8_TemporaryBlock, the command, the safe failure message, and the NPC remaining safe. The final submitted Explorer picture must show that the block is gone.",
-      "Unchanged totals: show Wood and Stone before and after the tests in one short recording or two clear screenshots.",
-      "Final cleanup: delete M8_TemporaryBlock, restore TargetPoint Transparency to 1, remove temporary test code, stop Play, save, and run one last clean route before sending."
+      "Code: copy the complete current moveNPCTo(npc, destinationPosition) function and complete CommandNPC handler. Include the TargetPoint selection, call, Boolean arrived branch, and both failure branches.",
+      "Explorer and Properties: show both NPCs, both resource TargetPoints, WorldServer, and the TargetPoint Anchored, CanCollide, and Transparency values.",
+      "Output: paste [M8] PATH SUCCESS NPC_1 -> Wood, [M8] PATH SUCCESS NPC_2 -> Stone, and [M8] PATH FAILED NPC_2 -> Stone from the final continuous run. Include any current red line mentioning WorldServer or CommandClient.",
+      "Video: show the complete Stage 10 continuous run, including BEFORE and AFTER totals before Stop, the five-Part enclosure switching on and off, safe failure, restored success, and cleanup after Stop.",
+      "Final Explorer proof: search for M8_TemporaryBlock and show that nothing remains. Confirm both TargetPoints have Transparency = 1.",
+      "Do not add Wood or Stone awards, a collecting pause, return-home movement, busy flags, a hut, or any other later-mission behavior. M8 ends after walking reports true or false."
     ],
-    "checkpoint":"The reviewer can see the exact code, exact object locations, successful movement, safe failure, clean Output, unchanged totals, and completed cleanup without Nick manually typing the Explorer tree.",
-    "recovery":"If one item is missing, add only that item. Do not repeat or retype evidence that is already visible and current.",
+    "checkpoint":"The reviewer can reproduce the final lesson from the exact code and can see matching success/failure wording, genuine blocked-route proof, continuous unchanged-total proof, and complete cleanup.",
+    "recovery":"If one item is missing or comes from an older run, repeat only the necessary final proof with the current code. Any changed code requires a new complete continuous run.",
     "codeBlocks":[]
   }
 ]);
