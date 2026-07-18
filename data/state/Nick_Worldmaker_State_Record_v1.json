@@ -221,7 +221,7 @@
     "required_next_actions": [
       {
         "scope": "state_control",
-        "action": "Review this documentation-and-state-only pull request; merging it would record the verified M8 merge on main without releasing, unlocking, deploying, or advancing a learner.",
+        "action": "M8 is merged but remains unreleased. Any M8 release transition requires separate explicit authorization. Before release promotion, complete the full independent M8 release gates, isolated evaluator-status checks, exact M9-only unlock proof, genuine learner-state protection proof, fixture cleanup, retained evidence review, manifest promotion, governed deployment, and production verification in their proper sequence. This entry does not authorize release, manifest change, deployment, production verification, unlock, learner progression, M9 work, or any repository change.",
         "authorized_actor": "Project owner or designated human operator",
         "does_not_authorize": ["release", "unlock", "deploy", "learner_advance", "repository_change", "mission_creation"]
       },
