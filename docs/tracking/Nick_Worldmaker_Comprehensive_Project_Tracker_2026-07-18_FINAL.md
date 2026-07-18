@@ -7,8 +7,8 @@
 **M8 merge result:** PR `#6` closed and squash-merged into `main` at `f2409a01ab4c3adb135c6b35ddc00b794d856642`.
 **Approved PR head:** `c1ecb06c8085623bb9a7d2f563ec49fb33c25cca`
 **Learner state:** M1–M3 approved; M4 is Nick's next genuine mission.  
-**Release state:** M3–M7 released and live-passed; M8 remains unreleased pending the independent Sunday production release gates.
-**18 July closure state:** M8 lesson and test-harness preparation completed, corrected learner lesson passed human beginner-usability review, PR #6 merged, and the automatic main audit passed; M8 remains unreleased and M9 remains untouched.
+**Release state:** M3–M7 released and live-passed; M8 remains unreleased and not live-passed. A later independent whole-lesson audit returned **NEEDS FIXING**, so M8 release work is blocked pending whole-lesson repair, a fresh AI audit, and fresh human review.
+**18 July closure state:** M8 implementation and test-harness preparation completed, the earlier human beginner-usability approval genuinely occurred, PR #6 merged, and automated checks passed. Later independent review found major learner defects. M8 remains locked and not started by Nick; M4 remains Nick's only unlocked next mission; M9 remains untouched.
 
 ## Human review result
 
@@ -54,6 +54,21 @@ The final July 18 checklist records:
 - M8 remained unreleased;
 - M9 was not started;
 - Nick's real learner progress was unchanged.
+
+## Later independent whole-lesson audit
+
+After the genuine earlier human approval and merge, a later independent review examined the complete assembled learner-visible M8 lesson on current `main`. Its verdict was **NEEDS FIXING**. This later evidence does not erase or relabel the earlier human approval; it establishes the current lesson defect and release blocker.
+
+Four major learner defects were confirmed directly against the current source:
+
+1. Stages 2–6 present separate code fragments without giving Nick one exact, safely assembled `moveNPCTo` function or completely unambiguous insertion instructions. An experienced programmer being able to reconstruct the fragments does not satisfy the beginner standard.
+2. The lesson tells Nick that the existing `CommandNPC` handler must call `moveNPCTo`, and later asks him to submit the command section, but never teaches the exact resource-to-`TargetPoint` selection block and true/false result handling needed to connect the function safely.
+3. The taught `humanoid.MoveToFinished:Wait()` can wait without the lesson's own controlled time bound, while the canonical M8 contract requires a bounded function and timeout/failure handling.
+4. The lesson teaches `moveNPCTo(npc, targetPoint)`, while the canonical mission contract specifies `moveNPCTo(npc, destinationPosition)`. The repair must resolve this consistently rather than leaving Nick to translate between incompatible interfaces.
+
+Separately, Stage 3 promises Output containing `[M8] PATH FAILED NPC_1 -> Wood`, but the taught print statement is `print("[M8] PATH FAILED " .. npc.Name)` and therefore omits the resource name and `-> Wood` suffix.
+
+This is a whole-lesson beginner-usability failure, not a localized wording correction. Before any M8 release work resumes, the complete lesson must be repaired as one coherent learner journey, then pass a fresh independent whole-lesson AI audit and a fresh human beginner-usability review of the repaired version.
 
 ## Permanent special rule — understandable instructions are mandatory
 
@@ -221,9 +236,11 @@ Important correction commits include:
 - No production entrypoint, release-test access, pilot setting, wrapper, or learner record was manually changed.
 - M9 was not started.
 
-## Still pending for Sunday
+## Current release blocker and exact next action
 
-The full isolated sequential production release gates, evaluator-status mapping, exact M9-only unlock proof, real-family protection proof, cleanup, and retained release evidence remain pending.
+Whole-lesson V1-M08 repair is the current release blocker. Production-release gates remain later work and must not start while the learner lesson is defective.
+
+Required next action: **Explicitly authorize bounded whole-lesson V1-M08 repair.**
 
 ## 18 July 2026 formal closure
 
@@ -256,6 +273,10 @@ Not performed:
 **Complete M8 beginner-usability rewrite: IMPLEMENTED, SOURCE-VERIFIED, AND HUMAN-APPROVED.**  
 **M8 implementation: MERGED INTO MAIN AT `f2409a01ab4c3adb135c6b35ddc00b794d856642`.**
 **18 July preparation day: COMPLETE AND FORMALLY CLOSED.**  
-**M8 release/live-pass: PENDING INDEPENDENT SUNDAY GATES.**  
+**Later independent whole-lesson M8 audit: NEEDS FIXING.**
+
+**Current M8 release blocker: BOUNDED WHOLE-LESSON REPAIR, THEN FRESH AI AUDIT AND FRESH HUMAN REVIEW.**
+
+**M8 release/live-pass: NOT STARTED.**
 **M9: NOT STARTED.**  
 **Nick's learner progress: UNCHANGED.**
