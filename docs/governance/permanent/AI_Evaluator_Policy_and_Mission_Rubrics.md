@@ -834,7 +834,7 @@ Use this document together with:
 - `docs/governance/permanent/Version_1_Acceptance_Test_Specification.md`
 - `docs/governance/permanent/AI_Evaluator_Response_Schema.md`
 - `docs/governance/permanent/Beginner_Lesson_and_Evidence_Standard.md`
-- `docs/governance/permanent/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`
+- `docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`
 
 Authority:
 
