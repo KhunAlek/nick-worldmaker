@@ -4,98 +4,92 @@ const lesson=window.WORLDMAKER_LESSONS&&window.WORLDMAKER_LESSONS["V1-M08"];
 if(!lesson)throw new Error("Load the V1-M08 core lesson first.");
 lesson.steps.push(...[
   {
-    "title":"Understand — find the safe Wood and Stone destinations",
+    "title":"Understand — follow the Wood or Stone request",
     "actions":[
-      "Look at the island in the 3D view. Imagine several safe dots leading around the obstacle from the settler to the resource.",
-      "The settler will walk to one dot, then the next dot, until it reaches the final safe standing place.",
-      "Roblox calls the complete route a path and each small destination a waypoint. You will make Roblox calculate the route; you will not type the dots yourself.",
-      "All new movement code belongs in ServerScriptService > WorldServer. Do not create another Script or another CommandClient.",
-      "In Explorer, expand Workspace, then World, then Resources.",
-      "Expand WoodNode. Click TargetPoint. At the top of Properties, confirm its object type is Part.",
-      "For a safe invisible destination, confirm Anchored = true, CanCollide = false, and Transparency = 1.",
-      "Temporarily change Transparency to 0.5 so you can see it. It should sit on open ground beside the visible tree, not inside the trunk, under the ground, or inside a wall.",
-      "Move the complete TargetPoint Part onto clear ground if needed. Return Transparency to 1.",
-      "Repeat the same checks for Workspace > World > Resources > StoneNode > TargetPoint.",
-      "Do not use WoodNode or StoneNode itself as the destination. The Model is the visible resource; TargetPoint is the safe standing place."
+      "Read this flow before editing: CommandClient sends the selected NPC and Wood or Stone; the existing CommandNPC handler checks both values; the handler chooses that resource's TargetPoint; moveNPCTo walks to the TargetPoint's Position; the handler uses the true-or-false result to send the matching status.",
+      "All M8 code belongs in ServerScriptService > WorldServer. Keep the working M7 CommandClient unchanged.",
+      "In Explorer, expand Workspace > World > Resources. Expand WoodNode and StoneNode. Each Model must contain exactly one Part named TargetPoint.",
+      "Click each TargetPoint and check Properties: Anchored = true, CanCollide = false, Transparency = 1. Temporarily use Transparency = 0.5 to check that it is on reachable ground beside the resource, then return it to 1.",
+      "The function receives a position, which Roblox stores as three coordinates. Its one consistent name is destinationPosition: moveNPCTo(npc, destinationPosition).",
+      "The handler still keeps M7's server checks. A request is never trusted just because CommandClient sent it."
     ],
-    "checkpoint":"Explorer shows exactly one Part named TargetPoint inside WoodNode and one inside StoneNode. Both are anchored, invisible, non-colliding, and placed on reachable ground.",
-    "recovery":"If the plan is still unclear, do not type code yet. Point in Explorer to WorldServer, one NPC, and one resource TargetPoint, then read the plan once more. If TargetPoint is missing, wrongly named, beside the resource Model, buried, or blocked, stop here. Move or recreate only that Part under the correct resource Model, set the three properties, and check again before editing code.",
+    "checkpoint":"You can point to CommandNPC, WorldServer, WoodNode > TargetPoint, and StoneNode > TargetPoint, and explain that the handler chooses the Part while moveNPCTo receives its Position.",
+    "recovery":"If either TargetPoint is missing, duplicated, buried, inside the visible resource, or blocked, stop before coding. Repair only that TargetPoint, restore Transparency to 1, and check both destinations again.",
     "codeBlocks":[]
   },
   {
-    "title":"Do — ask Roblox to calculate a route",
+    "title":"Do — replace the M7 handler with one complete M8 section",
     "actions":[
       "In Explorer, expand ServerScriptService and double-click WorldServer.",
-      "Near the top of WorldServer, find the existing lines that get Remotes or other Roblox services. Add the PathfindingService line beside those setup lines, not inside the button handler.",
-      "A Roblox service is a built-in game tool. PathfindingService is the built-in tool that tries to calculate a usable walking route.",
-      "Below the setup section and above CommandNPC.OnServerEvent, start a function named moveNPCTo. A function is a named set of instructions that can be used when either settler needs to walk.",
-      "The function receives npc, the settler Model, and targetPoint, the safe destination Part.",
-      "Inside moveNPCTo, find npc's Humanoid, which controls walking, and HumanoidRootPart, which gives the settler's current position.",
-      "Stop safely with false if either required object is missing. Returning false means: the walk did not finish, so the command caller must not pretend it succeeded.",
-      "Create one new path inside the function.",
-      "Ask that path to calculate from HumanoidRootPart.Position to targetPoint.Position.",
-      "Put ComputeAsync inside pcall. pcall means Roblox may try the calculation without a calculation error stopping the whole WorldServer Script."
+      "Find the one existing CommandNPC.OnServerEvent:Connect block from M7. Select that complete block from CommandNPC.OnServerEvent:Connect(function through its matching end). Delete only that block.",
+      "Do not delete the existing lines that create or find CommandNPC and StatusMessage. The complete code below uses those exact existing variables.",
+      "Near the other game:GetService lines, add the PathfindingService line once.",
+      "Paste the complete moveNPCTo function below the setup lines and above the place where the old handler was.",
+      "Paste the complete replacement CommandNPC handler immediately after the function. Do not keep a second CommandNPC handler.",
+      "Compare the pasted code from the first local function line through the final end). Do not assemble it from the later explanation cards."
     ],
-    "checkpoint":"The function has a Humanoid, a HumanoidRootPart, one created path, and a protected route calculation from the NPC's position to the TargetPoint's position.",
-    "recovery":"If Roblox underlines PathfindingService or says it is nil, compare every capital letter. Use game:GetService(\"PathfindingService\"). Do not add a PathfindingService object in Explorer. If Output shows a red WorldServer error on FindFirstChild, CreatePath, or ComputeAsync, stop Play, check the exact object names and line order, then test again. Do not continue to waypoints while the calculation itself errors.",
+    "checkpoint":"WorldServer has exactly one PathfindingService setup line, one moveNPCTo(npc, destinationPosition) function, and one CommandNPC handler. No duplicate handler remains.",
+    "recovery":"If two status messages appear for one click, stop Play and search WorldServer for CommandNPC.OnServerEvent. Keep only the complete M8 handler below. If CommandNPC or StatusMessage is underlined, restore the existing M7 setup lines instead of creating new RemoteEvents.",
     "codeBlocks":[
-      {"label":"Get Roblox's route-calculating tool","code":"local PathfindingService = game:GetService(\"PathfindingService\")","explanation":"game:GetService asks Roblox for one built-in tool. The name inside quotation marks must match exactly."},
-      {"label":"Start the movement instructions","code":"local function moveNPCTo(npc, targetPoint)\n    -- The next small sections go here.\nend","explanation":"npc is the chosen settler. targetPoint is the Part where that settler should finish."},
-      {"label":"Find the movement parts and create one route","code":"local humanoid = npc:FindFirstChildOfClass(\"Humanoid\")\nlocal root = npc:FindFirstChild(\"HumanoidRootPart\")\nif not humanoid or not root then\n    return false\nend\n\nlocal path = PathfindingService:CreatePath()","explanation":"The early false prevents later code from trying to move a broken or incomplete NPC."},
-      {"label":"Let Roblox try the route calculation safely","code":"local calculated = pcall(function()\n    path:ComputeAsync(root.Position, targetPoint.Position)\nend)\n\nif not calculated then\n    print(\"[M8] PATH CALCULATION ERROR \" .. npc.Name)\n    return false\nend","explanation":"calculated becomes true when the calculation call finished without a code error. It does not yet prove that a usable route exists."}
+      {"label":"Add once beside the other service setup lines","code":"local PathfindingService = game:GetService(\"PathfindingService\")","explanation":"PathfindingService is Roblox's built-in route calculator."},
+      {"label":"Paste this complete function — do not reconstruct fragments","code":"local function moveNPCTo(npc, destinationPosition)\n    local humanoid = npc:FindFirstChildOfClass(\"Humanoid\")\n    local root = npc:FindFirstChild(\"HumanoidRootPart\")\n    if not humanoid or not root then\n        return false\n    end\n\n    local path = PathfindingService:CreatePath()\n    local calculated = pcall(function()\n        path:ComputeAsync(root.Position, destinationPosition)\n    end)\n    if not calculated or path.Status ~= Enum.PathStatus.Success then\n        return false\n    end\n\n    local waypoints = path:GetWaypoints()\n    for _, waypoint in ipairs(waypoints) do\n        if waypoint.Action == Enum.PathWaypointAction.Jump then\n            humanoid.Jump = true\n        end\n\n        local finished = false\n        local reached = false\n        local connection = humanoid.MoveToFinished:Connect(function(didReach)\n            finished = true\n            reached = didReach\n        end)\n\n        humanoid:MoveTo(waypoint.Position)\n        local waitStarted = os.clock()\n        while not finished and os.clock() - waitStarted < 8 do\n            task.wait(0.1)\n        end\n        connection:Disconnect()\n\n        if not finished or not reached then\n            humanoid:MoveTo(root.Position)\n            return false\n        end\n    end\n\n    return true\nend","explanation":"This is the entire bounded movement function. Every waypoint wait stops after 8 seconds, and every failure returns false."},
+      {"label":"Paste this complete replacement for the existing M7 CommandNPC handler","code":"CommandNPC.OnServerEvent:Connect(function(player, npc, resourceName)\n    local world = workspace:FindFirstChild(\"World\")\n    local npcs = world and world:FindFirstChild(\"NPCs\")\n    local resources = world and world:FindFirstChild(\"Resources\")\n\n    local resourceIsValid = resourceName == \"Wood\" or resourceName == \"Stone\"\n    local npcIsValid = typeof(npc) == \"Instance\"\n        and npcs\n        and npc:IsDescendantOf(npcs)\n        and (npc.Name == \"NPC_1\" or npc.Name == \"NPC_2\")\n        and npc:FindFirstChildOfClass(\"Humanoid\")\n        and npc:FindFirstChild(\"HumanoidRootPart\")\n\n    if not resourceIsValid or not npcIsValid or not resources then\n        StatusMessage:FireClient(player, \"Command rejected.\")\n        return\n    end\n\n    local resourceNode = resources:FindFirstChild(resourceName .. \"Node\")\n    local targetPoint = resourceNode and resourceNode:FindFirstChild(\"TargetPoint\")\n    if not targetPoint or not targetPoint:IsA(\"BasePart\") then\n        print(\"[M8] PATH FAILED \" .. npc.Name .. \" -> \" .. resourceName)\n        StatusMessage:FireClient(player, npc.Name .. \" could not reach \" .. resourceName .. \".\")\n        return\n    end\n\n    local arrived = moveNPCTo(npc, targetPoint.Position)\n    if arrived then\n        print(\"[M8] PATH SUCCESS \" .. npc.Name .. \" -> \" .. resourceName)\n        StatusMessage:FireClient(player, npc.Name .. \" arrived at \" .. resourceName .. \".\")\n    else\n        print(\"[M8] PATH FAILED \" .. npc.Name .. \" -> \" .. resourceName)\n        StatusMessage:FireClient(player, npc.Name .. \" could not reach \" .. resourceName .. \".\")\n    end\nend)","explanation":"The validated M7 checks stay on the server. The handler chooses WoodNode or StoneNode, passes the exact TargetPoint.Position, and uses the Boolean result for matching Output and status text."}
     ]
   },
   {
-    "title":"Observe — check whether Roblox found a usable route",
+    "title":"Observe — check the exact signature and destination",
     "actions":[
-      "After ComputeAsync, Roblox stores a report inside path.Status.",
-      "Continue only when that report equals Enum.PathStatus.Success. This means Roblox found a route it considers usable.",
-      "When the report is anything else, print one clear failure line and return false before reading any route points.",
-      "This check matters because a failed route has no safe set of points for the settler to follow.",
-      "Expected success at this stage: no PATH FAILED line. Expected blocked result: [M8] PATH FAILED NPC_1 -> Wood."
+      "At the first function line, confirm it says moveNPCTo(npc, destinationPosition). It must not say targetPoint there.",
+      "Inside ComputeAsync, confirm the second value is destinationPosition. Do not add .Position because this value is already a position.",
+      "In the handler, confirm resourceName .. \"Node\" chooses WoodNode for Wood and StoneNode for Stone.",
+      "Confirm targetPoint is found inside that chosen node and the call is moveNPCTo(npc, targetPoint.Position).",
+      "Confirm local arrived stores the true-or-false result before the if arrived branch.",
+      "Use Edit > Find or Ctrl+F in WorldServer to search for moveNPCTo. You should see one function definition and one call."
     ],
-    "checkpoint":"GetWaypoints appears only after the PathStatus.Success check. A failed route returns false without a red WorldServer error.",
-    "recovery":"If the code calls GetWaypoints before checking path.Status, move that line below the success check. If a clear open route reports failure, first inspect the TargetPoint position and obstacle spacing before rewriting the whole function.",
-    "codeBlocks":[{"label":"Stop when no route exists","code":"if path.Status ~= Enum.PathStatus.Success then\n    print(\"[M8] PATH FAILED \" .. npc.Name)\n    return false\nend","explanation":"~= means 'is not equal to'. The function stops before movement when Roblox did not report Success."}]
+    "checkpoint":"The definition, ComputeAsync line, TargetPoint selection, call, and arrived branch all use one consistent interface with no manual translation left for Nick.",
+    "recovery":"If the call passes targetPoint without .Position, add .Position at the call. If the function uses targetPoint.Position, replace that function parameter and use with destinationPosition exactly as shown in the complete code.",
+    "codeBlocks":[]
   },
   {
-    "title":"Experiment — read the small route destinations",
+    "title":"Observe — see how a route is accepted or rejected",
     "actions":[
-      "Only after the success check, ask the path for its waypoints. A waypoint is one small destination on the route.",
-      "GetWaypoints gives a list. A list is several values kept in order: first point, second point, third point, and so on.",
-      "Temporarily print the number of waypoints so you can see that Roblox made a route.",
-      "For example, Output may show [M8] NPC_1 route has 7 waypoints. Your number can be different because it depends on the map.",
-      "Do not treat a different positive number as an error. Remove the temporary count print after you understand the result, unless the lesson asks you to retain it for evidence."
+      "PathfindingService:CreatePath() creates one route attempt for this command.",
+      "pcall lets Roblox try ComputeAsync without a route-calculation error stopping WorldServer.",
+      "path.Status must equal Enum.PathStatus.Success before GetWaypoints is used.",
+      "If calculation errors or no usable route exists, the function returns false. The handler then prints [M8] PATH FAILED NPC_1 -> Wood or the matching NPC and resource.",
+      "The resource name belongs in the handler's Output line because the handler knows whether this request is Wood or Stone."
     ],
-    "checkpoint":"Output shows a positive waypoint count for an open route. No waypoint count is printed after a failed status.",
-    "recovery":"If the count is 0 or the route fails, check whether the TargetPoint is above open ground and whether an NPC-sized gap exists. If Output shows a red GetWaypoints error, confirm the success check and spelling.",
-    "codeBlocks":[{"label":"Read the route points after success","code":"local waypoints = path:GetWaypoints()\nprint(\"[M8] \" .. npc.Name .. \" route has \" .. #waypoints .. \" waypoints\")","explanation":"#waypoints means the number of items in the ordered list."}]
+    "checkpoint":"GetWaypoints appears only after both calculated and PathStatus.Success are checked; every promised failure line ends with -> Wood or -> Stone.",
+    "recovery":"If Output shows a red ComputeAsync or GetWaypoints error, compare the complete function with Stage 2. Do not move GetWaypoints above the status check.",
+    "codeBlocks":[]
   },
   {
-    "title":"Do — move to each route point and wait for the result",
+    "title":"Experiment — follow waypoints with a controlled wait",
     "actions":[
-      "Use a loop to take the waypoints one at a time in their saved order. A loop repeats the same small movement instructions for each waypoint.",
-      "For the current waypoint, call Humanoid:MoveTo(waypoint.Position). This asks the Humanoid to walk to that small destination.",
-      "Then wait for Humanoid.MoveToFinished. Roblox gives back true when the Humanoid reached that point and false when it did not reach it in time.",
-      "When the result is false, print which waypoint failed and return false immediately. Do not continue toward later points after one point failed.",
-      "When every point succeeds, the function may print success and return true. Returning true tells the command code that the complete walk finished."
+      "GetWaypoints returns an ordered list of small destinations called waypoints.",
+      "The for loop visits each waypoint in order. A Jump-marked waypoint sets humanoid.Jump before MoveTo.",
+      "MoveToFinished sends a result when that small movement ends. The connection records whether it finished and whether the NPC reached the point.",
+      "The while line checks for at most 8 seconds. task.wait(0.1) gives Roblox time to move without waiting forever.",
+      "The connection is disconnected after each waypoint so old listeners do not remain.",
+      "If time ends or reached is false, the function stops that movement, returns false, and never walks to later waypoints."
     ],
-    "checkpoint":"The settler visits the points in order. One failed MoveToFinished result stops the function safely; all successful results lead to true.",
-    "recovery":"If the settler walks partway and stops, read the MOVE FAILED waypoint number. Check the space around that part of the route, the NPC's anchored properties, and whether the code waits for each MoveToFinished result.",
-    "codeBlocks":[{"label":"Walk through the ordered points","code":"for number, waypoint in ipairs(waypoints) do\n    humanoid:MoveTo(waypoint.Position)\n    local reached = humanoid.MoveToFinished:Wait()\n\n    if not reached then\n        print(\"[M8] MOVE FAILED \" .. npc.Name .. \" waypoint \" .. number)\n        return false\n    end\nend\n\nprint(\"[M8] PATH SUCCESS \" .. npc.Name)\nreturn true","explanation":"ipairs reads the list in order. number tells you which waypoint is being used. reached is the true-or-false movement result."}]
+    "checkpoint":"There is no MoveToFinished:Wait(). Every waypoint has the 8-second controlled wait, disconnect, and false branch before the loop continues.",
+    "recovery":"Search WorldServer for MoveToFinished:Wait. If found in the M8 function, replace the function with the complete Stage 2 version. If the NPC waits longer than 8 seconds at one point, check the while condition and waitStarted spelling.",
+    "codeBlocks":[]
   },
   {
-    "title":"Do — let the settler jump when the route asks",
+    "title":"Fix — test the two matching success messages",
     "actions":[
-      "Some calculated route points are marked as places where the character must jump over a small step.",
-      "Roblox calls this mark Enum.PathWaypointAction.Jump.",
-      "Inside the waypoint loop, put the jump check immediately before MoveTo.",
-      "When the current waypoint is marked Jump, set humanoid.Jump = true. The following MoveTo still sends the settler to the waypoint position.",
-      "During Play, a route with a small step may make the settler jump. A flat route may use no jump points, which is also normal."
+      "Open Output from View > Output or Window > Output. Click the clear button so old messages cannot be mistaken for this run.",
+      "Press Play. Select NPC_1 and press Gather Wood once.",
+      "NPC_1 should stop at WoodNode > TargetPoint. The status label must say NPC_1 arrived at Wood. Output must say [M8] PATH SUCCESS NPC_1 -> Wood.",
+      "Without stopping Play, select NPC_2 and press Gather Stone once.",
+      "NPC_2 should stop at StoneNode > TargetPoint. The status label must say NPC_2 arrived at Stone. Output must say [M8] PATH SUCCESS NPC_2 -> Stone.",
+      "Press Stop only after seeing both results. Neither resource total should change."
     ],
-    "checkpoint":"The Jump check is inside the loop and before MoveTo. Flat routes still work; jump-marked routes are not ignored.",
-    "recovery":"If the settler reaches a low step and stops, check whether the waypoint action equals Enum.PathWaypointAction.Jump and whether the jump line comes before MoveTo. Also check that the obstacle is small enough for a Roblox character to jump.",
-    "codeBlocks":[{"label":"Handle a jump-marked waypoint","code":"if waypoint.Action == Enum.PathWaypointAction.Jump then\n    humanoid.Jump = true\nend","explanation":"This does not make every waypoint a jump. It reacts only when Roblox marked that route point as Jump."}]
+    "checkpoint":"One Play run shows the correct NPC reaching each requested TargetPoint with the exact matching status and Output wording and no red WorldServer error.",
+    "recovery":"Wrong resource means compare resourceName .. \"Node\" and the targetPoint lookup. A rejected valid NPC means compare the M7 validation block. No movement plus PATH FAILED means check the TargetPoint and NPC Anchored properties before changing code.",
+    "codeBlocks":[]
   }
 ]);
 })();
