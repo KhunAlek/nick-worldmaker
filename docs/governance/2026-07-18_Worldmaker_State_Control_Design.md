@@ -23,7 +23,7 @@ The record keeps these dimensions separate for every mission:
 6. release state;
 7. production live-pass state.
 
-It also records active branch or pull-request preparation, current blockers, required next actions, unresolved facts, evidence sources, and append-only update history.
+It also records active branch or pull-request preparation, current blockers, required next actions, unresolved facts, evidence sources, and append-only update history. The changing narrative tracker is stored separately at `docs/tracking/Nick_Worldmaker_Comprehensive_Project_Tracker_2026-07-18_FINAL.md`; it supports explanation and history but does not belong among permanent rules and does not override the validated state record.
 
 ## 3. Permanent rules kept outside the record
 
