@@ -17,7 +17,7 @@ lessons["V1-M08"]={
     {"name":"Route","text":"The settler needs several small destinations that go around obstacles. Roblox calls the calculated route a path."},
     {"name":"Route points","text":"The small destinations on the route are called waypoints. The settler walks to them one at a time."},
     {"name":"Result","text":"The movement function gives back true when the whole walk finishes and false when it must stop safely. This true-or-false answer is the function result."},
-    {"name":"Waiting too long","text":"Humanoid movement can report that it did not reach the next point. This failed wait is often called a timeout."}
+    {"name":"Controlled wait","text":"The code waits no more than 8 seconds for each waypoint. When time ends without success, it disconnects the listener and returns false instead of waiting forever."}
   ],
   "hierarchy": "CORRECT EXPLORER LOCATIONS\n\nWorkspace\n└── World\n    ├── NPCs\n    │   ├── NPC_1 (Model)\n    │   │   ├── Humanoid\n    │   │   └── HumanoidRootPart\n    │   └── NPC_2 (Model)\n    │       ├── Humanoid\n    │       └── HumanoidRootPart\n    └── Resources\n        ├── WoodNode (Model)\n        │   └── TargetPoint (Part)\n        └── StoneNode (Model)\n            └── TargetPoint (Part)\n\nServerScriptService\n└── WorldServer (Script) — add all M8 movement code here\n\nStarterGui\n└── CommandGui\n    └── CommandClient (LocalScript) — keep the working M7 request and status code\n\nReplicatedStorage\n├── Remotes\n│   ├── CommandNPC\n│   └── StatusMessage\n└── GameState\n    ├── Wood\n    └── Stone",
   "steps": [],
