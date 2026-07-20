@@ -180,6 +180,16 @@
       const body = element("div", "step-body");
       const list = element("ol", "");
       step.actions.forEach(action => list.appendChild(element("li", "", action)));
+      if (Array.isArray(step.codeBlocks)) {
+        step.codeBlocks.forEach(block => {
+          const codeCard = element("div", "checkpoint");
+          const title = element("strong", "", block.label || "Code");
+          const code = element("pre", "mini-code", block.code || "");
+          codeCard.append(title, code);
+          if (block.explanation) codeCard.appendChild(element("p", "", block.explanation));
+          body.appendChild(codeCard);
+        });
+      }
       const checkpoint = element("div", "checkpoint");
       checkpoint.innerHTML = `<strong>Stop and check:</strong> ${text(step.checkpoint)}`;
       const recovery = element("div", "try-it");
